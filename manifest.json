@@ -1,0 +1,15 @@
+{
+  "name": "Find and replace",
+  "description": "",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": ["tabs", "activeTab", "scripting", "storage"],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "find_and_replace.png"
+  },
+  "content_scripts": [ {
+      "js": ["content.js"],
+      "matches": ["<all_urls>"]
+    }]
+}

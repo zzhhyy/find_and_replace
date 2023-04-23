@@ -1,0 +1,72 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="pure-min.css">
+    <script src="popup.js">
+    </script>
+</head>
+
+<body style="min-width: 540px;min-height: 320px;margin-bottom: 32px;">
+    <div style="margin-left: 16px;display: flex;align-items: center;">
+        <img src="find_and_replace.png" style="width: 32px;height: 32px;" />
+        <h2 style="margin-left: 8px;">Find and replace</h2>
+    </div>
+    <div style="margin-left: 16px;margin-top: 8px;">
+        <button id="add_rule_button" class="pure-button button-primary" style="font-size: large;">Add rule</button>
+        <button id="run_all_button" class="pure-button button-primary" style="font-size: large;">Run all</button>
+    </div>
+    <div style="margin-left: 16px;margin-top: 16px; margin-right: 16px;;">
+        <table class="pure-table pure-table-horizontal" style="min-width: 504px">
+            <thead>
+                <tr>
+                    <th>Rules</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="rule_table">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- add rule dialog -->
+    <div id="add_rule_box" class="overlay" style="visibility: hidden;font-size: larger;">
+        <div
+            style="margin-top: 32px;margin-left: 32px;margin-right: 32px;min-width: 480px;background-color: white;box-shadow: 0 0 15px #ccc;">
+            <div style="width: 100%;height: 16px;"></div>
+            <h3 style="text-align: center;">Add rule</h3>
+            <form class="pure-form pure-form-aligned">
+                <div class="pure-control-group">
+                    <label for="aligned-name">Domains</label>
+                    <input id="domains_text" type="text" style="width: 200px;" />
+                    <input id="domains_checkbox" type="checkbox" /> All domains
+                </div>
+                <div class="pure-control-group">
+                    <label for="aligned-name">Find</label>
+                    <input id="find_text" type="text" style="width: 280px;" />
+                </div>
+                <div class="pure-control-group">
+                    <label for="aligned-name">Replace</label>
+                    <input id="replace_text" type="text" placeholder="use $0,$1,$2... as search result"
+                        style="width: 280px;" />
+                </div>
+                <div class="pure-control-group">
+                    <label for="aligned-name">Run</label>
+                    <select id="runtype_select">
+                        <option>Auto</option>
+                        <option>Manual</option>
+                    </select>
+                </div>
+            </form>
+            <div style="margin-right: 32px;text-align: right;">
+                <button id="save_button" class="pure-button button-primary">Save</button>
+                <span>&nbsp;&nbsp;</span>
+                <button id="cancel_button" class="pure-button button-primary">Cancel</button>
+            </div>
+            <div style="height: 16px;" />
+        </div>
+    </div>
+</body>
+</html>
