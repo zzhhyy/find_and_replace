@@ -27,7 +27,7 @@ function replaceText(find, replace) {
                     }
                 }
             }
-        } else if (element.tagName == "input") {
+        } else if (element.tagName.toLowerCase() == "input") {
             let findResult = new Array();
             let text = element.value;
             if ((text != null) && (text.indexOf(find) !== -1)) {
