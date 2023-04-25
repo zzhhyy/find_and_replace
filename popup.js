@@ -2,9 +2,10 @@
 var g_rule_index = 0;
 var g_edit_mode = false;
 
-function Rule(domain, find, replace, runtype, display) {
+function Rule(domain, find, regex, replace, runtype, display) {
   this.domain = domain;
   this.find = find;
+  this.regex = regex;
   this.replace = replace;
   this.runtype = runtype;
   this.display = display;
@@ -55,9 +56,15 @@ function editRule(key) {
         document.getElementById("domains_checkbox").checked = true;
         document.getElementById("domains_text").value = "";
       } else {
+        document.getElementById("domains_checkbox").checked = false;
         document.getElementById("domains_text").value = value.domain;
       }
       document.getElementById("find_text").value = value.find;
+      if (value.regex == true) {
+        document.getElementById("regex_checkbox").checked = true;
+      } else {
+        document.getElementById("regex_checkbox").checked = false;
+      }
       document.getElementById("replace_text").value = value.replace;
       document.getElementById("runtype_select").value = value.runtype;
       document.getElementById("add_rule_box").style.visibility = "visible";
@@ -136,13 +143,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!find || (find.trim().length == 0)) {
       return;
     }
+    let regex = document.getElementById("regex_checkbox").checked;
     let display = cutString(find, 32);
     let replace = document.getElementById("replace_text").value;
     let runtype = document.getElementById("runtype_select").value;
 
     chrome.storage.sync.get([find], function (result) {
       if (g_edit_mode || (result[find] == null)) {
-        chrome.storage.sync.set({ [find]: new Rule(domain, find, replace, runtype, display) });
+        chrome.storage.sync.set({ [find]: new Rule(domain, find, regex, replace, runtype, display) });
         updateRulesTable();
         g_edit_mode = false;
         document.getElementById("add_rule_box").style.visibility = "hidden";
@@ -157,6 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("domains_checkbox").checked = false;
     document.getElementById("domains_text").value = "";
     document.getElementById("find_text").value = "";
+    document.getElementById("regex_checkbox").checked = false;
     document.getElementById("replace_text").value = "";
     document.getElementById("runtype_select").value = "Auto";
     g_edit_mode = false;

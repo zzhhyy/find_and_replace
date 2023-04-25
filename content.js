@@ -1,48 +1,65 @@
-function replaceText(find, replace) {
+function replaceText(text, find, regex, findRegex, replace) {
+    if (text == null) {
+        return null;
+    }
+    let findResult = null;
+    if (regex) {
+        findResult = findRegex.exec(text);
+    } else {
+        if (text.indexOf(find) != -1) {
+            findResult = new Array();
+            findResult.push(find);
+        }
+    }
+    if ((findResult == null) || (findResult.length == 0)) {
+        return null;
+    }
+    let realReplace = replace;
+    for (let k = 0; k < findResult.length; k++) {
+        let param = '$' + k;
+        if (realReplace.indexOf(param) != -1) {
+            realReplace = realReplace.replaceAll(param, findResult[k]);
+        }
+    }
+    let result = new Array();
+    result.push(findResult[0]);
+    result.push(realReplace);
+    return result;
+}
+
+function replaceElementText(find, regex, replace) {
     let elements = document.body.getElementsByTagName('*');
+    const findRegex = new RegExp(find, 'm');
     for (let i = 0; i < elements.length; i++) {
         let element = elements[i];
-        if ((element.tagName == "script") || (element.tagName == "style")) {
+        const tagName = element.tagName.toLowerCase();
+        if ((tagName == "script") || (tagName == "style") || (tagName == "img")) {
             continue;
         }
         if (element.childNodes.length > 0) {
             for (let j = 0; j < element.childNodes.length; j++) {
                 let node = element.childNodes[j];
                 if (node.nodeType === Node.TEXT_NODE) {
-                    let findResult = new Array();
                     let text = node.nodeValue;
-                    if (text.indexOf(find) !== -1) {
-                        findResult.push(find);
-                        let realReplace = replace;
-                        for (let k = 0; k < findResult.length; k++) {
-                            let param = '$' + k;
-                            if (realReplace.indexOf(param) !== -1) {
-                                realReplace = replace.replaceAll(param, findResult[k]);
-                            }
-                        }
-                        let newText = text.replaceAll(find, realReplace);
-                        if (text.indexOf(realReplace) == -1) {
-                            element.replaceChild(document.createTextNode(newText), node);
-                        }
+                    let result = replaceText(text, find, regex, findRegex, replace);
+                    if (result == null) {
+                        continue;
+                    }
+                    if (text.indexOf(result[1]) == -1) {
+                        let newText = text.replaceAll(result[0], result[1]);
+                        element.replaceChild(document.createTextNode(newText), node);
                     }
                 }
             }
         } else if (element.tagName.toLowerCase() == "input") {
-            let findResult = new Array();
             let text = element.value;
-            if ((text != null) && (text.indexOf(find) !== -1)) {
-                findResult.push(find);
-                let realReplace = replace;
-                for (let k = 0; k < findResult.length; k++) {
-                    let param = '$' + k;
-                    if (realReplace.indexOf(param) !== -1) {
-                        realReplace = replace.replaceAll(param, findResult[k]);
-                    }
-                }
-                let newText = text.replaceAll(find, realReplace);
-                if (text.indexOf(realReplace) == -1) {
-                    element.value = newText;
-                }
+            let result = replaceText(text, find, regex, findRegex, replace);
+            if (result == null) {
+                continue;
+            }
+            if (text.indexOf(result[1]) == -1) {
+                let newText = text.replaceAll(result[0], result[1]);
+                element.value = newText;
             }
         }
     }
@@ -60,11 +77,11 @@ function repeatReplace(times) {
                     if (value.runtype == "Manual") {
                         continue;
                     }
-                    replaceText(key, value.replace);
+                    replaceElementText(key, value.regex, value.replace);
                 }
                 repeatReplace(times + 1);
             });
-        }, 2000);
+        }, times * 1000);
     }
 }
 
@@ -80,7 +97,7 @@ function main() {
                     if ((value.domain != null) && (value.domain != window.location.host)) {
                         continue;
                     }
-                    replaceText(key, value.replace);
+                    replaceElementText(key, value.regex, value.replace);
                 }
                 chrome.storage.local.remove("cmd");
             });

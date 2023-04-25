@@ -34,18 +34,19 @@
     <!-- add rule dialog -->
     <div id="add_rule_box" class="overlay" style="visibility: hidden;font-size: larger;">
         <div
-            style="margin-top: 32px;margin-left: 32px;margin-right: 32px;min-width: 480px;background-color: white;box-shadow: 0 0 15px #ccc;">
+            style="margin-top: 32px;margin-left: 16px;margin-right: 16px;min-width: 480px;background-color: white;box-shadow: 0 0 15px #ccc;">
             <div style="width: 100%;height: 16px;"></div>
             <h3 style="text-align: center;">Add rule</h3>
             <form class="pure-form pure-form-aligned">
                 <div class="pure-control-group">
                     <label for="aligned-name">Domains</label>
-                    <input id="domains_text" type="text" style="width: 200px;" />
+                    <input id="domains_text" type="text" style="width: 220px;" />
                     <input id="domains_checkbox" type="checkbox" /> All domains
                 </div>
                 <div class="pure-control-group">
                     <label for="aligned-name">Find</label>
-                    <input id="find_text" type="text" style="width: 280px;" />
+                    <input id="find_text" type="text" style="width: 220px;" />
+                    <input id="regex_checkbox" type="checkbox" /> Regex
                 </div>
                 <div class="pure-control-group">
                     <label for="aligned-name">Replace</label>
@@ -69,4 +70,5 @@
         </div>
     </div>
 </body>
+
 </html>
