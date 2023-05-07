@@ -3,24 +3,15 @@
   "description": "A tool that help you find and replace text.",
   "version": "1.1",
   "manifest_version": 3,
-  "permissions": [
-    "tabs",
-    "activeTab",
-    "scripting",
-    "storage"
-  ],
+  "permissions": ["tabs", "activeTab", "scripting", "storage"],
   "action": {
     "default_popup": "index.html",
     "default_icon": "find_and_replace.png"
   },
   "content_scripts": [
     {
-      "js": [
-        "content.js"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "js": ["content.js"],
+      "matches": ["<all_urls>"]
     }
   ]
 }
