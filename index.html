@@ -6,32 +6,54 @@
   </head>
 
   <body style="min-width: 540px; min-height: 320px; margin-bottom: 32px">
-    <div style="margin-left: 16px; display: flex; align-items: center">
-      <img src="find_and_replace.png" style="width: 32px; height: 32px" />
-      <h2 style="margin-left: 8px">Find and replace</h2>
+    <div
+      id="header"
+      style="position: fixed; width: 100%; background-color: white"
+    >
+      <div style="margin-left: 16px; display: flex; align-items: center">
+        <img src="find_and_replace.png" style="width: 32px; height: 32px" />
+        <h2 style="margin-left: 8px">Find and replace</h2>
+      </div>
+      <div style="margin-left: 16px; margin-top: 8px">
+        <button
+          id="add_rule_button"
+          class="pure-button button-primary"
+          style="font-size: large"
+        >
+          Add rule
+        </button>
+        <button
+          id="run_all_button"
+          class="pure-button button-primary"
+          style="font-size: large"
+        >
+          Run all
+        </button>
+        <button
+          id="go_back"
+          class="pure-button button-primary"
+          style="font-size: large; visibility: hidden"
+        >
+          Back
+        </button>
+        <span style="font-size: medium; margin-left: 32px" id="details"></span>
+      </div>
+      <div style="width: 100%; height: 16px"></div>
     </div>
-    <div style="margin-left: 16px; margin-top: 8px">
-      <button
-        id="add_rule_button"
-        class="pure-button button-primary"
-        style="font-size: large"
-      >
-        Add rule
-      </button>
-      <button
-        id="run_all_button"
-        class="pure-button button-primary"
-        style="font-size: large"
-      >
-        Run all
-      </button>
-      <span style="font-size: medium; margin-left: 32px" id="details"></span>
-    </div>
-    <div style="margin-left: 16px; margin-top: 16px; margin-right: 16px">
+    <div id="header_placeholder" style="width: 100%"></div>
+    <div
+      style="
+        margin-left: 16px;
+        margin-top: 16px;
+        margin-right: 16px;
+        margin-bottom: 48px;
+      "
+    >
       <table class="pure-table pure-table-horizontal" style="min-width: 504px">
         <thead>
           <tr>
             <th>Rules</th>
+            <th></th>
             <th></th>
             <th></th>
             <th></th>
@@ -41,11 +63,30 @@
       </table>
     </div>
 
+    <div
+      style="
+        width: 100%;
+        height: 32px;
+        position: fixed;
+        bottom: 0;
+        align-items: center;
+        background-color: white;
+        display: flex;
+        justify-content: flex-end;
+      "
+    >
+      <span
+        id="group_usage"
+        style="margin-right: 16px; font-size: small"
+      ></span>
+      <span id="all_usage" style="margin-right: 16px; font-size: small"></span>
+    </div>
+
     <!-- add rule dialog -->
     <div
       id="add_rule_box"
       class="overlay"
-      style="visibility: hidden; font-size: larger"
+      style="position: fixed; visibility: hidden; font-size: larger"
     >
       <div
         id="add_rule"
@@ -53,6 +94,7 @@
           margin-top: 32px;
           margin-left: 16px;
           margin-right: 16px;
+          margin-bottom: 32px;
           min-width: 480px;
           background-color: white;
           box-shadow: 0 0 15px #ccc;
@@ -81,6 +123,11 @@
             />
           </div>
           <div class="pure-control-group">
+            <label for="aligned-name">Group</label>
+            <input id="group" type="text" list="groups" />
+            <datalist id="groups"></datalist>
+          </div>
+          <div class="pure-control-group">
             <label for="aligned-name">Run</label>
             <select id="runtype_select">
               <option>Auto</option>
@@ -103,7 +150,7 @@
             Cancel
           </button>
         </div>
-        <div style="height: 16px" />
+        <div style="width: 100%; height: 16px" />
       </div>
     </div>
   </body>
