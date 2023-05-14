@@ -1,9 +1,9 @@
-function replaceText(text, find, regex, findRegex, replace) {
+function getReplaceResult(text, find, findRegex, replace) {
   if (text == null) {
     return null;
   }
   let findResult = null;
-  if (regex) {
+  if (findRegex) {
     findResult = findRegex.exec(text);
   } else {
     if (text.indexOf(find) != -1) {
@@ -27,33 +27,26 @@ function replaceText(text, find, regex, findRegex, replace) {
   return result;
 }
 
-function replaceElementText(find, regex, replace, check) {
-  const elements = document.body.getElementsByTagName("*");
-  let findRegex = null;
-  if (regex) {
-    try {
-      findRegex = new RegExp(find, "m");
-    } catch (e) {
-      return 0;
-    }
-  }
+function replaceElements(rootNode, find, findRegex, replace, check) {
+  const elements = rootNode.querySelectorAll("*");
   let findCount = 0;
-  for (let i = 0; i < elements.length; i++) {
-    const element = elements[i];
+  for (const element of elements) {
     const tagName = element.tagName.toLowerCase();
     if (tagName == "script" || tagName == "style" || tagName == "img") {
       continue;
     }
-    const visible = element.offsetWidth > 0 && element.offsetHeight > 0;
+    const visible =
+      element.offsetWidth > 0 &&
+      element.offsetHeight > 0 &&
+      getComputedStyle(element).visibility == "visible";
     if (!visible) {
       continue;
     }
     if (element.childNodes.length > 0) {
-      for (let j = 0; j < element.childNodes.length; j++) {
-        const node = element.childNodes[j];
+      for (const node of element.childNodes) {
         if (node.nodeType === Node.TEXT_NODE) {
           const text = node.nodeValue;
-          const result = replaceText(text, find, regex, findRegex, replace);
+          const result = getReplaceResult(text, find, findRegex, replace);
           if (result == null) {
             continue;
           }
@@ -66,9 +59,10 @@ function replaceElementText(find, regex, replace, check) {
           }
         }
       }
-    } else if (element.tagName.toLowerCase() == "input") {
+    }
+    if (tagName == "input") {
       const text = element.value;
-      const result = replaceText(text, find, regex, findRegex, replace);
+      const result = getReplaceResult(text, find, findRegex, replace);
       if (result == null) {
         continue;
       }
@@ -80,23 +74,41 @@ function replaceElementText(find, regex, replace, check) {
         }
       }
     }
+    if (element.shadowRoot) {
+      findCount =
+        findCount +
+        replaceElements(element.shadowRoot, find, findRegex, replace, check);
+    }
   }
   return findCount;
+}
+
+function replaceText(find, regex, replace, check) {
+  let findRegex = null;
+  if (regex) {
+    try {
+      findRegex = new RegExp(find, "m");
+    } catch (e) {
+      return 0;
+    }
+  }
+  return replaceElements(document.body, find, findRegex, replace, check);
 }
 
 function repeatReplace(times) {
   if (times <= 4) {
     setTimeout(function () {
       chrome.storage.sync.get(null, function (result) {
-        for (let key in result) {
-          const value = result[key];
-          if (value.domain != null && value.domain != window.location.host) {
-            continue;
+        for (const rules of Object.values(result)) {
+          for (const [find, value] of Object.entries(rules)) {
+            if (value.domain != null && value.domain != window.location.host) {
+              continue;
+            }
+            if (value.runtype == "Manual") {
+              continue;
+            }
+            replaceText(find, value.regex, value.replace, false);
           }
-          if (value.runtype == "Manual") {
-            continue;
-          }
-          replaceElementText(key, value.regex, value.replace, false);
         }
         repeatReplace(times + 1);
       });
@@ -105,29 +117,56 @@ function repeatReplace(times) {
 }
 
 function main() {
-  chrome.storage.local.get("cmd", function (result) {
-    if (result["cmd"] == null) {
+  // commands
+  const kRunRule = "run_rule";
+  const kRunTest = "run_test";
+  const kRunCheck = "run_check";
+
+  const kCmd = "cmd";
+  const kTmp = "tmp";
+
+  chrome.storage.local.get([kCmd], function (result) {
+    if (result[kCmd] == null) {
       repeatReplace(1);
     } else {
-      chrome.storage.local.remove("cmd");
-      const value = result["cmd"];
-      if (value.type == "once") {
-        chrome.storage.sync.get(value.find, function (result) {
+      chrome.storage.local.remove(kCmd);
+      const cmd = result[kCmd];
+      if (cmd.type == kRunRule) {
+        chrome.storage.sync.get(cmd.group, function (result) {
           let replaceCount = 0;
-          for (let key in result) {
-            const value = result[key];
-            if (value.domain != null && value.domain != window.location.host) {
-              continue;
+          for (const rules of Object.values(result)) {
+            if (cmd.find == null) {
+              for (const [find, value] of Object.entries(rules)) {
+                if (
+                  value.domain != null &&
+                  value.domain != window.location.host
+                ) {
+                  continue;
+                }
+                replaceCount =
+                  replaceCount +
+                  replaceText(find, value.regex, value.replace, false);
+              }
+            } else {
+              const find = cmd.find;
+              const value = rules[find];
+              if (
+                value.domain != null &&
+                value.domain != window.location.host
+              ) {
+                continue;
+              }
+              replaceCount =
+                replaceCount +
+                replaceText(find, value.regex, value.replace, false);
+              break;
             }
-            replaceCount =
-              replaceCount +
-              replaceElementText(key, value.regex, value.replace, false);
           }
           chrome.runtime.sendMessage({ replaceCount: replaceCount });
         });
-      } else if (value.type == "test") {
-        chrome.storage.local.get("tmp", function (result) {
-          const rule = result["tmp"];
+      } else if (cmd.type == kRunTest) {
+        chrome.storage.local.get([kTmp], function (result) {
+          const rule = result[kTmp];
           if (rule == null || rule.valid == false) {
             return;
           }
@@ -135,11 +174,11 @@ function main() {
           if (value.domain != null && value.domain != window.location.host) {
             return;
           }
-          replaceElementText(rule.key, value.regex, value.replace, false);
+          replaceText(rule.find, value.regex, value.replace, false);
         });
-      } else if (value.type == "check") {
-        chrome.storage.local.get("tmp", function (result) {
-          const rule = result["tmp"];
+      } else if (cmd.type == kRunCheck) {
+        chrome.storage.local.get([kTmp], function (result) {
+          const rule = result[kTmp];
           let findCount = 0;
           if (rule == null || rule.valid == false) {
             findCount = 0;
@@ -148,8 +187,8 @@ function main() {
             if (value.domain != null && value.domain != window.location.host) {
               findCount = 0;
             } else {
-              findCount = replaceElementText(
-                rule.key,
+              findCount = replaceText(
+                rule.find,
                 value.regex,
                 value.replace,
                 true
