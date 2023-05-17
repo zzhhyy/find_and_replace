@@ -2,6 +2,7 @@
 
 const kTmp = "tmp";
 const kEditMode = "edit_mode";
+const kVersion = "version";
 
 // commands
 const kRunRule = "run_rule";
@@ -330,7 +331,7 @@ function updateRulesTable(group) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+function updateData() {
   updateRulesTable("");
   console.log(document.getElementById("header").style);
   document.getElementById("header_placeholder").style.height =
@@ -475,7 +476,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
   });
-});
+}
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (g_received_frames.has(sender.frameId) == false) {
@@ -496,4 +497,29 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         g_replace_count + " places were replaced";
     }
   }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  chrome.storage.local.get([kVersion], function (result) {
+    let value = result[kVersion];
+    if (value == "1.5") {
+      updateData();
+    } else {
+      chrome.storage.local.set({ [kVersion]: "1.5" });
+      chrome.storage.sync.get(null, function (result) {
+        chrome.storage.sync.clear();
+        let newObj = new Object();
+        for (let [key, value] of Object.entries(result)) {
+          newObj[key] = {
+            domain: value.domain,
+            regex: value.regex,
+            replace: value.replace,
+            runtype: value.runtype,
+          };
+        }
+        chrome.storage.sync.set({ [""]: newObj });
+        updateData();
+      });
+    }
+  });
 });
