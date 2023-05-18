@@ -116,7 +116,7 @@ function repeatReplace(times) {
   }
 }
 
-function main() {
+function executeReplace() {
   // commands
   const kRunRule = "run_rule";
   const kRunTest = "run_test";
@@ -198,6 +198,31 @@ function main() {
           chrome.runtime.sendMessage({ findCount: findCount });
         });
       }
+    }
+  });
+}
+
+function main() {
+  chrome.storage.local.get(["version"], function (result) {
+    let value = result["version"];
+    if (value == "1.5") {
+      executeReplace();
+    } else {
+      chrome.storage.local.set({ ["version"]: "1.5" });
+      chrome.storage.sync.get(null, function (result) {
+        chrome.storage.sync.clear();
+        let newObj = new Object();
+        for (let [key, value] of Object.entries(result)) {
+          newObj[key] = {
+            domain: value.domain,
+            regex: value.regex,
+            replace: value.replace,
+            runtype: value.runtype,
+          };
+        }
+        chrome.storage.sync.set({ [""]: newObj });
+        executeReplace();
+      });
     }
   });
 }
