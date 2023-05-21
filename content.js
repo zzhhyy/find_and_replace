@@ -1,4 +1,4 @@
-function getReplaceResult(text, find, findRegex, replace) {
+function GetReplaceResult(text, find, findRegex, replace) {
   if (text == null) {
     return null;
   }
@@ -27,7 +27,7 @@ function getReplaceResult(text, find, findRegex, replace) {
   return result;
 }
 
-function replaceElements(rootNode, find, findRegex, replace, check) {
+function ReplaceElements(rootNode, find, findRegex, replace, check) {
   const elements = rootNode.querySelectorAll("*");
   let findCount = 0;
   for (const element of elements) {
@@ -42,11 +42,24 @@ function replaceElements(rootNode, find, findRegex, replace, check) {
     if (!visible) {
       continue;
     }
-    if (element.childNodes.length > 0) {
+    if (tagName == "input") {
+      const text = element.value;
+      const result = GetReplaceResult(text, find, findRegex, replace);
+      if (result == null) {
+        continue;
+      }
+      if (replace == result[1] || text.indexOf(result[1]) == -1) {
+        findCount = findCount + 1;
+        if (check == false) {
+          const newText = text.replaceAll(result[0], result[1]);
+          element.value = newText;
+        }
+      }
+    } else if (element.childNodes.length > 0) {
       for (const node of element.childNodes) {
         if (node.nodeType === Node.TEXT_NODE) {
           const text = node.nodeValue;
-          const result = getReplaceResult(text, find, findRegex, replace);
+          const result = GetReplaceResult(text, find, findRegex, replace);
           if (result == null) {
             continue;
           }
@@ -60,30 +73,16 @@ function replaceElements(rootNode, find, findRegex, replace, check) {
         }
       }
     }
-    if (tagName == "input") {
-      const text = element.value;
-      const result = getReplaceResult(text, find, findRegex, replace);
-      if (result == null) {
-        continue;
-      }
-      if (replace == result[1] || text.indexOf(result[1]) == -1) {
-        findCount = findCount + 1;
-        if (check == false) {
-          const newText = text.replaceAll(result[0], result[1]);
-          element.value = newText;
-        }
-      }
-    }
     if (element.shadowRoot) {
       findCount =
         findCount +
-        replaceElements(element.shadowRoot, find, findRegex, replace, check);
+        ReplaceElements(element.shadowRoot, find, findRegex, replace, check);
     }
   }
   return findCount;
 }
 
-function replaceText(find, regex, replace, check) {
+function ReplaceText(find, regex, replace, check) {
   let findRegex = null;
   if (regex) {
     try {
@@ -92,10 +91,10 @@ function replaceText(find, regex, replace, check) {
       return 0;
     }
   }
-  return replaceElements(document.body, find, findRegex, replace, check);
+  return ReplaceElements(document.body, find, findRegex, replace, check);
 }
 
-function repeatReplace(times) {
+function RepeatReplace(times) {
   if (times <= 4) {
     setTimeout(function () {
       chrome.storage.sync.get(null, function (result) {
@@ -107,10 +106,10 @@ function repeatReplace(times) {
             if (value.runtype == "Manual") {
               continue;
             }
-            replaceText(find, value.regex, value.replace, false);
+            ReplaceText(find, value.regex, value.replace, false);
           }
         }
-        repeatReplace(times + 1);
+        RepeatReplace(times + 1);
       });
     }, times * 1000);
   }
@@ -127,7 +126,7 @@ function executeReplace() {
 
   chrome.storage.local.get([kCmd], function (result) {
     if (result[kCmd] == null) {
-      repeatReplace(1);
+      RepeatReplace(1);
     } else {
       chrome.storage.local.remove(kCmd);
       const cmd = result[kCmd];
@@ -145,7 +144,7 @@ function executeReplace() {
                 }
                 replaceCount =
                   replaceCount +
-                  replaceText(find, value.regex, value.replace, false);
+                  ReplaceText(find, value.regex, value.replace, false);
               }
             } else {
               const find = cmd.find;
@@ -158,7 +157,7 @@ function executeReplace() {
               }
               replaceCount =
                 replaceCount +
-                replaceText(find, value.regex, value.replace, false);
+                ReplaceText(find, value.regex, value.replace, false);
               break;
             }
           }
@@ -174,7 +173,7 @@ function executeReplace() {
           if (value.domain != null && value.domain != window.location.host) {
             return;
           }
-          replaceText(rule.find, value.regex, value.replace, false);
+          ReplaceText(rule.find, value.regex, value.replace, false);
         });
       } else if (cmd.type == kRunCheck) {
         chrome.storage.local.get([kTmp], function (result) {
@@ -187,7 +186,7 @@ function executeReplace() {
             if (value.domain != null && value.domain != window.location.host) {
               findCount = 0;
             } else {
-              findCount = replaceText(
+              findCount = ReplaceText(
                 rule.find,
                 value.regex,
                 value.replace,

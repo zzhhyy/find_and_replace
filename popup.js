@@ -46,47 +46,7 @@ function cutString(str, len) {
   }
 }
 
-/*
-functions to process rules
-*/
-function showAddRuleBox(group, find, value) {
-  if (value.domain == null) {
-    document.getElementById("domains_checkbox").checked = true;
-    document.getElementById("domains_text").value = "";
-  } else {
-    document.getElementById("domains_checkbox").checked = false;
-    document.getElementById("domains_text").value = value.domain;
-  }
-  document.getElementById("find_text").value = find;
-  if (value.regex == true) {
-    document.getElementById("regex_checkbox").checked = true;
-  } else {
-    document.getElementById("regex_checkbox").checked = false;
-  }
-  document.getElementById("replace_text").value = value.replace;
-  document.getElementById("group").value = group;
-  document.getElementById("runtype_select").value = value.runtype;
-  document.getElementById("add_rule_box").style.visibility = "visible";
-  g_adding_rule = true;
-  // update existing groups
-  chrome.storage.sync.get(null, function (result) {
-    let innerHTML = "";
-    for (let group in result) {
-      if (group.length > 0) {
-        innerHTML = innerHTML + `<option>${group}</option>`;
-      }
-    }
-    document.getElementById("groups").innerHTML = innerHTML;
-  });
-}
-
-function hideAddRuleBox() {
-  g_edit_mode = false;
-  g_adding_rule = false;
-  document.getElementById("add_rule_box").style.visibility = "hidden";
-  chrome.storage.local.remove([kTmp]);
-  chrome.storage.local.remove([kEditMode]);
-}
+/* functions to process rules start */
 
 function currentAddingRule() {
   let valid = true;
@@ -125,25 +85,6 @@ function saveTmpRule(force) {
   let rule = currentAddingRule();
   chrome.storage.local.set({ [kTmp]: rule });
   chrome.storage.local.set({ [kEditMode]: g_edit_mode });
-}
-
-function updateFindCount() {
-  clearTimeout(g_input_timer);
-  g_input_timer = setTimeout(function () {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.storage.local.set(
-        { cmd: { type: kRunCheck, group: null, find: null } },
-        function () {
-          g_received_frames.clear();
-          g_find_count = 0;
-          chrome.scripting.executeScript({
-            target: { tabId: tabs[0].id, allFrames: true },
-            files: ["content.js"],
-          });
-        }
-      );
-    });
-  }, 1000);
 }
 
 function runRule(group, find) {
@@ -218,6 +159,66 @@ function deleteGroup(group) {
     chrome.storage.sync.remove([group]);
     updateRulesTable("");
   }
+}
+/* functions to process rules end */
+
+/* ui functions start */
+function showAddRuleBox(group, find, value) {
+  if (value.domain == null) {
+    document.getElementById("domains_checkbox").checked = true;
+    document.getElementById("domains_text").value = "";
+  } else {
+    document.getElementById("domains_checkbox").checked = false;
+    document.getElementById("domains_text").value = value.domain;
+  }
+  document.getElementById("find_text").value = find;
+  if (value.regex == true) {
+    document.getElementById("regex_checkbox").checked = true;
+  } else {
+    document.getElementById("regex_checkbox").checked = false;
+  }
+  document.getElementById("replace_text").value = value.replace;
+  document.getElementById("group").value = group;
+  document.getElementById("runtype_select").value = value.runtype;
+  document.getElementById("add_rule_box").style.visibility = "visible";
+  g_adding_rule = true;
+  // update existing groups
+  chrome.storage.sync.get(null, function (result) {
+    let innerHTML = "";
+    for (let group in result) {
+      if (group.length > 0) {
+        innerHTML = innerHTML + `<option>${group}</option>`;
+      }
+    }
+    document.getElementById("groups").innerHTML = innerHTML;
+  });
+}
+
+function hideAddRuleBox() {
+  g_edit_mode = false;
+  g_adding_rule = false;
+  document.getElementById("add_rule_box").style.visibility = "hidden";
+  chrome.storage.local.remove([kTmp]);
+  chrome.storage.local.remove([kEditMode]);
+}
+
+function updateFindCount() {
+  clearTimeout(g_input_timer);
+  g_input_timer = setTimeout(function () {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.storage.local.set(
+        { cmd: { type: kRunCheck, group: null, find: null } },
+        function () {
+          g_received_frames.clear();
+          g_find_count = 0;
+          chrome.scripting.executeScript({
+            target: { tabId: tabs[0].id, allFrames: true },
+            files: ["content.js"],
+          });
+        }
+      );
+    });
+  }, 1000);
 }
 
 function updateRulesTable(group) {
@@ -330,6 +331,7 @@ function updateRulesTable(group) {
     ).innerText = `Group ${displayGroup} usage : ${percent}%`;
   });
 }
+/* ui functions end */
 
 function updateData() {
   updateRulesTable("");
