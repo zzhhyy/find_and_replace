@@ -2,12 +2,13 @@
 
 const kTmp = "tmp";
 const kEditMode = "edit_mode";
-const kVersion = "version";
 
 // commands
 const kRunRule = "run_rule";
 const kRunTest = "run_test";
 const kRunCheck = "run_check";
+const kRunHighLight = "run_highlight";
+const kClearHeightLight = "clear_highlight";
 
 /* constants end */
 
@@ -44,6 +45,29 @@ function cutString(str, len) {
   if (str_length < len) {
     return str;
   }
+}
+
+function clearRecivedData() {
+  g_received_frames.clear();
+  g_replace_count = 0;
+  g_find_count = 0;
+}
+
+function runCommand(command, group, find, runBefore, runAfter) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.storage.local.set({ cmd: { type: command, group: group, find: find } }, function () {
+      if (runBefore) {
+        runBefore();
+      }
+      chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id, allFrames: true },
+        files: ["content.js"],
+      });
+      if (runAfter) {
+        runAfter();
+      }
+    });
+  });
 }
 
 /* functions to process rules start */
@@ -88,19 +112,7 @@ function saveTmpRule(force) {
 }
 
 function runRule(group, find) {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    chrome.storage.local.set(
-      { cmd: { type: kRunRule, group: group, find: find } },
-      function () {
-        g_received_frames.clear();
-        g_replace_count = 0;
-        chrome.scripting.executeScript({
-          target: { tabId: tabs[0].id, allFrames: true },
-          files: ["content.js"],
-        });
-      }
-    );
-  });
+  runCommand(kRunRule, group, find, clearRecivedData, null);
 }
 
 function editRule(group, find) {
@@ -115,11 +127,7 @@ function editRule(group, find) {
 }
 
 function deleteRule(group, find) {
-  if (
-    confirm(
-      `Are you sure you want to delete rule \"${find}\" at group \"${group}\"?`
-    )
-  ) {
+  if (confirm(`Are you sure you want to delete rule \"${find}\" at group \"${group}\"?`)) {
     chrome.storage.sync.get([group], function (result) {
       let groupObj = result[group];
       delete groupObj[find];
@@ -135,19 +143,7 @@ function deleteRule(group, find) {
 }
 
 function runGroup(group) {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    chrome.storage.local.set(
-      { cmd: { type: kRunRule, group: group, find: null } },
-      function () {
-        g_received_frames.clear();
-        g_replace_count = 0;
-        chrome.scripting.executeScript({
-          target: { tabId: tabs[0].id, allFrames: true },
-          files: ["content.js"],
-        });
-      }
-    );
-  });
+  runCommand(kRunRule, group, null, clearRecivedData, null);
 }
 
 function openGroup(group) {
@@ -200,24 +196,13 @@ function hideAddRuleBox() {
   document.getElementById("add_rule_box").style.visibility = "hidden";
   chrome.storage.local.remove([kTmp]);
   chrome.storage.local.remove([kEditMode]);
+  runCommand(kClearHeightLight, null, null, null, null);
 }
 
 function updateFindCount() {
   clearTimeout(g_input_timer);
   g_input_timer = setTimeout(function () {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.storage.local.set(
-        { cmd: { type: kRunCheck, group: null, find: null } },
-        function () {
-          g_received_frames.clear();
-          g_find_count = 0;
-          chrome.scripting.executeScript({
-            target: { tabId: tabs[0].id, allFrames: true },
-            files: ["content.js"],
-          });
-        }
-      );
-    });
+    runCommand(kRunCheck, null, null, clearRecivedData, null);
   }, 1000);
 }
 
@@ -275,43 +260,30 @@ function updateRulesTable(group) {
     document.getElementById("rule_table").innerHTML = innerHtml;
     // add event lisenter after added to dom
     for (let [find, value] of ruleMap) {
-      document
-        .getElementById(value["run"])
-        .addEventListener("click", function () {
-          runRule(group, find);
-        });
-      document
-        .getElementById(value["edit"])
-        .addEventListener("click", function () {
-          editRule(group, find);
-        });
-      document
-        .getElementById(value["delete"])
-        .addEventListener("click", function () {
-          deleteRule(group, find);
-        });
+      document.getElementById(value["run"]).onclick = function () {
+        runRule(group, find);
+      };
+      document.getElementById(value["edit"]).onclick = function () {
+        editRule(group, find);
+      };
+      document.getElementById(value["delete"]).onclick = function () {
+        deleteRule(group, find);
+      };
     }
 
     for (let [ruleGroup, value] of groupMap) {
-      document
-        .getElementById(value["run"])
-        .addEventListener("click", function () {
-          runGroup(ruleGroup);
-        });
-
-      document
-        .getElementById(value["open"])
-        .addEventListener("click", function () {
-          openGroup(ruleGroup);
-        });
-
-      document
-        .getElementById(value["delete"])
-        .addEventListener("click", function () {
-          deleteGroup(ruleGroup);
-        });
+      document.getElementById(value["run"]).onclick = function () {
+        runGroup(ruleGroup);
+      };
+      document.getElementById(value["open"]).onclick = function () {
+        openGroup(ruleGroup);
+      };
+      document.getElementById(value["delete"]).onclick = function () {
+        deleteGroup(ruleGroup);
+      };
     }
   });
+
   //  update usage
   chrome.storage.sync.getBytesInUse(null, function (result) {
     let percent = ((result * 100) / 102400).toFixed(2);
@@ -325,87 +297,67 @@ function updateRulesTable(group) {
     if (percent > 100) {
       percent = 100;
     }
-    const displayGroup = cutString(group, 32);
-    document.getElementById(
-      "group_usage"
-    ).innerText = `Group ${displayGroup} usage : ${percent}%`;
+    const displayGroup = cutString(group, 16);
+    document.getElementById("group_usage").innerText = `Group ${displayGroup} usage : ${percent}%`;
   });
 }
 /* ui functions end */
 
-function updateData() {
+document.addEventListener("DOMContentLoaded", function () {
   updateRulesTable("");
-  console.log(document.getElementById("header").style);
-  document.getElementById("header_placeholder").style.height =
-    document.getElementById("header").clientHeight;
+  document.getElementById("header_placeholder").style.height = document.getElementById("header").clientHeight;
 
   // add rule button
-  document
-    .getElementById("add_rule_button")
-    .addEventListener("click", function () {
-      showAddRuleBox(g_current_group, "", {
-        domain: "",
-        regex: false,
-        replace: "",
-        runtype: "Auto",
-      });
-      chrome.tabs.query(
-        { active: true, lastFocusedWindow: true },
-        function (tabs) {
-          let url = tabs[0].url;
-          let domain = new URL(url).hostname;
-          document.getElementById("domains_text").value = domain;
-        }
-      );
+  document.getElementById("add_rule_button").onclick = function () {
+    showAddRuleBox(g_current_group, "", {
+      domain: "",
+      regex: false,
+      replace: "",
+      runtype: "Auto",
     });
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      let url = tabs[0].url;
+      let domain = new URL(url).hostname;
+      document.getElementById("domains_text").value = domain;
+    });
+  };
 
   // run all button
-  document
-    .getElementById("run_all_button")
-    .addEventListener("click", function () {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.storage.local.set(
-          { cmd: { type: kRunRule, group: null, find: null } },
-          function () {
-            g_received_frames.clear();
-            g_replace_count = 0;
-            chrome.scripting.executeScript({
-              target: { tabId: tabs[0].id, allFrames: true },
-              files: ["content.js"],
-            });
-          }
-        );
-      });
-    });
+  document.getElementById("run_all_button").onclick = function () {
+    runCommand(kRunRule, null, null, clearRecivedData, null);
+  };
 
-  document.getElementById("go_back").addEventListener("click", function () {
+  document.getElementById("go_back").onclick = function () {
     updateRulesTable("");
-  });
+  };
 
-  // test rule button
-  document.getElementById("test_button").addEventListener("click", function () {
+  // hightlight button
+  document.getElementById("highlight_button").onclick = function () {
     let rule = currentAddingRule();
     if (rule.valid == false) {
       alert("Find is empty");
       return;
     }
     saveTmpRule(true);
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.storage.local.set(
-        { cmd: { type: kRunTest, group: null, find: null } },
-        function () {
-          chrome.scripting.executeScript({
-            target: { tabId: tabs[0].id, allFrames: true },
-            files: ["content.js"],
-          });
-          updateFindCount();
-        }
-      );
-    });
-  });
+    runCommand(kRunHighLight, null, null, null, null);
+  };
+
+  // test rule button
+  document.getElementById("test_button").onclick = function () {
+    let rule = currentAddingRule();
+    if (rule.valid == false) {
+      alert("Find is empty");
+      return;
+    }
+    saveTmpRule(true);
+    const after = function () {
+      updateFindCount();
+    };
+    runCommand(kRunTest, null, null, null, after);
+  };
 
   // save rule button
-  document.getElementById("save_button").addEventListener("click", function () {
+  document.getElementById("save_button").onclick = function () {
     let rule = currentAddingRule();
     if (rule.valid == false) {
       alert("Find is empty");
@@ -432,41 +384,37 @@ function updateData() {
         }
       }
     });
-  });
+  };
 
   // cancel button
-  document
-    .getElementById("cancel_button")
-    .addEventListener("click", function () {
-      hideAddRuleBox();
-    });
+  document.getElementById("cancel_button").onclick = function () {
+    hideAddRuleBox();
+  };
 
   // save tmp rule when lose focus
-  document
-    .getElementById("add_rule")
-    .addEventListener("mouseleave", function () {
-      if (g_adding_rule == false) {
-        return;
-      }
-      console.log("save tmp");
-      saveTmpRule(false);
-    });
+  document.getElementById("add_rule").onmouseleave = function () {
+    if (g_adding_rule == false) {
+      return;
+    }
+    saveTmpRule(false);
+  };
 
   // detect find value change and auto refresh find count
-  document.getElementById("find_text").onkeyup = function () {
+  document.getElementById("find_text").onpaste = function () {
     saveTmpRule(true);
     updateFindCount();
   };
-  document
-    .getElementById("regex_checkbox")
-    .addEventListener("change", function () {
-      saveTmpRule(true);
-      updateFindCount();
-    });
+  document.getElementById("find_text").oninput = function () {
+    saveTmpRule(true);
+    updateFindCount();
+  };
+  document.getElementById("regex_checkbox").onchange = function () {
+    saveTmpRule(true);
+    updateFindCount();
+  };
 
   // show add rule if has tmp
   chrome.storage.local.get([kTmp], function (result) {
-    console.log(result);
     if (result[kTmp] != null) {
       showAddRuleBox(result[kTmp].group, result[kTmp].find, result[kTmp].value);
       updateFindCount();
@@ -478,7 +426,7 @@ function updateData() {
       });
     }
   });
-}
+});
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (g_received_frames.has(sender.frameId) == false) {
@@ -495,33 +443,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     let replaceCount = request.replaceCount;
     if (replaceCount != null) {
       g_replace_count = g_replace_count + replaceCount;
-      document.getElementById("details").innerText =
-        g_replace_count + " places were replaced";
+      document.getElementById("details").innerText = g_replace_count + " places were replaced";
     }
   }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  chrome.storage.local.get([kVersion], function (result) {
-    let value = result[kVersion];
-    if (value == "1.5") {
-      updateData();
-    } else {
-      chrome.storage.local.set({ [kVersion]: "1.5" });
-      chrome.storage.sync.get(null, function (result) {
-        chrome.storage.sync.clear();
-        let newObj = new Object();
-        for (let [key, value] of Object.entries(result)) {
-          newObj[key] = {
-            domain: value.domain,
-            regex: value.regex,
-            replace: value.replace,
-            runtype: value.runtype,
-          };
-        }
-        chrome.storage.sync.set({ [""]: newObj });
-        updateData();
-      });
-    }
-  });
 });

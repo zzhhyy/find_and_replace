@@ -27,7 +27,7 @@ function GetReplaceResult(text, find, findRegex, replace) {
   return result;
 }
 
-function ReplaceElements(rootNode, find, findRegex, replace, check) {
+function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight) {
   const elements = rootNode.querySelectorAll("*");
   let findCount = 0;
   for (const element of elements) {
@@ -36,13 +36,11 @@ function ReplaceElements(rootNode, find, findRegex, replace, check) {
       continue;
     }
     const visible =
-      element.offsetWidth > 0 &&
-      element.offsetHeight > 0 &&
-      getComputedStyle(element).visibility == "visible";
+      element.offsetWidth > 0 && element.offsetHeight > 0 && getComputedStyle(element).visibility == "visible";
     if (!visible) {
       continue;
     }
-    if (tagName == "input") {
+    if (tagName == "input" || tagName == "textarea") {
       const text = element.value;
       const result = GetReplaceResult(text, find, findRegex, replace);
       if (result == null) {
@@ -50,7 +48,11 @@ function ReplaceElements(rootNode, find, findRegex, replace, check) {
       }
       if (replace == result[1] || text.indexOf(result[1]) == -1) {
         findCount = findCount + 1;
-        if (check == false) {
+        if (highlight) {
+          //do nothing
+        } else if (check) {
+          //do nothing
+        } else {
           const newText = text.replaceAll(result[0], result[1]);
           element.value = newText;
         }
@@ -65,7 +67,17 @@ function ReplaceElements(rootNode, find, findRegex, replace, check) {
           }
           if (replace == result[1] || text.indexOf(result[1]) == -1) {
             findCount = findCount + 1;
-            if (check == false) {
+            if (highlight) {
+              const html = element.innerHTML;
+              const newHtml = html.replaceAll(
+                result[0],
+                `<span class="class_hl_find_and_replace" style="background-color:yellow">${result[0]}</span>`
+              );
+              element.innerHTML = newHtml;
+              break;
+            } else if (check) {
+              // do nothing
+            } else {
               const newText = text.replaceAll(result[0], result[1]);
               element.replaceChild(document.createTextNode(newText), node);
             }
@@ -74,15 +86,27 @@ function ReplaceElements(rootNode, find, findRegex, replace, check) {
       }
     }
     if (element.shadowRoot) {
-      findCount =
-        findCount +
-        ReplaceElements(element.shadowRoot, find, findRegex, replace, check);
+      findCount = findCount + DoTaskForElements(element.shadowRoot, find, findRegex, replace, check, highlight);
     }
   }
   return findCount;
 }
 
-function ReplaceText(find, regex, replace, check) {
+function RemoveHighLightElements() {
+  while (true) {
+    let hightLightElements = document.getElementsByClassName("class_hl_find_and_replace");
+    if (hightLightElements.length == 0) {
+      break;
+    }
+    for (const element of hightLightElements) {
+      const parentNode = element.parentNode;
+      parentNode.replaceChild(element.firstChild, element);
+      parentNode.normalize();
+    }
+  }
+}
+
+function FindTextAndDo(find, regex, replace, check, highlight) {
   let findRegex = null;
   if (regex) {
     try {
@@ -91,7 +115,7 @@ function ReplaceText(find, regex, replace, check) {
       return 0;
     }
   }
-  return ReplaceElements(document.body, find, findRegex, replace, check);
+  return DoTaskForElements(document.body, find, findRegex, replace, check, highlight);
 }
 
 function RepeatReplace(times) {
@@ -106,7 +130,7 @@ function RepeatReplace(times) {
             if (value.runtype == "Manual") {
               continue;
             }
-            ReplaceText(find, value.regex, value.replace, false);
+            FindTextAndDo(find, value.regex, value.replace, false, false);
           }
         }
         RepeatReplace(times + 1);
@@ -115,11 +139,12 @@ function RepeatReplace(times) {
   }
 }
 
-function executeReplace() {
+function main() {
   // commands
   const kRunRule = "run_rule";
   const kRunTest = "run_test";
   const kRunCheck = "run_check";
+  const kHighLight = "run_highlight";
 
   const kCmd = "cmd";
   const kTmp = "tmp";
@@ -128,6 +153,7 @@ function executeReplace() {
     if (result[kCmd] == null) {
       RepeatReplace(1);
     } else {
+      RemoveHighLightElements();
       chrome.storage.local.remove(kCmd);
       const cmd = result[kCmd];
       if (cmd.type == kRunRule) {
@@ -136,28 +162,18 @@ function executeReplace() {
           for (const rules of Object.values(result)) {
             if (cmd.find == null) {
               for (const [find, value] of Object.entries(rules)) {
-                if (
-                  value.domain != null &&
-                  value.domain != window.location.host
-                ) {
+                if (value.domain != null && value.domain != window.location.host) {
                   continue;
                 }
-                replaceCount =
-                  replaceCount +
-                  ReplaceText(find, value.regex, value.replace, false);
+                replaceCount = replaceCount + FindTextAndDo(find, value.regex, value.replace, false, false);
               }
             } else {
               const find = cmd.find;
               const value = rules[find];
-              if (
-                value.domain != null &&
-                value.domain != window.location.host
-              ) {
+              if (value.domain != null && value.domain != window.location.host) {
                 continue;
               }
-              replaceCount =
-                replaceCount +
-                ReplaceText(find, value.regex, value.replace, false);
+              replaceCount = replaceCount + FindTextAndDo(find, value.regex, value.replace, false, false);
               break;
             }
           }
@@ -173,7 +189,7 @@ function executeReplace() {
           if (value.domain != null && value.domain != window.location.host) {
             return;
           }
-          ReplaceText(rule.find, value.regex, value.replace, false);
+          FindTextAndDo(rule.find, value.regex, value.replace, false, false);
         });
       } else if (cmd.type == kRunCheck) {
         chrome.storage.local.get([kTmp], function (result) {
@@ -186,42 +202,24 @@ function executeReplace() {
             if (value.domain != null && value.domain != window.location.host) {
               findCount = 0;
             } else {
-              findCount = ReplaceText(
-                rule.find,
-                value.regex,
-                value.replace,
-                true
-              );
+              findCount = FindTextAndDo(rule.find, value.regex, value.replace, true, false);
             }
           }
           chrome.runtime.sendMessage({ findCount: findCount });
         });
+      } else if (cmd.type == kHighLight) {
+        chrome.storage.local.get([kTmp], function (result) {
+          const rule = result[kTmp];
+          if (rule == null || rule.valid == false) {
+            return;
+          }
+          const value = rule.value;
+          if (value.domain != null && value.domain != window.location.host) {
+            return;
+          }
+          FindTextAndDo(rule.find, value.regex, value.replace, false, true);
+        });
       }
-    }
-  });
-}
-
-function main() {
-  chrome.storage.local.get(["version"], function (result) {
-    let value = result["version"];
-    if (value == "1.5") {
-      executeReplace();
-    } else {
-      chrome.storage.local.set({ ["version"]: "1.5" });
-      chrome.storage.sync.get(null, function (result) {
-        chrome.storage.sync.clear();
-        let newObj = new Object();
-        for (let [key, value] of Object.entries(result)) {
-          newObj[key] = {
-            domain: value.domain,
-            regex: value.regex,
-            replace: value.replace,
-            runtype: value.runtype,
-          };
-        }
-        chrome.storage.sync.set({ [""]: newObj });
-        executeReplace();
-      });
     }
   });
 }
