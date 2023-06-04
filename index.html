@@ -6,34 +6,15 @@
   </head>
 
   <body style="min-width: 540px; min-height: 320px; margin-bottom: 32px">
-    <div
-      id="header"
-      style="position: fixed; width: 100%; background-color: white"
-    >
+    <div id="header" style="position: fixed; width: 100%; background-color: white">
       <div style="margin-left: 16px; display: flex; align-items: center">
         <img src="find_and_replace.png" style="width: 32px; height: 32px" />
         <h2 style="margin-left: 8px">Find and replace</h2>
       </div>
       <div style="margin-left: 16px; margin-top: 8px">
-        <button
-          id="add_rule_button"
-          class="pure-button button-primary"
-          style="font-size: large"
-        >
-          Add rule
-        </button>
-        <button
-          id="run_all_button"
-          class="pure-button button-primary"
-          style="font-size: large"
-        >
-          Run all
-        </button>
-        <button
-          id="go_back"
-          class="pure-button button-primary"
-          style="font-size: large; visibility: hidden"
-        >
+        <button id="add_rule_button" class="pure-button button-primary" style="font-size: large">Add rule</button>
+        <button id="run_all_button" class="pure-button button-primary" style="font-size: large">Run all</button>
+        <button id="go_back" class="pure-button button-primary" style="font-size: large; visibility: hidden">
           Back
         </button>
         <span style="font-size: medium; margin-left: 32px" id="details"></span>
@@ -41,14 +22,7 @@
       <div style="width: 100%; height: 16px"></div>
     </div>
     <div id="header_placeholder" style="width: 100%"></div>
-    <div
-      style="
-        margin-left: 16px;
-        margin-top: 16px;
-        margin-right: 16px;
-        margin-bottom: 48px;
-      "
-    >
+    <div style="margin-left: 16px; margin-top: 16px; margin-right: 16px; margin-bottom: 48px">
       <table class="pure-table pure-table-horizontal" style="min-width: 504px">
         <thead>
           <tr>
@@ -75,19 +49,12 @@
         justify-content: flex-end;
       "
     >
-      <span
-        id="group_usage"
-        style="margin-right: 16px; font-size: small"
-      ></span>
+      <span id="group_usage" style="margin-right: 16px; font-size: small"></span>
       <span id="all_usage" style="margin-right: 16px; font-size: small"></span>
     </div>
 
     <!-- add rule dialog -->
-    <div
-      id="add_rule_box"
-      class="overlay"
-      style="position: fixed; visibility: hidden; font-size: larger"
-    >
+    <div id="add_rule_box" class="overlay" style="position: fixed; visibility: hidden; font-size: larger">
       <div
         id="add_rule"
         style="
@@ -115,12 +82,7 @@
           </div>
           <div class="pure-control-group">
             <label for="aligned-name">Replace</label>
-            <input
-              id="replace_text"
-              type="text"
-              placeholder="use $0,$1,$2... as search result"
-              style="width: 280px"
-            />
+            <input id="replace_text" type="text" placeholder="use $0,$1,$2... as search result" style="width: 280px" />
           </div>
           <div class="pure-control-group">
             <label for="aligned-name">Group</label>
@@ -138,17 +100,13 @@
         <div style="margin-right: 32px; text-align: right">
           <span id="find_count"></span>
           <span>&nbsp;&nbsp;</span>
-          <button id="test_button" class="pure-button button-success">
-            Test
-          </button>
+          <button id="highlight_button" class="pure-button button-success">Highlight</button>
           <span>&nbsp;&nbsp;</span>
-          <button id="save_button" class="pure-button button-primary">
-            Save
-          </button>
+          <button id="test_button" class="pure-button button-success">Test</button>
           <span>&nbsp;&nbsp;</span>
-          <button id="cancel_button" class="pure-button button-primary">
-            Cancel
-          </button>
+          <button id="save_button" class="pure-button button-primary">Save</button>
+          <span>&nbsp;&nbsp;</span>
+          <button id="cancel_button" class="pure-button button-primary">Cancel</button>
         </div>
         <div style="width: 100%; height: 16px" />
       </div>
