@@ -1,14 +1,21 @@
-function GetReplaceResult(text, find, findRegex, replace) {
+function GetReplaceResult(text, find, findRegex, ignoreCase, replace) {
   if (text == null) {
     return null;
   }
+
   let findResult = null;
   if (findRegex) {
     findResult = findRegex.exec(text);
   } else {
-    if (text.indexOf(find) != -1) {
+    let index;
+    if (ignoreCase) {
+      index = text.toLowerCase().indexOf(find.toLowerCase());
+    } else {
+      index = text.indexOf(find);
+    }
+    if (index != -1) {
       findResult = new Array();
-      findResult.push(find);
+      findResult.push(text.substring(index, index + find.length));
     }
   }
   if (findResult == null || findResult.length == 0) {
@@ -27,7 +34,7 @@ function GetReplaceResult(text, find, findRegex, replace) {
   return result;
 }
 
-function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight) {
+function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check, highlight) {
   const elements = rootNode.querySelectorAll("*");
   let findCount = 0;
   for (const element of elements) {
@@ -42,7 +49,7 @@ function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight)
     }
     if (tagName == "input" || tagName == "textarea") {
       const text = element.value;
-      const result = GetReplaceResult(text, find, findRegex, replace);
+      const result = GetReplaceResult(text, find, findRegex, ignoreCase, replace);
       if (result == null) {
         continue;
       }
@@ -61,7 +68,7 @@ function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight)
       for (const node of element.childNodes) {
         if (node.nodeType === Node.TEXT_NODE) {
           const text = node.nodeValue;
-          const result = GetReplaceResult(text, find, findRegex, replace);
+          const result = GetReplaceResult(text, find, findRegex, ignoreCase, replace);
           if (result == null) {
             continue;
           }
@@ -86,7 +93,8 @@ function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight)
       }
     }
     if (element.shadowRoot) {
-      findCount = findCount + DoTaskForElements(element.shadowRoot, find, findRegex, replace, check, highlight);
+      findCount =
+        findCount + DoTaskForElements(element.shadowRoot, find, findRegex, ignoreCase, replace, check, highlight);
     }
   }
   return findCount;
@@ -106,16 +114,17 @@ function RemoveHighLightElements() {
   }
 }
 
-function FindTextAndDo(find, regex, replace, check, highlight) {
+function FindTextAndDo(find, regex, ignoreCase, replace, check, highlight) {
   let findRegex = null;
   if (regex) {
     try {
-      findRegex = new RegExp(find, "m");
+      const mode = ignoreCase === true ? "mi" : "m";
+      findRegex = new RegExp(find, mode);
     } catch (e) {
       return 0;
     }
   }
-  return DoTaskForElements(document.body, find, findRegex, replace, check, highlight);
+  return DoTaskForElements(document.body, find, findRegex, ignoreCase, replace, check, highlight);
 }
 
 function RepeatReplace(times) {
@@ -130,7 +139,10 @@ function RepeatReplace(times) {
             if (value.runtype == "Manual") {
               continue;
             }
-            FindTextAndDo(find, value.regex, value.replace, false, false);
+            if (value.disabled == true) {
+              continue;
+            }
+            FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
           }
         }
         RepeatReplace(times + 1);
@@ -165,7 +177,12 @@ function main() {
                 if (value.domain != null && value.domain != window.location.host) {
                   continue;
                 }
-                replaceCount = replaceCount + FindTextAndDo(find, value.regex, value.replace, false, false);
+                if (value.disabled == true) {
+                  continue;
+                }
+                replaceCount =
+                  replaceCount +
+                  FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
               }
             } else {
               const find = cmd.find;
@@ -173,7 +190,12 @@ function main() {
               if (value.domain != null && value.domain != window.location.host) {
                 continue;
               }
-              replaceCount = replaceCount + FindTextAndDo(find, value.regex, value.replace, false, false);
+              if (value.disabled == true) {
+                continue;
+              }
+              replaceCount =
+                replaceCount +
+                FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
               break;
             }
           }
@@ -189,7 +211,7 @@ function main() {
           if (value.domain != null && value.domain != window.location.host) {
             return;
           }
-          FindTextAndDo(rule.find, value.regex, value.replace, false, false);
+          FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
         });
       } else if (cmd.type == kRunCheck) {
         chrome.storage.local.get([kTmp], function (result) {
@@ -202,7 +224,14 @@ function main() {
             if (value.domain != null && value.domain != window.location.host) {
               findCount = 0;
             } else {
-              findCount = FindTextAndDo(rule.find, value.regex, value.replace, true, false);
+              findCount = FindTextAndDo(
+                rule.find,
+                value.regex === true,
+                value.ignoreCase === true,
+                value.replace,
+                true,
+                false
+              );
             }
           }
           chrome.runtime.sendMessage({ findCount: findCount });
@@ -217,7 +246,7 @@ function main() {
           if (value.domain != null && value.domain != window.location.host) {
             return;
           }
-          FindTextAndDo(rule.find, value.regex, value.replace, false, true);
+          FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, false, true);
         });
       }
     }
