@@ -170,6 +170,8 @@ export class Rules extends React.Component {
 
     this.keyIndex = 0;
     this.editMode = false;
+    this.editingGroup = "";
+    this.editingFind = "";
     this.addingRule = false;
     this.lastSaveTime = 0;
     this.findTimer = null;
@@ -202,6 +204,12 @@ export class Rules extends React.Component {
           if (value != null) {
             this.editMode = value;
           }
+        });
+        chrome.storage.local.get([KEY.EDIT_GROUP], (result) => {
+          this.editingGroup = result[KEY.EDIT_GROUP];
+        });
+        chrome.storage.local.get([KEY.EDIT_FIND], (result) => {
+          this.editingFind = result[KEY.EDIT_FIND];
         });
       }
     });
@@ -350,29 +358,49 @@ export class Rules extends React.Component {
     }
     const group = rule.group;
     const find = rule.find;
-    chrome.storage.sync.get(group, (result) => {
-      if (result[group] === null || result[group] === undefined) {
-        let newGroup = {};
-        newGroup[find] = rule.value;
-        chrome.storage.sync.set({ [group]: newGroup });
-        this.updateCurrentRules(this.state.currentGroup);
-        this.onClickCancel();
-      } else {
-        let currentGroup = result[group];
-        if (this.editMode || !currentGroup.hasOwnProperty(find)) {
-          currentGroup[find] = rule.value;
-          chrome.storage.sync.set({ [group]: currentGroup });
+
+    const AddOneRule = () => {
+      chrome.storage.sync.get(group, (result) => {
+        if (result[group] === null || result[group] === undefined) {
+          let newGroup = {};
+          newGroup[find] = rule.value;
+          chrome.storage.sync.set({ [group]: newGroup });
           this.updateCurrentRules(this.state.currentGroup);
           this.onClickCancel();
         } else {
-          alert("Duplicate rule, save failed!");
+          let currentGroup = result[group];
+          if (this.editMode || !currentGroup.hasOwnProperty(find)) {
+            currentGroup[find] = rule.value;
+            chrome.storage.sync.set({ [group]: currentGroup });
+            this.updateCurrentRules(this.state.currentGroup);
+            this.onClickCancel();
+          } else {
+            alert("Duplicate rule, save failed!");
+          }
         }
-      }
-    });
+      });
+    };
+    if (this.editMode && ((group !== this.editingGroup) || (find !== this.editingFind))) {
+      // Delete old rule
+      chrome.storage.sync.get([this.editingGroup], (result) => {
+        let groupObj = result[this.editingGroup];
+        delete groupObj[this.editingFind];
+        if (Object.keys(groupObj).length === 0) {
+          chrome.storage.sync.remove([this.editingGroup]);
+        } else {
+          chrome.storage.sync.set({ [this.editingGroup]: groupObj });
+        }
+        AddOneRule();
+      });
+    } else {
+      AddOneRule();
+    }
   };
 
   onClickCancel = () => {
     this.editMode = false;
+    this.editingGroup = "";
+    this.editingFind = "";
     this.addingRule = false;
     chrome.storage.local.remove([KEY.TMP]);
     chrome.storage.local.remove([KEY.EDIT_MODE]);
@@ -432,6 +460,8 @@ export class Rules extends React.Component {
     let rule = this.currentAddingRule();
     chrome.storage.local.set({ [KEY.TMP]: rule });
     chrome.storage.local.set({ [KEY.EDIT_MODE]: this.editMode });
+    chrome.storage.local.set({ [KEY.EDIT_GROUP]: this.editingGroup });
+    chrome.storage.local.set({ [KEY.EDIT_FIND]: this.editingFind });
   }
 
   /* Actions */
@@ -448,6 +478,8 @@ export class Rules extends React.Component {
       const groupMap = result[rule.group];
       const value = groupMap[rule.find];
       this.editMode = true;
+      this.editingGroup = rule.group;
+      this.editingFind = rule.find;
       this.showAddRuleBox(rule.group, rule.find, value);
       setTimeout(() => {
         this.saveTmpRule(true);
@@ -532,7 +564,7 @@ export class Rules extends React.Component {
               size="small"
               defaultValue={this.state.presetRule ? this.state.presetRule.find : ""}
               onChange={this.onFindChange}
-              style={{width: "280px"}}
+              style={{ width: "280px" }}
             />
           </div>
           <div style={vertical}>
@@ -567,7 +599,7 @@ export class Rules extends React.Component {
               size="small"
               defaultValue={this.state.presetRule ? this.state.presetRule.value.replace : ""}
               placeholder={"use $0,$1,$2.. as search result"}
-              style={{width: "280px"}}
+              style={{ width: "280px" }}
             />
           </div>
           <div style={space}></div>
@@ -578,7 +610,7 @@ export class Rules extends React.Component {
               size="small"
               inputProps={{ list: "groups" }}
               defaultValue={this.state.presetRule ? this.state.presetRule.group : ""}
-              style={{width: "280px"}}
+              style={{ width: "280px" }}
             />
             <datalist id={"groups"}>
               {this.state.groups.map((group) => (

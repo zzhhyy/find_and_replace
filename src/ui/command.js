@@ -3,6 +3,8 @@
 export const KEY = {
   TMP: "tmp",
   EDIT_MODE: "edit_mode",
+  EDIT_GROUP: "edit_group",
+  EDIT_FIND: "edit_find",
 };
 
 export const CMD = {
