@@ -1,3 +1,39 @@
+function GetReplacedText(text, find, findRegex, ignoreCase, replace) {
+  if (text == null) {
+    return "";
+  }
+
+  let findResult = null;
+  if (findRegex) {
+    findResult = findRegex.exec(text);
+  } else {
+    let index;
+    if (ignoreCase) {
+      index = text.toLowerCase().indexOf(find.toLowerCase());
+    } else {
+      index = text.indexOf(find);
+    }
+    if (index != -1) {
+      findResult = new Array();
+      findResult.push(text.substring(index, index + find.length));
+    }
+  }
+  if (findResult == null || findResult.length == 0) {
+    return text;
+  }
+  let realReplace = replace;
+  for (let k = 0; k < findResult.length; k++) {
+    const param = "$" + k;
+    if (realReplace.indexOf(param) != -1) {
+      realReplace = realReplace.replaceAll(param, findResult[k]);
+    }
+  }
+  const index = text.indexOf(findResult[0]) + findResult[0].length;
+  const firstPart = text.substring(0, index);
+  const secondPart = text.substring(index);
+  return firstPart.replaceAll(findResult[0], realReplace) + GetReplacedText(secondPart, find, findRegex, ignoreCase, replace);
+}
+
 function GetReplaceResult(text, find, findRegex, ignoreCase, replace) {
   if (text == null) {
     return null;
@@ -60,8 +96,7 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
         } else if (check) {
           //do nothing
         } else {
-          const newText = text.replaceAll(result[0], result[1]);
-          element.value = newText;
+          element.value = GetReplacedText(text, find, findRegex, ignoreCase, replace);
         }
       }
     } else if (element.childNodes.length > 0) {
@@ -85,7 +120,7 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
             } else if (check) {
               // do nothing
             } else {
-              const newText = text.replaceAll(result[0], result[1]);
+              const newText =  GetReplacedText(text, find, findRegex, ignoreCase, replace);
               element.replaceChild(document.createTextNode(newText), node);
             }
           }

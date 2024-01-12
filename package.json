@@ -1,6 +1,6 @@
 {
   "name": "find_and_replace",
-  "version": "2.0",
+  "version": "2.1",
   "private": true,
   "dependencies": {
     "@babel/core": "^7.16.0",
