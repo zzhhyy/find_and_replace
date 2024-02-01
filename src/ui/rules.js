@@ -88,7 +88,7 @@ class Rule extends React.Component {
     this.onCloseMenu();
   };
 
-  onClickMenu = (event) => {
+  onClickMenu = event => {
     this.setState({ menuAnchor: event.currentTarget });
   };
 
@@ -195,20 +195,20 @@ export class Rules extends React.Component {
       document.getElementById("header")
     ).height;
     this.updateCurrentRules("");
-    chrome.storage.local.get([KEY.TMP], (result) => {
+    chrome.storage.local.get([KEY.TMP], result => {
       if (result[KEY.TMP] != null) {
         this.showAddRuleBox(result[KEY.TMP].group, result[KEY.TMP].find, result[KEY.TMP].value);
         this.updateFindCount();
-        chrome.storage.local.get([KEY.EDIT_MODE], (result) => {
+        chrome.storage.local.get([KEY.EDIT_MODE], result => {
           const value = result[KEY.EDIT_MODE];
           if (value != null) {
             this.editMode = value;
           }
         });
-        chrome.storage.local.get([KEY.EDIT_GROUP], (result) => {
+        chrome.storage.local.get([KEY.EDIT_GROUP], result => {
           this.editingGroup = result[KEY.EDIT_GROUP];
         });
-        chrome.storage.local.get([KEY.EDIT_FIND], (result) => {
+        chrome.storage.local.get([KEY.EDIT_FIND], result => {
           this.editingFind = result[KEY.EDIT_FIND];
         });
       }
@@ -241,13 +241,13 @@ export class Rules extends React.Component {
     }, 1000);
   };
 
-  updateCurrentRules = (group) => {
+  updateCurrentRules = group => {
     let key = group;
     if (key === "") {
       key = null;
     }
     let data = [];
-    chrome.storage.sync.get(key, (result) => {
+    chrome.storage.sync.get(key, result => {
       if (key === null) {
         for (let group in result) {
           if (group.length > 0) {
@@ -266,14 +266,14 @@ export class Rules extends React.Component {
     });
 
     //  update usage
-    chrome.storage.sync.getBytesInUse(null, (result) => {
+    chrome.storage.sync.getBytesInUse(null, result => {
       let percent = ((result * 100) / 102400).toFixed(2);
       if (percent > 100) {
         percent = 100;
       }
       this.setState({ allUsage: `All usage : ${percent}%` });
     });
-    chrome.storage.sync.getBytesInUse(group, (result) => {
+    chrome.storage.sync.getBytesInUse(group, result => {
       let percent = ((result * 100) / 8192).toFixed(2);
       if (percent > 100) {
         percent = 100;
@@ -287,7 +287,7 @@ export class Rules extends React.Component {
     this.setState({ showAddRule: true, presetRule: { group: group, find: find, value: value } });
     this.addingRule = true;
     // update existing groups
-    chrome.storage.sync.get(null, (result) => {
+    chrome.storage.sync.get(null, result => {
       let groups = [];
       for (let group in result) {
         if (group.length > 0) {
@@ -305,7 +305,7 @@ export class Rules extends React.Component {
   };
 
   onClickAddRule = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
       let url = tabs[0].url;
       let domain = new URL(url).hostname;
       this.showAddRuleBox(this.state.currentGroup, "", {
@@ -360,7 +360,7 @@ export class Rules extends React.Component {
     const find = rule.find;
 
     const AddOneRule = () => {
-      chrome.storage.sync.get(group, (result) => {
+      chrome.storage.sync.get(group, result => {
         if (result[group] === null || result[group] === undefined) {
           let newGroup = {};
           newGroup[find] = rule.value;
@@ -380,9 +380,9 @@ export class Rules extends React.Component {
         }
       });
     };
-    if (this.editMode && ((group !== this.editingGroup) || (find !== this.editingFind))) {
+    if (this.editMode && (group !== this.editingGroup || find !== this.editingFind)) {
       // Delete old rule
-      chrome.storage.sync.get([this.editingGroup], (result) => {
+      chrome.storage.sync.get([this.editingGroup], result => {
         let groupObj = result[this.editingGroup];
         delete groupObj[this.editingFind];
         if (Object.keys(groupObj).length === 0) {
@@ -465,16 +465,16 @@ export class Rules extends React.Component {
   }
 
   /* Actions */
-  runRule = (rule) => {
+  runRule = rule => {
     RunCommand(CMD.RUN_RULE, rule.group, rule.find, this.clearRecivedData, null);
   };
 
-  openGroup = (rule) => {
+  openGroup = rule => {
     this.updateCurrentRules(rule.group);
   };
 
-  editRule = (rule) => {
-    chrome.storage.sync.get([rule.group], (result) => {
+  editRule = rule => {
+    chrome.storage.sync.get([rule.group], result => {
       const groupMap = result[rule.group];
       const value = groupMap[rule.find];
       this.editMode = true;
@@ -488,16 +488,16 @@ export class Rules extends React.Component {
     });
   };
 
-  deleteGroup = (rule) => {
+  deleteGroup = rule => {
     if (window.confirm(`Are you sure you want to delete group ${rule.group}?`)) {
       chrome.storage.sync.remove([rule.group]);
       this.updateCurrentRules("");
     }
   };
 
-  deleteRule = (rule) => {
+  deleteRule = rule => {
     if (window.confirm(`Are you sure you want to delete rule ${rule.find} at group ${rule.group}?`)) {
-      chrome.storage.sync.get([rule.group], (result) => {
+      chrome.storage.sync.get([rule.group], result => {
         let groupObj = result[rule.group];
         delete groupObj[rule.find];
         if (Object.keys(groupObj).length === 0) {
@@ -511,8 +511,8 @@ export class Rules extends React.Component {
     }
   };
 
-  enableRule = (rule) => {
-    chrome.storage.sync.get([rule.group], (result) => {
+  enableRule = rule => {
+    chrome.storage.sync.get([rule.group], result => {
       let groupObj = result[rule.group];
       groupObj[rule.find].disabled = false;
       chrome.storage.sync.set({ [rule.group]: groupObj });
@@ -520,8 +520,8 @@ export class Rules extends React.Component {
     });
   };
 
-  disableRule = (rule) => {
-    chrome.storage.sync.get([rule.group], (result) => {
+  disableRule = rule => {
+    chrome.storage.sync.get([rule.group], result => {
       let groupObj = result[rule.group];
       groupObj[rule.find].disabled = true;
       chrome.storage.sync.set({ [rule.group]: groupObj });
@@ -613,7 +613,7 @@ export class Rules extends React.Component {
               style={{ width: "280px" }}
             />
             <datalist id={"groups"}>
-              {this.state.groups.map((group) => (
+              {this.state.groups.map(group => (
                 <option key={group} value={group}>
                   {group}
                 </option>
@@ -706,7 +706,7 @@ export class Rules extends React.Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {this.state.currentRules.map((rule) =>
+              {this.state.currentRules.map(rule =>
                 React.createElement(Rule, {
                   key: this.keyIndex++,
                   rule: rule,
