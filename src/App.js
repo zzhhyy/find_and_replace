@@ -1,9 +1,9 @@
-import './App.css';
+import "./App.css";
 
-import { Rules } from './ui/rules';
+import { Rules } from "./ui/rules";
 
 function App() {
-  return (<Rules />);
+  return <Rules />;
 }
 
 export default App;

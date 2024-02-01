@@ -31,7 +31,9 @@ function GetReplacedText(text, find, findRegex, ignoreCase, replace) {
   const index = text.indexOf(findResult[0]) + findResult[0].length;
   const firstPart = text.substring(0, index);
   const secondPart = text.substring(index);
-  return firstPart.replaceAll(findResult[0], realReplace) + GetReplacedText(secondPart, find, findRegex, ignoreCase, replace);
+  return (
+    firstPart.replaceAll(findResult[0], realReplace) + GetReplacedText(secondPart, find, findRegex, ignoreCase, replace)
+  );
 }
 
 function GetReplaceResult(text, find, findRegex, ignoreCase, replace) {
@@ -120,7 +122,7 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
             } else if (check) {
               // do nothing
             } else {
-              const newText =  GetReplacedText(text, find, findRegex, ignoreCase, replace);
+              const newText = GetReplacedText(text, find, findRegex, ignoreCase, replace);
               element.replaceChild(document.createTextNode(newText), node);
             }
           }
