@@ -3,15 +3,43 @@
   "description": "A tool that help you find and replace text.",
   "version": "2.2",
   "manifest_version": 3,
-  "permissions": ["tabs", "activeTab", "scripting", "storage"],
+  "permissions": ["tabs", "activeTab", "scripting", "storage", "sidePanel", "contextMenus"],
+  "icons": {
+    "16": "find_and_replace.png",
+    "32": "find_and_replace.png",
+    "48": "find_and_replace.png"
+  },
   "action": {
-    "default_popup": "index.html",
     "default_icon": "find_and_replace.png"
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "background": {
+    "service_worker": "service_worker.js"
   },
   "content_scripts": [
     {
       "js": ["content.js"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "commands": {
+    "settings.keyboard_shortcut.cmd1": {
+      "suggested_key": "Ctrl+1",
+      "description": "1"
+    },
+    "settings.keyboard_shortcut.cmd2": {
+      "suggested_key": "Ctrl+2",
+      "description": "2"
+    },
+    "settings.keyboard_shortcut.cmd3": {
+      "suggested_key": "Ctrl+3",
+      "description": "3"
+    },
+    "settings.keyboard_shortcut.cmd4": {
+      "suggested_key": "Ctrl+4",
+      "description": "4"
+    }
+  }
 }

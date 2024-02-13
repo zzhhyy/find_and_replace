@@ -1,9 +1,9 @@
 import "./App.css";
 
-import { Rules } from "./ui/rules";
+import { Main } from "./ui/main";
 
 function App() {
-  return <Rules />;
+  return <Main />;
 }
 
 export default App;

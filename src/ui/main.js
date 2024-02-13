@@ -1,159 +1,15 @@
 /*global chrome*/
 import React from "react";
-import {
-  Button,
-  TableHead,
-  Table,
-  TableRow,
-  TableCell,
-  TableBody,
-  IconButton,
-  Menu,
-  MenuItem,
-  Dialog,
-  TextField,
-  Checkbox,
-  Select,
-  FormControlLabel,
-} from "@mui/material";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import { Button, IconButton, MenuItem, Dialog, TextField, Checkbox, Select, FormControlLabel } from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 import MainIcon from "./image/find_and_replace.png";
-import FolderIcon from "./image/folder.png";
-import DocumentIcon from "./image/document.png";
-import { RunCommand, CMD, KEY } from "./command";
+import { Settings } from "./settings.js";
+import { Rule, RuleTable } from "./rule_table.js";
+import { CutString, RunCommand, CreateContextMenu } from "./utils.js";
+import { KEY, CMD, SETTINGS, OPEN_MODE } from "./constant.js";
 
-function cutString(str, len) {
-  let str_length = 0;
-  let str_cut = "";
-  for (let i = 0; i < str.length; i++) {
-    let a = str.charAt(i);
-    str_length++;
-    if (a.length > 1) {
-      str_length++;
-    }
-    str_cut = str_cut.concat(a);
-    if (str_length >= len) {
-      str_cut = str_cut.concat("...");
-      return str_cut;
-    }
-  }
-  if (str_length < len) {
-    return str;
-  }
-}
-
-class Rule extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      menuAnchor: null,
-    };
-  }
-
-  isGroup = () => {
-    return this.props.rule.find === null;
-  };
-
-  isDisbaled = () => {
-    return this.props.rule.disabled === true;
-  };
-
-  onClickRun = () => {
-    this.props.runRule(this.props.rule);
-  };
-
-  onClickOpenOrEdit = () => {
-    if (this.isGroup()) {
-      this.props.openGroup(this.props.rule);
-    } else {
-      this.props.editRule(this.props.rule);
-    }
-  };
-
-  onClickDisable = () => {
-    if (this.isDisbaled()) {
-      this.props.enableRule(this.props.rule);
-    } else {
-      this.props.disableRule(this.props.rule);
-    }
-  };
-
-  onClickDelete = () => {
-    if (this.isGroup()) {
-      this.props.deleteGroup(this.props.rule);
-    } else {
-      this.props.deleteRule(this.props.rule);
-    }
-    this.onCloseMenu();
-  };
-
-  onClickMenu = event => {
-    this.setState({ menuAnchor: event.currentTarget });
-  };
-
-  onCloseMenu = () => {
-    this.setState({ menuAnchor: null });
-  };
-
-  renderMenu() {
-    return (
-      <>
-        {this.state.menuAnchor && (
-          <Menu anchorEl={this.state.menuAnchor} open={true} onClose={this.onCloseMenu}>
-            {!this.isGroup() && (
-              <MenuItem onClick={this.onClickDisable}>{this.isDisbaled() ? "Enable" : "Disable"}</MenuItem>
-            )}
-            <MenuItem onClick={this.onClickDelete}>Delete</MenuItem>
-          </Menu>
-        )}
-      </>
-    );
-  }
-
-  render() {
-    return (
-      <TableRow>
-        <TableCell>
-          <img src={this.isGroup() ? FolderIcon : DocumentIcon} alt={""} />
-        </TableCell>
-        <TableCell align="left" style={{ fontSize: "medium" }}>
-          {this.isGroup() ? cutString(this.props.rule.group, 16) : cutString(this.props.rule.find, 16)}
-        </TableCell>
-        <TableCell align="left">
-          <Button
-            variant="contained"
-            disabled={this.isDisbaled()}
-            color="success"
-            style={{ textTransform: "none" }}
-            onClick={this.onClickRun}
-          >
-            Run
-          </Button>
-        </TableCell>
-        <TableCell align="left">
-          <Button
-            variant="contained"
-            disabled={this.isDisbaled()}
-            color="success"
-            style={{ textTransform: "none" }}
-            onClick={this.onClickOpenOrEdit}
-          >
-            {this.isGroup() ? "Open" : "Edit"}
-          </Button>
-        </TableCell>
-        <TableCell align="left">
-          <IconButton onClick={this.onClickMenu}>
-            <MoreHorizIcon />
-          </IconButton>
-          {this.renderMenu()}
-        </TableCell>
-      </TableRow>
-    );
-  }
-}
-
-export class Rules extends React.Component {
+export class Main extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -166,6 +22,11 @@ export class Rules extends React.Component {
       presetRule: null,
       allUsage: "",
       groupUsage: "",
+      showSettings: false,
+      headerHeight: 0,
+      tableWidth: 328,
+      domainFieldWidth: 120,
+      generalFieldWidth: 200,
     };
 
     this.keyIndex = 0;
@@ -178,6 +39,7 @@ export class Rules extends React.Component {
     this.findCount = 0;
     this.replaceCount = 0;
     this.receivedFrames = new Set();
+    this.isSidePanel = localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE) === OPEN_MODE.SIDE_PANEL;
 
     this.domainInputRef = React.createRef();
     this.domainCheckRef = React.createRef();
@@ -188,12 +50,15 @@ export class Rules extends React.Component {
     this.groupInputRef = React.createRef();
     this.runSelectRef = React.createRef();
     this.disableCheckRef = React.createRef();
+    this.headerRef = React.createRef();
+    this.bodyRef = React.createRef();
+
+    this.resizeObserver = new ResizeObserver(this.handleSizeChange);
   }
 
   componentDidMount() {
-    document.getElementById("header_placeholder").style.height = getComputedStyle(
-      document.getElementById("header")
-    ).height;
+    this.resizeObserver.observe(this.headerRef.current);
+    this.resizeObserver.observe(this.bodyRef.current);
     this.updateCurrentRules("");
     chrome.storage.local.get([KEY.TMP], result => {
       if (result[KEY.TMP] != null) {
@@ -233,6 +98,28 @@ export class Rules extends React.Component {
       }
     });
   }
+
+  componentWillUnmount() {
+    this.resizeObserver.unobserve(this.headerRef.current);
+    this.resizeObserver.unobserve(this.bodyRef.current);
+  }
+
+  handleSizeChange = entries => {
+    for (const entry of entries) {
+      if (entry.target === this.bodyRef.current) {
+        const bodyWidth = entry.contentRect.width;
+        const domainWidth = bodyWidth > 440 ? 200 : bodyWidth - 240;
+        const generalWidth = bodyWidth > 410 ? 250 : bodyWidth - 160;
+        this.setState({
+          tableWidth: entry.contentRect.width - 32,
+          domainFieldWidth: domainWidth,
+          generalFieldWidth: generalWidth,
+        });
+      } else if (entry.target === this.headerRef.current) {
+        this.setState({ headerHeight: entry.contentRect.height });
+      }
+    }
+  };
 
   updateFindCount = () => {
     clearTimeout(this.findTimer);
@@ -278,7 +165,7 @@ export class Rules extends React.Component {
       if (percent > 100) {
         percent = 100;
       }
-      const displayGroup = cutString(group, 16);
+      const displayGroup = CutString(group, 16);
       this.setState({ groupUsage: `Group ${displayGroup} usage : ${percent}%` });
     });
   };
@@ -367,6 +254,7 @@ export class Rules extends React.Component {
           chrome.storage.sync.set({ [group]: newGroup });
           this.updateCurrentRules(this.state.currentGroup);
           this.onClickCancel();
+          CreateContextMenu(false, false, false);
         } else {
           let currentGroup = result[group];
           if (this.editMode || !currentGroup.hasOwnProperty(find)) {
@@ -374,6 +262,7 @@ export class Rules extends React.Component {
             chrome.storage.sync.set({ [group]: currentGroup });
             this.updateCurrentRules(this.state.currentGroup);
             this.onClickCancel();
+            CreateContextMenu(false, false, false);
           } else {
             alert("Duplicate rule, save failed!");
           }
@@ -529,23 +418,37 @@ export class Rules extends React.Component {
     });
   };
 
+  /* Settings */
+
+  onShowSettings = () => {
+    this.setState({ showSettings: true });
+  };
+
+  onCloseSettings = () => {
+    this.setState({ showSettings: false });
+  };
+
+  renderSetting() {
+    return <Settings showSettings={this.state.showSettings} onCloseSettings={this.onCloseSettings} />;
+  }
+
   renderAddRule() {
     const vertical = { display: "flex", alignItems: "center" };
-    const label = { width: "96px", textAlign: "right" };
+    const label = { width: "80px", textAlign: "right" };
     const space = { height: "4px" };
     return (
-      <Dialog open={this.state.showAddRule}>
-        <div style={{ padding: "16px", fontSize: "medium" }} onMouseLeave={this.onMouseLeave}>
+      <Dialog open={this.state.showAddRule} PaperProps={{ style: { margin: "8px" } }}>
+        <div style={{ padding: "8px", fontSize: "medium" }} onMouseLeave={this.onMouseLeave}>
           <h3 style={{ textAlign: "center" }}>Add rule</h3>
           <div style={vertical}>
-            <label style={label}>Domains&nbsp;&nbsp;</label>
+            <div style={label}>Domains&nbsp;&nbsp;</div>
             <TextField
               inputRef={this.domainInputRef}
               size="small"
+              style={{ paddingRight: "8px", width: this.state.domainFieldWidth }}
               defaultValue={this.state.presetRule ? this.state.presetRule.value.domain : ""}
             />
             <FormControlLabel
-              style={{ marginLeft: "8px" }}
               control={
                 <Checkbox
                   inputRef={this.domainCheckRef}
@@ -553,18 +456,18 @@ export class Rules extends React.Component {
                   defaultChecked={this.state.presetRule ? this.state.presetRule.value.domain == null : false}
                 />
               }
-              label="All domains"
+              label={<div style={{ fontSize: "14px" }}>All domains</div>}
             />
           </div>
           <div style={space}></div>
           <div style={vertical}>
-            <label style={label}>Find&nbsp;&nbsp;</label>
+            <div style={label}>Find&nbsp;&nbsp;</div>
             <TextField
               inputRef={this.findInputRef}
               size="small"
               defaultValue={this.state.presetRule ? this.state.presetRule.find : ""}
               onChange={this.onFindChange}
-              style={{ width: "280px" }}
+              style={{ width: this.state.generalFieldWidth }}
             />
           </div>
           <div style={vertical}>
@@ -578,7 +481,7 @@ export class Rules extends React.Component {
                   onChange={this.onFindChange}
                 />
               }
-              label="Regex"
+              label={<div style={{ fontSize: "14px" }}>Regex</div>}
             />
             <FormControlLabel
               control={
@@ -589,9 +492,10 @@ export class Rules extends React.Component {
                   onChange={this.onFindChange}
                 />
               }
-              label="Ignore case"
+              label={<div style={{ fontSize: "14px" }}>Ignore case</div>}
             />
           </div>
+          <div style={space}></div>
           <div style={vertical}>
             <label style={label}>Replace&nbsp;&nbsp;</label>
             <TextField
@@ -599,7 +503,7 @@ export class Rules extends React.Component {
               size="small"
               defaultValue={this.state.presetRule ? this.state.presetRule.value.replace : ""}
               placeholder={"use $0,$1,$2.. as search result"}
-              style={{ width: "280px" }}
+              style={{ width: this.state.generalFieldWidth }}
             />
           </div>
           <div style={space}></div>
@@ -610,7 +514,7 @@ export class Rules extends React.Component {
               size="small"
               inputProps={{ list: "groups" }}
               defaultValue={this.state.presetRule ? this.state.presetRule.group : ""}
-              style={{ width: "280px" }}
+              style={{ width: this.state.generalFieldWidth }}
             />
             <datalist id={"groups"}>
               {this.state.groups.map(group => (
@@ -632,10 +536,13 @@ export class Rules extends React.Component {
               <MenuItem value={"Manual"}>Manual</MenuItem>
             </Select>
           </div>
-          <div style={{ height: "16px" }}></div>
+          <div style={{ width: "100%", height: "8px" }}></div>
           <div style={{ textAlign: "right" }}>
             <span>{this.state.findCount}</span>
             <span>&nbsp;&nbsp;</span>
+          </div>
+          <div style={{ width: "100%", height: "8px" }}></div>
+          <div style={{ textAlign: "right" }}>
             <Button
               variant="contained"
               color="success"
@@ -665,10 +572,17 @@ export class Rules extends React.Component {
   renderMain() {
     return (
       <div style={{ marginLeft: "16px", marginRight: "16px" }}>
-        <div id={"header"} style={{ position: "fixed", backgroundColor: "white", width: "100%" }}>
+        <div
+          id={"header"}
+          ref={this.headerRef}
+          style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)" }}
+        >
           <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
             <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
             <h3 style={{ marginLeft: "8px", fontSize: "medium" }}>Find and replace</h3>
+            <IconButton style={{ marginLeft: "auto" }} onClick={this.onShowSettings}>
+              <SettingsIcon />
+            </IconButton>
           </div>
           <div style={{ marginTop: "8px" }}>
             <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickAddRule}>
@@ -693,22 +607,14 @@ export class Rules extends React.Component {
           </div>
           <div style={{ height: "16px" }}></div>
         </div>
-        <div id={"header_placeholder"} style={{ width: "100%" }}></div>
+        <div id={"header_placeholder"} style={{ width: "100%", height: this.state.headerHeight }}></div>
         <div style={{ marginTop: "16px" }}>
-          <Table size="small" style={{ border: "1px solid lightgrey" }}>
-            <TableHead>
-              <TableRow style={{ backgroundColor: "lightgrey" }}>
-                <TableCell>Rules</TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+          {
+            <RuleTable width={this.state.tableWidth}>
               {this.state.currentRules.map(rule =>
                 React.createElement(Rule, {
                   key: this.keyIndex++,
+                  width: this.state.tableWidth,
                   rule: rule,
                   runRule: this.runRule,
                   deleteRule: this.deleteRule,
@@ -719,8 +625,8 @@ export class Rules extends React.Component {
                   disableRule: this.disableRule,
                 })
               )}
-            </TableBody>
-          </Table>
+            </RuleTable>
+          }
         </div>
         <div
           style={{
@@ -730,7 +636,7 @@ export class Rules extends React.Component {
         ></div>
         <div
           style={{
-            width: "100%",
+            width: "calc(100% - 32px)",
             height: "32px",
             position: "fixed",
             bottom: "0",
@@ -750,9 +656,17 @@ export class Rules extends React.Component {
 
   render() {
     return (
-      <div style={{ minWidth: "640px", minHeight: "480px" }}>
-        {this.renderMain()}
-        {this.renderAddRule()}
+      <div ref={this.bodyRef} style={{ width: "100%" }}>
+        <div
+          style={{
+            width: this.isSidePanel ? "auto" : "640px",
+            height: this.isSidePanel ? "auto" : "480px",
+          }}
+        >
+          {this.renderMain()}
+          {this.renderAddRule()}
+          {this.renderSetting()}
+        </div>
       </div>
     );
   }
