@@ -119,7 +119,7 @@ export class Settings extends React.Component {
     const localSettings = await chrome.storage.local.get(null);
     const rules = await chrome.storage.sync.get(null);
 
-    let groups = new Array();
+    let groups = [];
     for (const group in rules) {
       if (group.length > 0) {
         groups.push(group);
