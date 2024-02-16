@@ -9,6 +9,14 @@ chrome.runtime.onInstalled.addListener(details => {
   }
 });
 
+chrome.runtime.onStartup.addListener(() => {
+  chrome.storage.local.get(["settings.general.open_mode"], result => {
+    if (result["settings.general.open_mode"] === "pop_up") {
+      chrome.action.setPopup({ popup: "index.html" });
+    }
+  });
+});
+
 chrome.action.onClicked.addListener(tab => {
   chrome.storage.local.get(["settings.general.open_mode"], result => {
     if (result["settings.general.open_mode"] !== "pop_up") {
