@@ -126,7 +126,7 @@ export class Settings extends React.Component {
       }
     }
 
-    const isSidePanel = localSettings[SETTINGS.GENERAL.OPEN_MODE] !== OPEN_MODE.POP_UP;
+    const isSidePanel = localSettings[SETTINGS.GENERAL.OPEN_MODE] === OPEN_MODE.SIDE_PANEL;
     const run_all = localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] ?? false;
     const run_group = localSettings[SETTINGS.CONTEXT_MENU.RUN_GROUP] ?? false;
     const run_rule = localSettings[SETTINGS.CONTEXT_MENU.RUN_RULE] ?? false;

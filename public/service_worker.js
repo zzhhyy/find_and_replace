@@ -1,7 +1,10 @@
 chrome.runtime.onInstalled.addListener(details => {
+  if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
+    chrome.action.setPopup({ popup: "index.html" });
+  }
   if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
     chrome.storage.local.get(["settings.general.open_mode"], result => {
-      if (result["settings.general.open_mode"] === "pop_up") {
+      if (result["settings.general.open_mode"] !== "side_panel") {
         chrome.action.setPopup({ popup: "index.html" });
       }
     });
@@ -11,7 +14,7 @@ chrome.runtime.onInstalled.addListener(details => {
 
 chrome.runtime.onStartup.addListener(() => {
   chrome.storage.local.get(["settings.general.open_mode"], result => {
-    if (result["settings.general.open_mode"] === "pop_up") {
+    if (result["settings.general.open_mode"] !== "side_panel") {
       chrome.action.setPopup({ popup: "index.html" });
     }
   });
@@ -19,7 +22,7 @@ chrome.runtime.onStartup.addListener(() => {
 
 chrome.action.onClicked.addListener(tab => {
   chrome.storage.local.get(["settings.general.open_mode"], result => {
-    if (result["settings.general.open_mode"] !== "pop_up") {
+    if (result["settings.general.open_mode"] === "side_panel") {
       chrome.sidePanel.open({ windowId: tab.windowId });
     } else {
       chrome.action.setPopup({ popup: "index.html" });

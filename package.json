@@ -1,6 +1,6 @@
 {
   "name": "find_and_replace",
-  "version": "2.5",
+  "version": "2.6",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.11.1",
