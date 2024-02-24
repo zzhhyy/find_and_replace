@@ -534,6 +534,7 @@ export class Main extends React.Component {
             >
               <MenuItem value={"Auto"}>Auto</MenuItem>
               <MenuItem value={"Manual"}>Manual</MenuItem>
+              <MenuItem value={"Realtime"}>Realtime</MenuItem>
             </Select>
           </div>
           <div style={{ width: "100%", height: "8px" }}></div>

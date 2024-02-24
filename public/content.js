@@ -168,12 +168,38 @@ function RepeatReplace(times) {
   if (times <= 4) {
     setTimeout(function () {
       chrome.storage.sync.get(null, function (result) {
+        if (result != null) {
+          for (const rules of Object.values(result)) {
+            for (const [find, value] of Object.entries(rules)) {
+              if (value.domain != null && value.domain != window.location.host) {
+                continue;
+              }
+              if (value.runtype != "Auto") {
+                continue;
+              }
+              if (value.disabled == true) {
+                continue;
+              }
+              FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+            }
+          }
+        }
+        RepeatReplace(times + 1);
+      });
+    }, times * 1000);
+  }
+}
+
+function RealtimeReplace() {
+  setTimeout(function () {
+    chrome.storage.sync.get(null, function (result) {
+      if (result != null) {
         for (const rules of Object.values(result)) {
           for (const [find, value] of Object.entries(rules)) {
             if (value.domain != null && value.domain != window.location.host) {
               continue;
             }
-            if (value.runtype == "Manual") {
+            if (value.runtype != "Realtime") {
               continue;
             }
             if (value.disabled == true) {
@@ -182,10 +208,10 @@ function RepeatReplace(times) {
             FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
           }
         }
-        RepeatReplace(times + 1);
-      });
-    }, times * 1000);
-  }
+      }
+      RealtimeReplace();
+    });
+  }, 1500);
 }
 
 function main() {
@@ -201,6 +227,7 @@ function main() {
   chrome.storage.local.get([kCmd], function (result) {
     if (result[kCmd] == null) {
       RepeatReplace(1);
+      RealtimeReplace();
     } else {
       RemoveHighLightElements();
       chrome.storage.local.remove(kCmd);
