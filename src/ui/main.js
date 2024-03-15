@@ -29,7 +29,6 @@ export class Main extends React.Component {
       generalFieldWidth: 200,
     };
 
-    this.keyIndex = 0;
     this.editMode = false;
     this.editingGroup = "";
     this.editingFind = "";
@@ -576,7 +575,7 @@ export class Main extends React.Component {
         <div
           id={"header"}
           ref={this.headerRef}
-          style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)" }}
+          style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}
         >
           <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
             <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
@@ -614,7 +613,7 @@ export class Main extends React.Component {
             <RuleTable width={this.state.tableWidth}>
               {this.state.currentRules.map(rule =>
                 React.createElement(Rule, {
-                  key: this.keyIndex++,
+                  key: rule.group + rule.find,
                   width: this.state.tableWidth,
                   rule: rule,
                   runRule: this.runRule,

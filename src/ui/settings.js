@@ -265,7 +265,7 @@ export class Settings extends React.Component {
 
   render() {
     return (
-      <Dialog open={this.props.showSettings} onClose={this.props.onCloseSettings}>
+      <Dialog open={this.props.showSettings} onClose={this.props.onCloseSettings} disableScrollLock={true}>
         <div style={{ width: "100%", display: "flex", justifyContent: "end" }}>
           <IconButton
             style={{ width: "40px", height: "40px", marginTop: "8px", marginRight: "8px" }}

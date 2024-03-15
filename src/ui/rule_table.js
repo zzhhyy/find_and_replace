@@ -85,7 +85,7 @@ export class Rule extends React.Component {
     return (
       <>
         {this.state.menuAnchor && (
-          <Menu anchorEl={this.state.menuAnchor} open={true} onClose={this.onCloseMenu}>
+          <Menu anchorEl={this.state.menuAnchor} open={true} onClose={this.onCloseMenu} disableScrollLock={true}>
             {!this.isGroup() && (
               <MenuItem onClick={this.onClickDisable}>{this.isDisbaled() ? "Enable" : "Disable"}</MenuItem>
             )}
