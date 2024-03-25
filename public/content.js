@@ -122,8 +122,7 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
             } else if (check) {
               // do nothing
             } else {
-              const newText = GetReplacedText(text, find, findRegex, ignoreCase, replace);
-              element.replaceChild(document.createTextNode(newText), node);
+              node.nodeValue = GetReplacedText(text, find, findRegex, ignoreCase, replace);
             }
           }
         }
