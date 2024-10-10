@@ -107,6 +107,7 @@ export class Settings extends React.Component {
       groups: [],
     };
     this.initState();
+    this.fileRef = React.createRef();
   }
 
   componentDidUpdate(prevProps) {
@@ -195,6 +196,67 @@ export class Settings extends React.Component {
     this.props.onCloseSettings();
   };
 
+  onWriteRules = async rules => {
+    const importSyncRules = rules["sync"];
+    const importLocalRules = rules["local"];
+    chrome.storage.sync.set(importSyncRules, () => {
+      if (chrome.runtime.lastError) {
+        alert("The sync type storage space is not enough, import failed.");
+      } else {
+        setTimeout(async () => {
+          await chrome.storage.local.set({ local: importLocalRules });
+          this.props.onRuleUpdated();
+        }, 200);
+      }
+    });
+  };
+
+  onSelectFile = event => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = async event => {
+      try {
+        const rules = JSON.parse(event.target.result);
+        const syncRules = await chrome.storage.sync.get(null);
+        const localRules = await chrome.storage.local.get(["local"]);
+        if (Object.keys(syncRules).length > 0 || Object.keys(localRules).length > 0) {
+          if (window.confirm("The existing rules need to be cleared. Do you want to clear them?")) {
+            await chrome.storage.sync.clear();
+            await chrome.storage.local.remove(["local"]);
+            this.onWriteRules(rules);
+          }
+        } else {
+          this.onWriteRules(rules);
+        }
+      } catch (e) {
+        alert(e.toString());
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  onImportRules = () => {
+    this.fileRef.current.click();
+  };
+
+  onExportRules = async () => {
+    const syncRules = await chrome.storage.sync.get(null);
+    const localRules = await chrome.storage.local.get("local");
+    const rules = { sync: syncRules, local: localRules.local ? localRules.local : {} };
+
+    let data = JSON.stringify(rules, null, 2);
+    let blob = new Blob([data], { type: "application/json" });
+    let url = URL.createObjectURL(blob);
+
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "rules.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   renderGeneral() {
     return (
       <div>
@@ -263,6 +325,34 @@ export class Settings extends React.Component {
     );
   }
 
+  renderImportExport() {
+    return (
+      <>
+        <div style={{ width: "100%", textAlign: "center" }}>
+          <input type="file" ref={this.fileRef} style={{ width: "0", height: "0" }} onChange={this.onSelectFile} />
+          <Button
+            inert
+            variant="contained"
+            color="primary"
+            style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }}
+            onClick={this.onImportRules}
+          >
+            Import
+          </Button>
+          <div style={{ width: "100%", height: "24px" }} />
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }}
+            onClick={this.onExportRules}
+          >
+            Export
+          </Button>
+        </div>
+      </>
+    );
+  }
+
   render() {
     return (
       <Dialog open={this.props.showSettings} onClose={this.props.onCloseSettings} disableScrollLock={true}>
@@ -284,6 +374,7 @@ export class Settings extends React.Component {
             <Tab label="General" style={{ textTransform: "none" }} />
             <Tab label="Context menu" style={{ textTransform: "none" }} />
             <Tab label="Keyboard shortcuts" style={{ textTransform: "none" }} />
+            <Tab label="Import & Export" style={{ textTransform: "none" }} />
           </Tabs>
           <TabPanel index={0} value={this.state.tabIndex}>
             {this.renderGeneral()}
@@ -293,6 +384,9 @@ export class Settings extends React.Component {
           </TabPanel>
           <TabPanel index={2} value={this.state.tabIndex}>
             {this.renderKeyboardShortcuts()}
+          </TabPanel>
+          <TabPanel index={3} value={this.state.tabIndex}>
+            {this.renderImportExport()}
           </TabPanel>
         </Box>
       </Dialog>

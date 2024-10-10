@@ -427,8 +427,18 @@ export class Main extends React.Component {
     this.setState({ showSettings: false });
   };
 
+  onRuleUpdated = () => {
+    this.updateCurrentRules("");
+  };
+
   renderSetting() {
-    return <Settings showSettings={this.state.showSettings} onCloseSettings={this.onCloseSettings} />;
+    return (
+      <Settings
+        showSettings={this.state.showSettings}
+        onCloseSettings={this.onCloseSettings}
+        onRuleUpdated={this.onRuleUpdated}
+      />
+    );
   }
 
   renderAddRule() {
