@@ -20,6 +20,7 @@ import { Close as CloseIcon } from "@mui/icons-material";
 
 import { CONTEXT_MENU_ID, OPEN_MODE, SETTINGS } from "./constant";
 import { CreateContextMenu, IsChrome } from "./utils";
+import { ReadGroup } from "./rule";
 
 class TabPanel extends React.Component {
   render() {
@@ -118,14 +119,7 @@ export class Settings extends React.Component {
 
   initState = async () => {
     const localSettings = await chrome.storage.local.get(null);
-    const rules = await chrome.storage.sync.get(null);
-
-    let groups = [];
-    for (const group in rules) {
-      if (group.length > 0) {
-        groups.push(group);
-      }
-    }
+    const groups = await ReadGroup();
 
     const isSidePanel = localSettings[SETTINGS.GENERAL.OPEN_MODE] === OPEN_MODE.SIDE_PANEL;
     const run_all = localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] ?? false;
@@ -199,16 +193,13 @@ export class Settings extends React.Component {
   onWriteRules = async rules => {
     const importSyncRules = rules["sync"];
     const importLocalRules = rules["local"];
-    chrome.storage.sync.set(importSyncRules, () => {
-      if (chrome.runtime.lastError) {
-        alert("The sync type storage space is not enough, import failed.");
-      } else {
-        setTimeout(async () => {
-          await chrome.storage.local.set({ local: importLocalRules });
-          this.props.onRuleUpdated();
-        }, 200);
-      }
-    });
+    try {
+      await chrome.storage.sync.set(importSyncRules);
+      await chrome.storage.local.set({ local: importLocalRules });
+      this.props.onRuleUpdated();
+    } catch (_) {
+      alert("The sync type storage space is not enough, import failed.");
+    }
   };
 
   onSelectFile = event => {

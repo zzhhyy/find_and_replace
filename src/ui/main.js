@@ -8,6 +8,7 @@ import { Settings } from "./settings.js";
 import { Rule, RuleTable } from "./rule_table.js";
 import { CutString, RunCommand, CreateContextMenu } from "./utils.js";
 import { KEY, CMD, SETTINGS, OPEN_MODE } from "./constant.js";
+import { DeleteGroup, DeleteRule, ReadGroup, ReadRule, WriteRule } from "./rule.js";
 
 export class Main extends React.Component {
   constructor() {
@@ -127,59 +128,52 @@ export class Main extends React.Component {
     }, 1000);
   };
 
-  updateCurrentRules = group => {
+  updateCurrentRules = async group => {
     let key = group;
     if (key === "") {
       key = null;
     }
     let data = [];
-    chrome.storage.sync.get(key, result => {
-      if (key === null) {
-        for (let group in result) {
-          if (group.length > 0) {
-            data.push({ group: group, find: null, disabled: false });
-          }
+    let groups = new Set();
+
+    const syncRules = await chrome.storage.sync.get(key);
+    const localResult = await chrome.storage.local.get([KEY.LOCAL]);
+    const localRules = localResult[KEY.LOCAL] ?? {};
+    if (key === null) {
+      for (let group in syncRules) {
+        if (group.length > 0) {
+          groups.add(group);
         }
       }
-
-      if (result[group] != null) {
-        for (let [find, value] of Object.entries(result[group])) {
-          data.push({ group: group, find: find, disabled: value.disabled });
+      for (let group in localRules) {
+        if (group.length > 0) {
+          groups.add(group);
         }
       }
-
-      this.setState({ currentRules: data, currentGroup: group });
-    });
-
-    //  update usage
-    chrome.storage.sync.getBytesInUse(null, result => {
-      let percent = ((result * 100) / 102400).toFixed(2);
-      if (percent > 100) {
-        percent = 100;
+      for (const group of groups) {
+        data.push({ group: group, find: null, disabled: false });
       }
-      this.setState({ allUsage: `All usage : ${percent}%` });
-    });
-    chrome.storage.sync.getBytesInUse(group, result => {
-      let percent = ((result * 100) / 8192).toFixed(2);
-      if (percent > 100) {
-        percent = 100;
+    }
+
+    if (syncRules[group] != null) {
+      for (let [find, value] of Object.entries(syncRules[group])) {
+        data.push({ group: group, find: find, disabled: value.disabled });
       }
-      const displayGroup = CutString(group, 16);
-      this.setState({ groupUsage: `Group ${displayGroup} usage : ${percent}%` });
-    });
+    }
+    if (localRules[group] != null) {
+      for (let [find, value] of Object.entries(localRules[group])) {
+        data.push({ group: group, find: find, disabled: value.disabled });
+      }
+    }
+
+    this.setState({ currentRules: data, currentGroup: group });
   };
 
   showAddRuleBox(group, find, value) {
     this.setState({ showAddRule: true, presetRule: { group: group, find: find, value: value } });
     this.addingRule = true;
     // update existing groups
-    chrome.storage.sync.get(null, result => {
-      let groups = [];
-      for (let group in result) {
-        if (group.length > 0) {
-          groups.push(group);
-        }
-      }
+    ReadGroup().then(groups => {
       this.setState({ groups: groups });
     });
   }
@@ -246,38 +240,22 @@ export class Main extends React.Component {
     const find = rule.find;
 
     const AddOneRule = () => {
-      chrome.storage.sync.get(group, result => {
-        if (result[group] === null || result[group] === undefined) {
-          let newGroup = {};
-          newGroup[find] = rule.value;
-          chrome.storage.sync.set({ [group]: newGroup });
+      ReadRule(group, find).then(result => {
+        if (result !== null && !this.editMode) {
+          alert("Duplicate rule, save failed!");
+          return;
+        }
+        WriteRule(group, find, rule[KEY.VALUE]).then(result => {
           this.updateCurrentRules(this.state.currentGroup);
           this.onClickCancel();
           CreateContextMenu(false, false, false);
-        } else {
-          let currentGroup = result[group];
-          if (this.editMode || !currentGroup.hasOwnProperty(find)) {
-            currentGroup[find] = rule.value;
-            chrome.storage.sync.set({ [group]: currentGroup });
-            this.updateCurrentRules(this.state.currentGroup);
-            this.onClickCancel();
-            CreateContextMenu(false, false, false);
-          } else {
-            alert("Duplicate rule, save failed!");
-          }
-        }
+        });
       });
     };
+
     if (this.editMode && (group !== this.editingGroup || find !== this.editingFind)) {
       // Delete old rule
-      chrome.storage.sync.get([this.editingGroup], result => {
-        let groupObj = result[this.editingGroup];
-        delete groupObj[this.editingFind];
-        if (Object.keys(groupObj).length === 0) {
-          chrome.storage.sync.remove([this.editingGroup]);
-        } else {
-          chrome.storage.sync.set({ [this.editingGroup]: groupObj });
-        }
+      DeleteRule(this.editingGroup, this.editingFind).then(_ => {
         AddOneRule();
       });
     } else {
@@ -362,9 +340,7 @@ export class Main extends React.Component {
   };
 
   editRule = rule => {
-    chrome.storage.sync.get([rule.group], result => {
-      const groupMap = result[rule.group];
-      const value = groupMap[rule.find];
+    ReadRule(rule.group, rule.find).then(value => {
       this.editMode = true;
       this.editingGroup = rule.group;
       this.editingFind = rule.find;
@@ -378,42 +354,35 @@ export class Main extends React.Component {
 
   deleteGroup = rule => {
     if (window.confirm(`Are you sure you want to delete group ${rule.group}?`)) {
-      chrome.storage.sync.remove([rule.group]);
-      this.updateCurrentRules("");
+      DeleteGroup(rule.group).then(_ => {
+        this.updateCurrentRules("");
+      });
     }
   };
 
   deleteRule = rule => {
     if (window.confirm(`Are you sure you want to delete rule ${rule.find} at group ${rule.group}?`)) {
-      chrome.storage.sync.get([rule.group], result => {
-        let groupObj = result[rule.group];
-        delete groupObj[rule.find];
-        if (Object.keys(groupObj).length === 0) {
-          chrome.storage.sync.remove([rule.group]);
-          this.updateCurrentRules("");
-        } else {
-          chrome.storage.sync.set({ [rule.group]: groupObj });
-          this.updateCurrentRules(rule.group);
-        }
+      DeleteRule(rule.group, rule.find).then(empty => {
+        this.updateCurrentRules(empty ? "" : rule.group);
       });
     }
   };
 
   enableRule = rule => {
-    chrome.storage.sync.get([rule.group], result => {
-      let groupObj = result[rule.group];
-      groupObj[rule.find].disabled = false;
-      chrome.storage.sync.set({ [rule.group]: groupObj });
-      this.updateCurrentRules(rule.group);
+    ReadRule(rule.group, rule.find).then(value => {
+      value.disabled = false;
+      WriteRule(rule.group, rule.find, value).then(_ => {
+        this.updateCurrentRules(rule.group);
+      });
     });
   };
 
   disableRule = rule => {
-    chrome.storage.sync.get([rule.group], result => {
-      let groupObj = result[rule.group];
-      groupObj[rule.find].disabled = true;
-      chrome.storage.sync.set({ [rule.group]: groupObj });
-      this.updateCurrentRules(rule.group);
+    ReadRule(rule.group, rule.find).then(value => {
+      value.disabled = true;
+      WriteRule(rule.group, rule.find, value).then(_ => {
+        this.updateCurrentRules(rule.group);
+      });
     });
   };
 

@@ -110,7 +110,9 @@ const CONTEXT_MENU_ID = {
 
 async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run_rule) {
   const localSettings = await chrome.storage.local.get(null);
-  const rules = await chrome.storage.sync.get(null);
+  const syncRules = await chrome.storage.sync.get(null);
+  const localResult = await chrome.storage.local.get("local");
+  const localRules = localResult["local"] ?? {};
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] === true) {
     if (turn_on_run_all === false) {
       chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_ALL);
@@ -132,7 +134,8 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
       type: "normal",
       id: CONTEXT_MENU_ID.RUN_GROUP,
     });
-    for (const group of Object.keys(rules)) {
+
+    const addGroupMenu = group => {
       if (group.length > 0) {
         chrome.contextMenus.create({
           title: "Group " + group,
@@ -142,6 +145,12 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
           parentId: parent,
         });
       }
+    };
+    for (const group of Object.keys(syncRules)) {
+      addGroupMenu(group);
+    }
+    for (const group of Object.keys(localRules)) {
+      addGroupMenu(group);
     }
   }
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_RULE] === true) {
@@ -155,7 +164,7 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
       id: CONTEXT_MENU_ID.RUN_RULE,
     });
 
-    for (const [group, childRules] of Object.entries(rules)) {
+    const addRuleMenu = (group, childRules) => {
       let secondParent = parent;
       if (group !== "") {
         secondParent = chrome.contextMenus.create({
@@ -175,6 +184,14 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
           parentId: secondParent,
         });
       }
+    };
+
+    for (const [group, childRules] of Object.entries(syncRules)) {
+      addRuleMenu(group, childRules);
+    }
+
+    for (const [group, childRules] of Object.entries(localRules)) {
+      addRuleMenu(group, childRules);
     }
   }
 }
