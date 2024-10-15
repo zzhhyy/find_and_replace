@@ -9,6 +9,8 @@ import { Rule, RuleTable } from "./rule_table.js";
 import { CutString, RunCommand, CreateContextMenu } from "./utils.js";
 import { KEY, CMD, SETTINGS, OPEN_MODE } from "./constant.js";
 import { DeleteGroup, DeleteRule, ReadGroup, ReadRule, WriteRule } from "./rule.js";
+import i18n from "./i18n/i18n.js";
+import R from "./i18n/R.js";
 
 export class Main extends React.Component {
   constructor() {
@@ -54,6 +56,8 @@ export class Main extends React.Component {
     this.bodyRef = React.createRef();
 
     this.resizeObserver = new ResizeObserver(this.handleSizeChange);
+
+    i18n.init();
   }
 
   componentDidMount() {
@@ -558,7 +562,7 @@ export class Main extends React.Component {
         >
           <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
             <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
-            <h3 style={{ marginLeft: "8px", fontSize: "medium" }}>Find and replace</h3>
+            <h3 style={{ marginLeft: "8px", fontSize: "medium" }}>{i18n.T(R.AppName)}</h3>
             <IconButton style={{ marginLeft: "auto" }} onClick={this.onShowSettings}>
               <SettingsIcon />
             </IconButton>
