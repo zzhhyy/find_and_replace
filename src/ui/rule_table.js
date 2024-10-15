@@ -4,6 +4,7 @@ import { Button, IconButton, Menu, MenuItem } from "@mui/material";
 
 import FolderIcon from "./image/folder.png";
 import DocumentIcon from "./image/document.png";
+import DocumentNoSyncIcon from "./image/document_nosync.png";
 import { CreateContextMenu, CutString } from "./utils";
 
 export class Rule extends React.Component {
@@ -110,7 +111,7 @@ export class Rule extends React.Component {
         }}
       >
         <div style={{ width: "32px", paddingLeft: this.state.paddingSize, paddingRight: this.state.paddingSize }}>
-          <img src={this.isGroup() ? FolderIcon : DocumentIcon} alt={""} />
+          <img src={this.isGroup() ? FolderIcon : this.props.rule.local ? DocumentNoSyncIcon : DocumentIcon} alt={""} />
         </div>
         <div style={{ width: this.state.nameWidth, fontSize: "medium", paddingRight: this.state.paddingSize * 2 }}>
           {this.isGroup() ? CutString(this.props.rule.group, 16) : CutString(this.props.rule.find, 16)}

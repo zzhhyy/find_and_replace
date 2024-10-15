@@ -162,7 +162,7 @@ export class Main extends React.Component {
     }
     if (localRules[group] != null) {
       for (let [find, value] of Object.entries(localRules[group])) {
-        data.push({ group: group, find: find, disabled: value.disabled });
+        data.push({ group: group, find: find, disabled: value.disabled, local: true });
       }
     }
 
@@ -626,7 +626,6 @@ export class Main extends React.Component {
           }}
         >
           <span style={{ marginRight: "32px" }}>{this.state.replaceCount}</span>
-          <span style={{ marginRight: "32px" }}>{this.state.groupUsage}</span>
           <span style={{ marginRight: "32px" }}>{this.state.allUsage}</span>
         </div>
       </div>
