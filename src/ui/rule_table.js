@@ -61,6 +61,7 @@ export class Rule extends React.Component {
     } else {
       this.props.disableRule(this.props.rule);
     }
+    this.onCloseMenu();
   };
 
   onClickDelete = () => {
