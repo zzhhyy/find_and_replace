@@ -3,7 +3,7 @@ import json
 
 base_path = "./src/ui/i18n/"
 supported_languages = ["ar", "es", "hi", "zh"]
-token = "";
+token = "AIzaSyDbtgiiOlVs88cWJfQX9shrwD4VyxMI2RI";
 url = "https://translation.googleapis.com/language/translate/v2?key=" + token
 
 with open(base_path + "strings.json", "r") as file:

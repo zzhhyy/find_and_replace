@@ -21,6 +21,7 @@ const R = {
   Cancel: "Cancel",
   Regex: "Regex",
   IgnoreCase: "IgnoreCase",
+  WholeWord: "WholeWord",
   UseParam: "UseParam",
   Auto: "Auto",
   Manual: "Manual",

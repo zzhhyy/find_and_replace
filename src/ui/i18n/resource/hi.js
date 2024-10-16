@@ -21,6 +21,7 @@ export const hi = {
   Cancel: "रद्द करना",
   Regex: "regex",
   IgnoreCase: "मामले को नज़रअंदाज़ करें",
+  WholeWord: "संपूर्ण शब्द का मिलान करें",
   UseParam: "खोज परिणाम के रूप में $0,$1,$2.. का उपयोग करें",
   Auto: "ऑटो",
   Manual: "नियमावली",

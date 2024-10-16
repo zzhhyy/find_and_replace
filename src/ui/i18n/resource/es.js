@@ -21,6 +21,7 @@ export const es = {
   Cancel: "Cancelar",
   Regex: "Expresión regular",
   IgnoreCase: "Ignorar mayúsculas y minúsculas",
+  WholeWord: "Coincidir con la palabra completa",
   UseParam: "Utilice $0,$1,$2.. como resultado de búsqueda",
   Auto: "Auto",
   Manual: "Manual",

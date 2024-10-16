@@ -21,6 +21,7 @@ export const ar = {
   Cancel: "يلغي",
   Regex: "التعبيرات العادية",
   IgnoreCase: "تجاهل الحالة",
+  WholeWord: "تطابق الكلمة بأكملها",
   UseParam: "استخدم $0,$1,$2.. كنتيجة بحث",
   Auto: "آلي",
   Manual: "يدوي",

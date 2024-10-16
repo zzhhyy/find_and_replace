@@ -61,6 +61,7 @@ export class Main extends React.Component {
     this.findInputRef = React.createRef();
     this.regCheckRef = React.createRef();
     this.caseCheckRef = React.createRef();
+    this.wholeWordRef = React.createRef();
     this.replaceInputRef = React.createRef();
     this.groupInputRef = React.createRef();
     this.runSelectRef = React.createRef();
@@ -209,6 +210,7 @@ export class Main extends React.Component {
         domain: domain,
         regex: false,
         ignoreCase: false,
+        wholeWord: false,
         replace: "",
         runtype: "Auto",
         disabled: false,
@@ -316,6 +318,7 @@ export class Main extends React.Component {
     }
     let regex = this.regCheckRef.current.checked;
     let ignoreCase = this.caseCheckRef.current.checked;
+    let wholeWord = this.wholeWordRef.current.checked;
     let replace = this.replaceInputRef.current.value;
     let group = this.groupInputRef.current.value.trim();
     let runtype = this.runSelectRef.current.value;
@@ -327,6 +330,7 @@ export class Main extends React.Component {
         domain: domain,
         regex: regex,
         ignoreCase: ignoreCase,
+        wholeWord: wholeWord,
         replace: replace,
         runtype: runtype,
         disabled: false,
@@ -518,6 +522,17 @@ export class Main extends React.Component {
                 />
               }
               label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  inputRef={this.wholeWordRef}
+                  size="small"
+                  defaultChecked={this.state.presetRule ? this.state.presetRule.value.wholeWord : false}
+                  onChange={this.onFindChange}
+                />
+              }
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.WholeWord)}</div>}
             />
           </div>
           <div style={space}></div>

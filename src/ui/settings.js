@@ -70,7 +70,7 @@ class Shortcut extends React.Component {
         <>
           <div style={{ display: "flex", alignItems: "center", paddingTop: "4px", paddingBottom: "4px" }}>
             <div style={{ width: "16px" }}>{this.props.desc}</div>
-            <div style={{ marginLeft: "8px", width: "48px", fontSize: "14px" }}>{this.state.key}</div>
+            <div style={{ marginLeft: "8px", width: "60px", fontSize: "14px" }}>{this.state.key}</div>
             <Select size="small" style={{ fontSize: "14px", marginLeft: "16px" }} defaultValue={this.state.value} onChange={this.onChange}>
               <MenuItem dense value={"cmd:run_all"} style={{ fontSize: "14px" }}>
                 {i18n.T(R.RunAll)}

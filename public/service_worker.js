@@ -135,22 +135,26 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
       id: CONTEXT_MENU_ID.RUN_GROUP,
     });
 
-    const addGroupMenu = group => {
-      if (group.length > 0) {
-        chrome.contextMenus.create({
-          title: "Group " + group,
-          contexts: ["all"],
-          type: "normal",
-          id: CONTEXT_MENU_ID.RUN_GROUP + "\\n" + group,
-          parentId: parent,
-        });
-      }
-    };
+    let groups = new Set();
+
     for (const group of Object.keys(syncRules)) {
-      addGroupMenu(group);
+      if (group.length > 0) {
+        groups.add(group);
+      }
     }
     for (const group of Object.keys(localRules)) {
-      addGroupMenu(group);
+      if (group.length > 0) {
+        groups.add(group);
+      }
+    }
+    for (const group of Array.from(groups)) {
+      chrome.contextMenus.create({
+        title: "Group " + group,
+        contexts: ["all"],
+        type: "normal",
+        id: CONTEXT_MENU_ID.RUN_GROUP + "\\n" + group,
+        parentId: parent,
+      });
     }
   }
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_RULE] === true) {
@@ -186,12 +190,22 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
       }
     };
 
-    for (const [group, childRules] of Object.entries(syncRules)) {
-      addRuleMenu(group, childRules);
-    }
+    let groups = new Set();
 
-    for (const [group, childRules] of Object.entries(localRules)) {
-      addRuleMenu(group, childRules);
+    for (const group of Object.keys(syncRules)) {
+      groups.add(group);
+    }
+    for (const group of Object.keys(localRules)) {
+      groups.add(group);
+    }
+    for (const group of Array.from(groups)) {
+      if (syncRules.hasOwnProperty(group) && localRules.hasOwnProperty(group)) {
+        addRuleMenu(group, { ...syncRules[group], ...localRules[group] });
+      } else if (syncRules.hasOwnProperty(group)) {
+        addRuleMenu(group, syncRules[group]);
+      } else {
+        addRuleMenu(group, localRules[group]);
+      }
     }
   }
 }
