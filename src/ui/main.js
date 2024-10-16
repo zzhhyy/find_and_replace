@@ -468,7 +468,7 @@ export class Main extends React.Component {
     return (
       <Dialog open={this.state.showAddRule} PaperProps={{ style: { margin: "8px" } }}>
         <div style={{ padding: "8px", fontSize: "medium" }} onMouseLeave={this.onMouseLeave}>
-          <h3 style={{ textAlign: "center" }}>Add rule</h3>
+          <h3 style={{ textAlign: "center" }}>{i18n.T(R.AddRule)}</h3>
           <div style={vertical}>
             <div style={label}>{i18n.T(R.Domains)}&nbsp;&nbsp;</div>
             <TextField
@@ -674,6 +674,7 @@ export class Main extends React.Component {
             }}
           >
             <LanguageIcon />
+            &nbsp;&nbsp;
             {i18n.T(R.Language)}
           </span>
         </div>
