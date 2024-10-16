@@ -1,12 +1,26 @@
 /*global chrome*/
 import React from "react";
-import { Button, IconButton, MenuItem, Dialog, TextField, Checkbox, Select, FormControlLabel } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  MenuItem,
+  Dialog,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  TextField,
+  Checkbox,
+  Select,
+  FormControlLabel,
+} from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
+import LanguageIcon from "@mui/icons-material/Language";
 
 import MainIcon from "./image/find_and_replace.png";
 import { Settings } from "./settings.js";
 import { Rule, RuleTable } from "./rule_table.js";
-import { CutString, RunCommand, CreateContextMenu } from "./utils.js";
+import { RunCommand, CreateContextMenu } from "./utils.js";
 import { KEY, CMD, SETTINGS, OPEN_MODE } from "./constant.js";
 import { DeleteGroup, DeleteRule, ReadGroup, ReadRule, WriteRule } from "./rule.js";
 import i18n from "./i18n/i18n.js";
@@ -23,13 +37,12 @@ export class Main extends React.Component {
       showAddRule: false,
       groups: [],
       presetRule: null,
-      allUsage: "",
-      groupUsage: "",
       showSettings: false,
       headerHeight: 0,
       tableWidth: 328,
       domainFieldWidth: 120,
       generalFieldWidth: 200,
+      showLanguageList: false,
     };
 
     this.editMode = false;
@@ -414,6 +427,42 @@ export class Main extends React.Component {
     );
   }
 
+  renderSelectLanguage() {
+    const languages = [
+      { language: "عربي", code: "ar" },
+      { language: "English", code: "en" },
+      { language: "español", code: "es" },
+      { language: "हिंदी", code: "hi" },
+      { language: "中文", code: "zh" },
+    ];
+    return (
+      <Dialog
+        open={this.state.showLanguageList}
+        onClose={() => {
+          this.setState({ showLanguageList: false });
+        }}
+      >
+        <List style={{ minWidth: "240px" }}>
+          {languages.map(item => {
+            return (
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    i18n.SetLanguage(item.code);
+                    this.setState({ showLanguageList: false });
+                    this.props.forceUpdate();
+                  }}
+                >
+                  <ListItemText primary={item.language} style={{ textAlign: "center" }} />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Dialog>
+    );
+  }
+
   renderAddRule() {
     const vertical = { display: "flex", alignItems: "center" };
     const label = { width: "80px", textAlign: "right" };
@@ -423,7 +472,7 @@ export class Main extends React.Component {
         <div style={{ padding: "8px", fontSize: "medium" }} onMouseLeave={this.onMouseLeave}>
           <h3 style={{ textAlign: "center" }}>Add rule</h3>
           <div style={vertical}>
-            <div style={label}>Domains&nbsp;&nbsp;</div>
+            <div style={label}>{i18n.T(R.Domains)}&nbsp;&nbsp;</div>
             <TextField
               inputRef={this.domainInputRef}
               size="small"
@@ -438,12 +487,12 @@ export class Main extends React.Component {
                   defaultChecked={this.state.presetRule ? this.state.presetRule.value.domain == null : false}
                 />
               }
-              label={<div style={{ fontSize: "14px" }}>All domains</div>}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.AllDomains)}</div>}
             />
           </div>
           <div style={space}></div>
           <div style={vertical}>
-            <div style={label}>Find&nbsp;&nbsp;</div>
+            <div style={label}>{i18n.T(R.Find)}&nbsp;&nbsp;</div>
             <TextField
               inputRef={this.findInputRef}
               size="small"
@@ -463,7 +512,7 @@ export class Main extends React.Component {
                   onChange={this.onFindChange}
                 />
               }
-              label={<div style={{ fontSize: "14px" }}>Regex</div>}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
             />
             <FormControlLabel
               control={
@@ -474,23 +523,23 @@ export class Main extends React.Component {
                   onChange={this.onFindChange}
                 />
               }
-              label={<div style={{ fontSize: "14px" }}>Ignore case</div>}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
             />
           </div>
           <div style={space}></div>
           <div style={vertical}>
-            <label style={label}>Replace&nbsp;&nbsp;</label>
+            <label style={label}>{i18n.T(R.Replace)}&nbsp;&nbsp;</label>
             <TextField
               inputRef={this.replaceInputRef}
               size="small"
               defaultValue={this.state.presetRule ? this.state.presetRule.value.replace : ""}
-              placeholder={"use $0,$1,$2.. as search result"}
+              placeholder={i18n.T(R.UseParam)}
               style={{ width: this.state.generalFieldWidth }}
             />
           </div>
           <div style={space}></div>
           <div style={vertical}>
-            <label style={label}>Group&nbsp;&nbsp;</label>
+            <label style={label}>{i18n.T(R.Group)}&nbsp;&nbsp;</label>
             <TextField
               inputRef={this.groupInputRef}
               size="small"
@@ -508,15 +557,15 @@ export class Main extends React.Component {
           </div>
           <div style={space}></div>
           <div style={vertical}>
-            <label style={label}>Run&nbsp;&nbsp;</label>
+            <label style={label}>{i18n.T(R.Run)}&nbsp;&nbsp;</label>
             <Select
               inputRef={this.runSelectRef}
               size="small"
               defaultValue={this.state.presetRule ? this.state.presetRule.value.runtype : "Auto"}
             >
-              <MenuItem value={"Auto"}>Auto</MenuItem>
-              <MenuItem value={"Manual"}>Manual</MenuItem>
-              <MenuItem value={"Realtime"}>Realtime</MenuItem>
+              <MenuItem value={"Auto"}>{i18n.T(R.Auto)}</MenuItem>
+              <MenuItem value={"Manual"}>{i18n.T(R.Manual)}</MenuItem>
+              <MenuItem value={"Realtime"}>{i18n.T(R.Realtime)}</MenuItem>
             </Select>
           </div>
           <div style={{ width: "100%", height: "8px" }}></div>
@@ -532,19 +581,19 @@ export class Main extends React.Component {
               style={{ textTransform: "none" }}
               onClick={this.onClickHighlight}
             >
-              Highlight
+              {i18n.T(R.Highlight)}
             </Button>
             <span>&nbsp;&nbsp;</span>
             <Button variant="contained" color="success" style={{ textTransform: "none" }} onClick={this.onClickTest}>
-              Test
+              {i18n.T(R.Test)}
             </Button>
             <span>&nbsp;&nbsp;</span>
             <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickSave}>
-              Save
+              {i18n.T(R.Save)}
             </Button>
             <span>&nbsp;&nbsp;</span>
             <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickCancel}>
-              Cancel
+              {i18n.T(R.Cancel)}
             </Button>
           </div>
         </div>
@@ -569,14 +618,14 @@ export class Main extends React.Component {
           </div>
           <div style={{ marginTop: "8px" }}>
             <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickAddRule}>
-              Add rule
+              {i18n.T(R.AddRule)}
             </Button>
             <Button
               variant="contained"
               style={{ textTransform: "none", marginLeft: "16px" }}
               onClick={this.onClickRunAll}
             >
-              Run all
+              {i18n.T(R.RunAll)}
             </Button>
             {this.state.currentGroup !== "" && (
               <Button
@@ -584,7 +633,7 @@ export class Main extends React.Component {
                 style={{ textTransform: "none", marginLeft: "16px" }}
                 onClick={this.onClickBack}
               >
-                Back
+                {i18n.T(R.Back)}
               </Button>
             )}
           </div>
@@ -630,7 +679,15 @@ export class Main extends React.Component {
           }}
         >
           <span style={{ marginRight: "32px" }}>{this.state.replaceCount}</span>
-          <span style={{ marginRight: "32px" }}>{this.state.allUsage}</span>
+          <span
+            style={{ marginRight: "16px", display: "flex", alignItems: "center", cursor: "pointer" }}
+            onClick={() => {
+              this.setState({ showLanguageList: true });
+            }}
+          >
+            <LanguageIcon />
+            {i18n.T(R.Language)}
+          </span>
         </div>
       </div>
     );
@@ -648,6 +705,7 @@ export class Main extends React.Component {
           {this.renderMain()}
           {this.renderAddRule()}
           {this.renderSetting()}
+          {this.renderSelectLanguage()}
         </div>
       </div>
     );

@@ -21,6 +21,8 @@ import { Close as CloseIcon } from "@mui/icons-material";
 import { CONTEXT_MENU_ID, OPEN_MODE, SETTINGS } from "./constant";
 import { CreateContextMenu, IsChrome } from "./utils";
 import { ReadGroup } from "./rule";
+import i18n from "./i18n/i18n";
+import R from "./i18n/R";
 
 class TabPanel extends React.Component {
   render() {
@@ -54,7 +56,7 @@ class Shortcut extends React.Component {
         break;
       }
     }
-    if (key === "") key = "Not set";
+    if (key === "") key = i18n.T(R.NotSet);
     this.setState({ value: value, key: key });
   }
 
@@ -76,7 +78,7 @@ class Shortcut extends React.Component {
               onChange={this.onChange}
             >
               <MenuItem dense value={"cmd:run_all"} style={{ fontSize: "14px" }}>
-                Run all
+                {i18n.T(R.RunAll)}
               </MenuItem>
               {this.props.groups.length > 0 && (
                 <MenuItem dense disabled style={{ fontSize: "14px" }}>
@@ -252,7 +254,7 @@ export class Settings extends React.Component {
     return (
       <div>
         <FormControl>
-          <FormLabel>Open in</FormLabel>
+          <FormLabel>{i18n.T(R.OpenIn)}</FormLabel>
           <RadioGroup
             row
             defaultValue={this.state.isSidePanel ? OPEN_MODE.SIDE_PANEL : OPEN_MODE.POP_UP}
@@ -262,13 +264,13 @@ export class Settings extends React.Component {
               style={{ fontSize: "1rem" }}
               value={OPEN_MODE.POP_UP}
               control={<Radio size="md" />}
-              label={<div style={{ fontSize: "14px" }}>Pop up</div>}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Popup)}</div>}
             />
             <FormControlLabel
               style={{ fontSize: "1rem" }}
               value={OPEN_MODE.SIDE_PANEL}
               control={<Radio size="md" />}
-              label={<div style={{ fontSize: "14px" }}>Side panel</div>}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.SidePanel)}</div>}
             />
           </RadioGroup>
         </FormControl>
@@ -280,15 +282,15 @@ export class Settings extends React.Component {
     return (
       <div>
         <div style={{ width: "100%", display: "flex", alignItems: "center", fontSize: "1rem" }}>
-          <div style={{ flex: "auto" }}>Run all</div>
+          <div style={{ flex: "auto" }}>{i18n.T(R.RunAll)}</div>
           <Switch onChange={this.onRunAllContextMenuChange} defaultChecked={this.state.isRunAllMenuOn} />
         </div>
         <div style={{ width: "100%", display: "flex", alignItems: "center", fontSize: "1rem" }}>
-          <div style={{ flex: "auto" }}>Run group</div>
+          <div style={{ flex: "auto" }}>{i18n.T(R.RunGroup)}</div>
           <Switch onChange={this.onRunGroupContextMenuChange} defaultChecked={this.state.isRunGroupMenuOn} />
         </div>
         <div style={{ width: "100%", display: "flex", alignItems: "center", fontSize: "1rem" }}>
-          <div style={{ flex: "auto" }}>Run rule</div>
+          <div style={{ flex: "auto" }}>{i18n.T(R.RunRule)}</div>
           <Switch onChange={this.onRunRuleContextMenuChange} defaultChecked={this.state.isRunRuleMenuOn} />
         </div>
       </div>
@@ -309,7 +311,7 @@ export class Settings extends React.Component {
             style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }}
             onClick={this.onClickEditKeys}
           >
-            Edit keys
+            {i18n.T(R.EditKeys)}
           </Button>
         </div>
       </div>
@@ -328,7 +330,7 @@ export class Settings extends React.Component {
             style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }}
             onClick={this.onImportRules}
           >
-            Import
+            {i18n.T(R.Import)}
           </Button>
           <div style={{ width: "100%", height: "24px" }} />
           <Button
@@ -337,7 +339,7 @@ export class Settings extends React.Component {
             style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }}
             onClick={this.onExportRules}
           >
-            Export
+            {i18n.T(R.Export)}
           </Button>
         </div>
       </>
@@ -362,10 +364,10 @@ export class Settings extends React.Component {
             onChange={this.onTabChange}
             sx={{ borderRight: 1, borderColor: "divider" }}
           >
-            <Tab label="General" style={{ textTransform: "none" }} />
-            <Tab label="Context menu" style={{ textTransform: "none" }} />
-            <Tab label="Keyboard shortcuts" style={{ textTransform: "none" }} />
-            <Tab label="Import & Export" style={{ textTransform: "none" }} />
+            <Tab label={i18n.T(R.General)} style={{ textTransform: "none" }} />
+            <Tab label={i18n.T(R.ContextMenu)} style={{ textTransform: "none" }} />
+            <Tab label={i18n.T(R.KeyboardShortcuts)} style={{ textTransform: "none" }} />
+            <Tab label={i18n.T(R.ImportExport)} style={{ textTransform: "none" }} />
           </Tabs>
           <TabPanel index={0} value={this.state.tabIndex}>
             {this.renderGeneral()}

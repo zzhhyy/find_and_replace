@@ -3,6 +3,7 @@
   "AppDesc": "A tool that help you find and replace text.",
   "AddRule": "Add rule",
   "RunAll": "Run all",
+  "Back": "Back",
   "Run": "Run",
   "Open": "Open",
   "Edit": "Edit",
@@ -23,5 +24,19 @@
   "UseParam": "use $0,$1,$2.. as search result",
   "Auto": "Auto",
   "Manual": "Manual",
-  "Realtime": "Real time"
+  "Realtime": "Real time",
+  "Language": "Language",
+  "General": "General",
+  "ContextMenu": "Context menu",
+  "KeyboardShortcuts": "Keyboard shortcuts",
+  "ImportExport": "Import & Export",
+  "OpenIn": "Open in",
+  "Popup": "Pop up",
+  "SidePanel": "Side panel",
+  "RunGroup": "Run group",
+  "RunRule": "Run rule",
+  "NotSet": "Not set",
+  "Import": "Import",
+  "Export": "Export",
+  "EditKeys": "Edit keys"
 }

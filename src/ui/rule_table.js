@@ -6,6 +6,8 @@ import FolderIcon from "./image/folder.png";
 import DocumentIcon from "./image/document.png";
 import DocumentNoSyncIcon from "./image/document_nosync.png";
 import { CreateContextMenu, CutString } from "./utils";
+import i18n from "./i18n/i18n";
+import R from "./i18n/R";
 
 export class Rule extends React.Component {
   constructor() {
@@ -89,9 +91,11 @@ export class Rule extends React.Component {
         {this.state.menuAnchor && (
           <Menu anchorEl={this.state.menuAnchor} open={true} onClose={this.onCloseMenu} disableScrollLock={true}>
             {!this.isGroup() && (
-              <MenuItem onClick={this.onClickDisable}>{this.isDisbaled() ? "Enable" : "Disable"}</MenuItem>
+              <MenuItem onClick={this.onClickDisable}>
+                {this.isDisbaled() ? i18n.T(R.Enable) : i18n.T(R.Disable)}
+              </MenuItem>
             )}
-            <MenuItem onClick={this.onClickDelete}>Delete</MenuItem>
+            <MenuItem onClick={this.onClickDelete}>{i18n.T(R.Delete)}</MenuItem>
           </Menu>
         )}
       </>
@@ -124,7 +128,7 @@ export class Rule extends React.Component {
             style={{ textTransform: "none" }}
             onClick={this.onClickRun}
           >
-            Run
+            {i18n.T(R.Run)}
           </Button>
         </div>
         <div style={{ width: "68px", paddingLeft: this.state.paddingSize, paddingRight: this.state.paddingSize }}>
@@ -135,7 +139,7 @@ export class Rule extends React.Component {
             style={{ textTransform: "none" }}
             onClick={this.onClickOpenOrEdit}
           >
-            {this.isGroup() ? "Open" : "Edit"}
+            {this.isGroup() ? i18n.T(R.Open) : i18n.T(R.Edit)}
           </Button>
         </div>
         <div style={{ width: "32px", paddingLeft: this.state.paddingSize, paddingRight: this.state.paddingSize }}>
