@@ -31,9 +31,7 @@ function GetReplacedText(text, find, findRegex, ignoreCase, replace) {
   const index = text.indexOf(findResult[0]) + findResult[0].length;
   const firstPart = text.substring(0, index);
   const secondPart = text.substring(index);
-  return (
-    firstPart.replaceAll(findResult[0], realReplace) + GetReplacedText(secondPart, find, findRegex, ignoreCase, replace)
-  );
+  return firstPart.replaceAll(findResult[0], realReplace) + GetReplacedText(secondPart, find, findRegex, ignoreCase, replace);
 }
 
 function GetReplaceResult(text, find, findRegex, ignoreCase, replace) {
@@ -80,8 +78,7 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
     if (tagName == "script" || tagName == "style" || tagName == "img") {
       continue;
     }
-    const visible =
-      element.offsetWidth > 0 && element.offsetHeight > 0 && getComputedStyle(element).visibility == "visible";
+    const visible = element.offsetWidth > 0 && element.offsetHeight > 0 && getComputedStyle(element).visibility == "visible";
     if (!visible) {
       continue;
     }
@@ -113,10 +110,7 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
             findCount = findCount + 1;
             if (highlight) {
               const html = element.innerHTML;
-              const newHtml = html.replaceAll(
-                result[0],
-                `<span class="class_hl_find_and_replace" style="background-color:yellow">${result[0]}</span>`
-              );
+              const newHtml = html.replaceAll(result[0], `<span class="class_hl_find_and_replace" style="background-color:yellow">${result[0]}</span>`);
               element.innerHTML = newHtml;
               break;
             } else if (check) {
@@ -129,8 +123,7 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
       }
     }
     if (element.shadowRoot) {
-      findCount =
-        findCount + DoTaskForElements(element.shadowRoot, find, findRegex, ignoreCase, replace, check, highlight);
+      findCount = findCount + DoTaskForElements(element.shadowRoot, find, findRegex, ignoreCase, replace, check, highlight);
     }
   }
   return findCount;
@@ -264,9 +257,7 @@ async function main() {
             if (value.disabled == true) {
               continue;
             }
-            replaceCount =
-              replaceCount +
-              FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+            replaceCount = replaceCount + FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
           }
         } else {
           const value = rules[cmdFind];
@@ -276,9 +267,7 @@ async function main() {
           if (value.disabled == true) {
             return;
           }
-          replaceCount =
-            replaceCount +
-            FindTextAndDo(cmdFind, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+          replaceCount = replaceCount + FindTextAndDo(cmdFind, value.regex === true, value.ignoreCase === true, value.replace, false, false);
         }
       }
     };
@@ -313,14 +302,7 @@ async function main() {
       if (value.domain != null && value.domain != window.location.host) {
         findCount = 0;
       } else {
-        findCount = FindTextAndDo(
-          rule.find,
-          value.regex === true,
-          value.ignoreCase === true,
-          value.replace,
-          true,
-          false
-        );
+        findCount = FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, true, false);
       }
     }
     chrome.runtime.sendMessage({ findCount: findCount });

@@ -418,13 +418,7 @@ export class Main extends React.Component {
   };
 
   renderSetting() {
-    return (
-      <Settings
-        showSettings={this.state.showSettings}
-        onCloseSettings={this.onCloseSettings}
-        onRuleUpdated={this.onRuleUpdated}
-      />
-    );
+    return <Settings showSettings={this.state.showSettings} onCloseSettings={this.onCloseSettings} onRuleUpdated={this.onRuleUpdated} />;
   }
 
   renderSelectLanguage() {
@@ -558,11 +552,7 @@ export class Main extends React.Component {
           <div style={space}></div>
           <div style={vertical}>
             <label style={label}>{i18n.T(R.Run)}&nbsp;&nbsp;</label>
-            <Select
-              inputRef={this.runSelectRef}
-              size="small"
-              defaultValue={this.state.presetRule ? this.state.presetRule.value.runtype : "Auto"}
-            >
+            <Select inputRef={this.runSelectRef} size="small" defaultValue={this.state.presetRule ? this.state.presetRule.value.runtype : "Auto"}>
               <MenuItem value={"Auto"}>{i18n.T(R.Auto)}</MenuItem>
               <MenuItem value={"Manual"}>{i18n.T(R.Manual)}</MenuItem>
               <MenuItem value={"Realtime"}>{i18n.T(R.Realtime)}</MenuItem>
@@ -575,12 +565,7 @@ export class Main extends React.Component {
           </div>
           <div style={{ width: "100%", height: "8px" }}></div>
           <div style={{ textAlign: "right" }}>
-            <Button
-              variant="contained"
-              color="success"
-              style={{ textTransform: "none" }}
-              onClick={this.onClickHighlight}
-            >
+            <Button variant="contained" color="success" style={{ textTransform: "none" }} onClick={this.onClickHighlight}>
               {i18n.T(R.Highlight)}
             </Button>
             <span>&nbsp;&nbsp;</span>
@@ -604,11 +589,7 @@ export class Main extends React.Component {
   renderMain() {
     return (
       <div style={{ marginLeft: "16px", marginRight: "16px" }}>
-        <div
-          id={"header"}
-          ref={this.headerRef}
-          style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}
-        >
+        <div id={"header"} ref={this.headerRef} style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}>
           <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
             <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
             <h3 style={{ marginLeft: "8px", fontSize: "medium" }}>{i18n.T(R.AppName)}</h3>
@@ -620,19 +601,11 @@ export class Main extends React.Component {
             <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickAddRule}>
               {i18n.T(R.AddRule)}
             </Button>
-            <Button
-              variant="contained"
-              style={{ textTransform: "none", marginLeft: "16px" }}
-              onClick={this.onClickRunAll}
-            >
+            <Button variant="contained" style={{ textTransform: "none", marginLeft: "16px" }} onClick={this.onClickRunAll}>
               {i18n.T(R.RunAll)}
             </Button>
             {this.state.currentGroup !== "" && (
-              <Button
-                variant="contained"
-                style={{ textTransform: "none", marginLeft: "16px" }}
-                onClick={this.onClickBack}
-              >
+              <Button variant="contained" style={{ textTransform: "none", marginLeft: "16px" }} onClick={this.onClickBack}>
                 {i18n.T(R.Back)}
               </Button>
             )}

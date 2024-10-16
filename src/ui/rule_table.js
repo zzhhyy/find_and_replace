@@ -90,11 +90,7 @@ export class Rule extends React.Component {
       <>
         {this.state.menuAnchor && (
           <Menu anchorEl={this.state.menuAnchor} open={true} onClose={this.onCloseMenu} disableScrollLock={true}>
-            {!this.isGroup() && (
-              <MenuItem onClick={this.onClickDisable}>
-                {this.isDisbaled() ? i18n.T(R.Enable) : i18n.T(R.Disable)}
-              </MenuItem>
-            )}
+            {!this.isGroup() && <MenuItem onClick={this.onClickDisable}>{this.isDisbaled() ? i18n.T(R.Enable) : i18n.T(R.Disable)}</MenuItem>}
             <MenuItem onClick={this.onClickDelete}>{i18n.T(R.Delete)}</MenuItem>
           </Menu>
         )}
@@ -121,24 +117,12 @@ export class Rule extends React.Component {
           {this.isGroup() ? CutString(this.props.rule.group, 16) : CutString(this.props.rule.find, 16)}
         </div>
         <div style={{ width: "68px", paddingLeft: this.state.paddingSize, paddingRight: this.state.paddingSize }}>
-          <Button
-            variant="contained"
-            disabled={this.isDisbaled()}
-            color="success"
-            style={{ textTransform: "none" }}
-            onClick={this.onClickRun}
-          >
+          <Button variant="contained" disabled={this.isDisbaled()} color="success" style={{ textTransform: "none" }} onClick={this.onClickRun}>
             {i18n.T(R.Run)}
           </Button>
         </div>
         <div style={{ width: "68px", paddingLeft: this.state.paddingSize, paddingRight: this.state.paddingSize }}>
-          <Button
-            variant="contained"
-            disabled={this.isDisbaled()}
-            color="success"
-            style={{ textTransform: "none" }}
-            onClick={this.onClickOpenOrEdit}
-          >
+          <Button variant="contained" disabled={this.isDisbaled()} color="success" style={{ textTransform: "none" }} onClick={this.onClickOpenOrEdit}>
             {this.isGroup() ? i18n.T(R.Open) : i18n.T(R.Edit)}
           </Button>
         </div>

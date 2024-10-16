@@ -71,12 +71,7 @@ class Shortcut extends React.Component {
           <div style={{ display: "flex", alignItems: "center", paddingTop: "4px", paddingBottom: "4px" }}>
             <div style={{ width: "16px" }}>{this.props.desc}</div>
             <div style={{ marginLeft: "8px", width: "48px", fontSize: "14px" }}>{this.state.key}</div>
-            <Select
-              size="small"
-              style={{ fontSize: "14px", marginLeft: "16px" }}
-              defaultValue={this.state.value}
-              onChange={this.onChange}
-            >
+            <Select size="small" style={{ fontSize: "14px", marginLeft: "16px" }} defaultValue={this.state.value} onChange={this.onChange}>
               <MenuItem dense value={"cmd:run_all"} style={{ fontSize: "14px" }}>
                 {i18n.T(R.RunAll)}
               </MenuItem>
@@ -255,11 +250,7 @@ export class Settings extends React.Component {
       <div>
         <FormControl>
           <FormLabel>{i18n.T(R.OpenIn)}</FormLabel>
-          <RadioGroup
-            row
-            defaultValue={this.state.isSidePanel ? OPEN_MODE.SIDE_PANEL : OPEN_MODE.POP_UP}
-            onChange={this.onOpenModeChange}
-          >
+          <RadioGroup row defaultValue={this.state.isSidePanel ? OPEN_MODE.SIDE_PANEL : OPEN_MODE.POP_UP} onChange={this.onOpenModeChange}>
             <FormControlLabel
               style={{ fontSize: "1rem" }}
               value={OPEN_MODE.POP_UP}
@@ -305,12 +296,7 @@ export class Settings extends React.Component {
         <Shortcut desc={"3"} cmd={SETTINGS.KEYBOARD_SHORTCUT.CMD3} groups={this.state.groups} />
         <Shortcut desc={"4"} cmd={SETTINGS.KEYBOARD_SHORTCUT.CMD4} groups={this.state.groups} />
         <div style={{ width: "100%", textAlign: "center" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }}
-            onClick={this.onClickEditKeys}
-          >
+          <Button variant="contained" color="primary" style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }} onClick={this.onClickEditKeys}>
             {i18n.T(R.EditKeys)}
           </Button>
         </div>
@@ -323,22 +309,11 @@ export class Settings extends React.Component {
       <>
         <div style={{ width: "100%", textAlign: "center" }}>
           <input type="file" ref={this.fileRef} style={{ width: "0", height: "0" }} onChange={this.onSelectFile} />
-          <Button
-            inert
-            variant="contained"
-            color="primary"
-            style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }}
-            onClick={this.onImportRules}
-          >
+          <Button inert variant="contained" color="primary" style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }} onClick={this.onImportRules}>
             {i18n.T(R.Import)}
           </Button>
           <div style={{ width: "100%", height: "24px" }} />
-          <Button
-            variant="contained"
-            color="primary"
-            style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }}
-            onClick={this.onExportRules}
-          >
+          <Button variant="contained" color="primary" style={{ fontSize: "1rem", textTransform: "none", marginTop: "32px" }} onClick={this.onExportRules}>
             {i18n.T(R.Export)}
           </Button>
         </div>
@@ -350,20 +325,12 @@ export class Settings extends React.Component {
     return (
       <Dialog open={this.props.showSettings} onClose={this.props.onCloseSettings} disableScrollLock={true}>
         <div style={{ width: "100%", display: "flex", justifyContent: "end" }}>
-          <IconButton
-            style={{ width: "40px", height: "40px", marginTop: "8px", marginRight: "8px" }}
-            onClick={this.props.onCloseSettings}
-          >
+          <IconButton style={{ width: "40px", height: "40px", marginTop: "8px", marginRight: "8px" }} onClick={this.props.onCloseSettings}>
             <CloseIcon />
           </IconButton>
         </div>
         <Box sx={{ flexGrow: 1, bgcolor: "background.paper", display: "flex", padding: 1 }}>
-          <Tabs
-            orientation="vertical"
-            value={this.state.tabIndex}
-            onChange={this.onTabChange}
-            sx={{ borderRight: 1, borderColor: "divider" }}
-          >
+          <Tabs orientation="vertical" value={this.state.tabIndex} onChange={this.onTabChange} sx={{ borderRight: 1, borderColor: "divider" }}>
             <Tab label={i18n.T(R.General)} style={{ textTransform: "none" }} />
             <Tab label={i18n.T(R.ContextMenu)} style={{ textTransform: "none" }} />
             <Tab label={i18n.T(R.KeyboardShortcuts)} style={{ textTransform: "none" }} />

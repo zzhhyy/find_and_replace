@@ -31,9 +31,7 @@ export function WriteRule(group, find, value) {
       } catch (_) {
         // Delete the rule in sync
         delete rules[find];
-        Object.keys(rules).length === 0
-          ? await chrome.storage.sync.remove(group)
-          : chrome.storage.sync.set({ [group]: rules });
+        Object.keys(rules).length === 0 ? await chrome.storage.sync.remove(group) : chrome.storage.sync.set({ [group]: rules });
 
         rules = localRules[group] ?? {};
         rules[find] = value;
