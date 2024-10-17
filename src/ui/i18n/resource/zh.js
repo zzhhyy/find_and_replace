@@ -40,4 +40,10 @@ export const zh = {
   Import: "导入",
   Export: "导出",
   EditKeys: "编辑键",
+  DeleteGroup: "确定要删除组 {0} 吗？",
+  DeleteRule: "确定要删除组 {1} 中的规则 {0} 吗？",
+  ClearOldRule: "需要清除现有规则。是否清除？",
+  FindEmpty: "查找内容为空",
+  DuplicateRule: "规则重复，保存失败！",
+  SyncStorageFull: "同步类型存储空间不足，导入失败。",
 };

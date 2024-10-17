@@ -40,4 +40,10 @@ export const es = {
   Import: "importar",
   Export: "Exportar",
   EditKeys: "Editar clave",
+  DeleteGroup: "¿Estás seguro de que deseas eliminar el grupo {0}?",
+  DeleteRule: "¿Está seguro de que desea eliminar la regla {0} en el grupo {1}?",
+  ClearOldRule: "Es necesario borrar las reglas existentes. ¿Quieres borrarlas?",
+  FindEmpty: "Buscar está vacío",
+  DuplicateRule: "¡Regla duplicada, error al guardar!",
+  SyncStorageFull: "El espacio de almacenamiento del tipo de sincronización no es suficiente, la importación falló.",
 };

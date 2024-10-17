@@ -40,4 +40,10 @@ export const en = {
   Import: "Import",
   Export: "Export",
   EditKeys: "Edit keys",
+  DeleteGroup: "Are you sure you want to delete group {0}?",
+  DeleteRule: "Are you sure you want to delete rule {0} at group {1}?",
+  ClearOldRule: "The existing rules need to be cleared. Do you want to clear them?",
+  FindEmpty: "Find is empty",
+  DuplicateRule: "Duplicate rule, save failed!",
+  SyncStorageFull: "The sync type storage space is not enough, import failed.",
 };

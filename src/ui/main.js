@@ -229,7 +229,7 @@ export class Main extends React.Component {
   onClickHighlight = () => {
     let rule = this.currentAddingRule();
     if (rule.valid === false) {
-      alert("Find is empty");
+      alert(i18n.T(R.FindEmpty));
       return;
     }
     this.saveTmpRule(true);
@@ -239,7 +239,7 @@ export class Main extends React.Component {
   onClickTest = () => {
     let rule = this.currentAddingRule();
     if (rule.valid === false) {
-      alert("Find is empty");
+      alert(i18n.T(R.FindEmpty));
       return;
     }
     this.saveTmpRule(true);
@@ -252,7 +252,7 @@ export class Main extends React.Component {
   onClickSave = () => {
     let rule = this.currentAddingRule();
     if (rule.valid === false) {
-      alert("Find is empty");
+      alert(i18n.T(R.FindEmpty));
       return;
     }
     const group = rule.group;
@@ -261,7 +261,7 @@ export class Main extends React.Component {
     const AddOneRule = () => {
       ReadRule(group, find).then(result => {
         if (result !== null && !this.editMode) {
-          alert("Duplicate rule, save failed!");
+          alert(i18n.T(R.DuplicateRule));
           return;
         }
         WriteRule(group, find, rule[KEY.VALUE]).then(result => {
@@ -374,7 +374,7 @@ export class Main extends React.Component {
   };
 
   deleteGroup = rule => {
-    if (window.confirm(`Are you sure you want to delete group ${rule.group}?`)) {
+    if (window.confirm(i18n.F(R.DeleteGroup, rule.group))) {
       DeleteGroup(rule.group).then(_ => {
         this.updateCurrentRules("");
       });
@@ -382,7 +382,7 @@ export class Main extends React.Component {
   };
 
   deleteRule = rule => {
-    if (window.confirm(`Are you sure you want to delete rule ${rule.find} at group ${rule.group}?`)) {
+    if (window.confirm(i18n.F(R.DeleteRule, rule.find, rule.group))) {
       DeleteRule(rule.group, rule.find).then(empty => {
         this.updateCurrentRules(empty ? "" : rule.group);
       });

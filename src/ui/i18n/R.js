@@ -40,5 +40,11 @@ const R = {
   Import: "Import",
   Export: "Export",
   EditKeys: "EditKeys",
+  DeleteGroup: "DeleteGroup",
+  DeleteRule: "DeleteRule",
+  ClearOldRule: "ClearOldRule",
+  FindEmpty: "FindEmpty",
+  DuplicateRule: "DuplicateRule",
+  SyncStorageFull: "SyncStorageFull",
 };
 export default R;

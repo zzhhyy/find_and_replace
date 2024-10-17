@@ -195,7 +195,7 @@ export class Settings extends React.Component {
       await chrome.storage.local.set({ local: importLocalRules });
       this.props.onRuleUpdated();
     } catch (_) {
-      alert("The sync type storage space is not enough, import failed.");
+      alert(i18n.T(R.SyncStorageFull));
     }
   };
 
@@ -208,7 +208,7 @@ export class Settings extends React.Component {
         const syncRules = await chrome.storage.sync.get(null);
         const localRules = await chrome.storage.local.get(["local"]);
         if (Object.keys(syncRules).length > 0 || Object.keys(localRules).length > 0) {
-          if (window.confirm("The existing rules need to be cleared. Do you want to clear them?")) {
+          if (window.confirm(i18n.T(R.ClearOldRule))) {
             await chrome.storage.sync.clear();
             await chrome.storage.local.remove(["local"]);
             this.onWriteRules(rules);
