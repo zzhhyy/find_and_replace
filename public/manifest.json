@@ -1,6 +1,6 @@
 {
-  "name": "Find and replace",
-  "description": "A tool that help you find and replace text.",
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDescription__",
   "version": "2.9",
   "manifest_version": 3,
   "permissions": ["tabs", "activeTab", "scripting", "storage", "sidePanel", "contextMenus"],
@@ -41,5 +41,6 @@
       "suggested_key": "Ctrl+4",
       "description": "4"
     }
-  }
+  },
+  "default_locale": "en"
 }
