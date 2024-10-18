@@ -150,7 +150,7 @@ export class RuleTable extends React.Component {
             padding: "12px 12px 12px 16px",
           }}
         >
-          Rules
+          {i18n.T(R.Rules)}
         </div>
         {this.props.children}
       </div>

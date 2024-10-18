@@ -46,4 +46,5 @@ export const hi = {
   FindEmpty: "खोज रिक्त है",
   DuplicateRule: "नियम दोहराए गए और सेव विफल रहा!",
   SyncStorageFull: "सिंक प्रकार संग्रहण स्थान पर्याप्त नहीं है, आयात विफल हुआ.",
+  Rules: "नियम",
 };

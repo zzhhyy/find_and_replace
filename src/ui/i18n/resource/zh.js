@@ -46,4 +46,5 @@ export const zh = {
   FindEmpty: "查找内容为空",
   DuplicateRule: "规则重复，保存失败！",
   SyncStorageFull: "同步类型存储空间不足，导入失败。",
+  Rules: "规则",
 };

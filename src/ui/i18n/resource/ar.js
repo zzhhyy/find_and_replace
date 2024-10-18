@@ -46,4 +46,5 @@ export const ar = {
   FindEmpty: "البحث فارغ",
   DuplicateRule: "قاعدة مكررة، فشل الحفظ!",
   SyncStorageFull: "مساحة تخزين نوع المزامنة غير كافية، فشل الاستيراد.",
+  Rules: "قواعد",
 };

@@ -46,4 +46,5 @@ export const en = {
   FindEmpty: "Find is empty",
   DuplicateRule: "Duplicate rule, save failed!",
   SyncStorageFull: "The sync type storage space is not enough, import failed.",
+  Rules: "Rules",
 };

@@ -448,7 +448,6 @@ export class Main extends React.Component {
                   onClick={() => {
                     i18n.SetLanguage(item.code);
                     this.setState({ showLanguageList: false });
-                    this.props.forceUpdate();
                   }}
                 >
                   <ListItemText primary={item.language} style={{ textAlign: "center" }} />

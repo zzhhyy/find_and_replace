@@ -46,5 +46,6 @@ const R = {
   FindEmpty: "FindEmpty",
   DuplicateRule: "DuplicateRule",
   SyncStorageFull: "SyncStorageFull",
+  Rules: "Rules",
 };
 export default R;

@@ -46,4 +46,5 @@ export const es = {
   FindEmpty: "Buscar está vacío",
   DuplicateRule: "¡Regla duplicada, error al guardar!",
   SyncStorageFull: "El espacio de almacenamiento del tipo de sincronización no es suficiente, la importación falló.",
+  Rules: "Reglas",
 };
