@@ -143,16 +143,12 @@ function RemoveHighLightElements() {
   }
 }
 
-function FindTextAndDo(find, regex, ignoreCase, wholeWord, replace, check, highlight) {
+function FindTextAndDo(find, regex, ignoreCase, replace, check, highlight) {
   let findRegex = null;
-  if (regex || wholeWord) {
+  if (regex) {
     try {
       const mode = ignoreCase === true ? "mi" : "m";
-      if (wholeWord) {
-        findRegex = new RegExp(`\\b${find}\\b`, mode);
-      } else {
-        findRegex = new RegExp(find, mode);
-      }
+      findRegex = new RegExp(find, mode);
     } catch (e) {
       return 0;
     }
@@ -174,7 +170,7 @@ function RepeatReplace(times) {
           if (value.disabled == true) {
             continue;
           }
-          FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.wholeWord === true, value.replace, false, false);
+          FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
         }
       };
 
@@ -207,7 +203,7 @@ function RealtimeReplace() {
         if (value.disabled == true) {
           continue;
         }
-        FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.wholeWord === true, value.replace, false, false);
+        FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
       }
     };
 
@@ -261,8 +257,7 @@ async function main() {
             if (value.disabled == true) {
               continue;
             }
-            replaceCount =
-              replaceCount + FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.wholeWord === true, value.replace, false, false);
+            replaceCount = replaceCount + FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
           }
         } else {
           const value = rules[cmdFind];
@@ -272,8 +267,7 @@ async function main() {
           if (value.disabled == true) {
             return;
           }
-          replaceCount =
-            replaceCount + FindTextAndDo(cmdFind, value.regex === true, value.ignoreCase === true, value.wholeWord === true, value.replace, false, false);
+          replaceCount = replaceCount + FindTextAndDo(cmdFind, value.regex === true, value.ignoreCase === true, value.replace, false, false);
         }
       }
     };
@@ -296,7 +290,7 @@ async function main() {
     if (value.domain != null && value.domain != window.location.host) {
       return;
     }
-    FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.wholeWord === true, value.replace, false, false);
+    FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
   } else if (cmd.type == kRunCheck) {
     const result = await chrome.storage.local.get([kTmp]);
     const rule = result[kTmp];
@@ -308,7 +302,7 @@ async function main() {
       if (value.domain != null && value.domain != window.location.host) {
         findCount = 0;
       } else {
-        findCount = FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.wholeWord === true, value.replace, true, false);
+        findCount = FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, true, false);
       }
     }
     chrome.runtime.sendMessage({ findCount: findCount });
@@ -322,7 +316,7 @@ async function main() {
     if (value.domain != null && value.domain != window.location.host) {
       return;
     }
-    FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.wholeWord === true, value.replace, false, true);
+    FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, false, true);
   }
 }
 
