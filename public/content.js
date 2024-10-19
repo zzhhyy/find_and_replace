@@ -288,11 +288,11 @@ async function main() {
     };
 
     const syncRules = await chrome.storage.sync.get(cmd.group);
-    runRule(cmd.group ? syncRules[cmd.group] : syncRules, cmd.group, cmd.find);
+    runRule(cmd.group == null ? syncRules : syncRules[cmd.group], cmd.group, cmd.find);
 
     const localResult = await chrome.storage.local.get(["local"]);
     const localRules = localResult["local"] ?? {};
-    runRule(cmd.group ? localRules[cmd.group] : localRules, cmd.group, cmd.find);
+    runRule(cmd.group == null ? localRules : localRules[cmd.group], cmd.group, cmd.find);
 
     chrome.runtime.sendMessage({ replaceCount: replaceCount });
   } else if (cmd.type == kRunTest) {
