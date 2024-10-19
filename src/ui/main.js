@@ -115,6 +115,11 @@ export class Main extends React.Component {
         }
       }
     });
+    chrome.storage.local.get([SETTINGS.GENERAL.OPEN_MODE], result => {
+      if (result[SETTINGS.GENERAL.OPEN_MODE] !== localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE)) {
+        localStorage.setItem(SETTINGS.GENERAL.OPEN_MODE, result[SETTINGS.GENERAL.OPEN_MODE]);
+      }
+    });
   }
 
   componentWillUnmount() {

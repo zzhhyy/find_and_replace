@@ -247,9 +247,9 @@ async function main() {
   if (cmd.type == kRunRule) {
     let replaceCount = 0;
 
-    const runRule = (result, cmdFind) => {
-      for (const rules of Object.values(result)) {
-        if (cmdFind == null) {
+    const runRule = (result, cmdGroup, cmdFind) => {
+      if (cmdGroup == null) {
+        for (const rules of Object.values(result)) {
           for (const [find, value] of Object.entries(rules)) {
             if (value.domain != null && value.domain != window.location.host) {
               continue;
@@ -259,8 +259,23 @@ async function main() {
             }
             replaceCount = replaceCount + FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
           }
+        }
+      } else {
+        if (cmdFind == null) {
+          for (const [find, value] of Object.entries(result)) {
+            if (value.domain != null && value.domain != window.location.host) {
+              continue;
+            }
+            if (value.disabled == true) {
+              continue;
+            }
+            replaceCount = replaceCount + FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+          }
         } else {
-          const value = rules[cmdFind];
+          const value = result[cmdFind];
+          if (!value) {
+            return;
+          }
           if (value.domain != null && value.domain != window.location.host) {
             return;
           }
@@ -273,11 +288,11 @@ async function main() {
     };
 
     const syncRules = await chrome.storage.sync.get(cmd.group);
-    runRule(syncRules, cmd.find);
+    runRule(cmd.group ? syncRules[cmd.group] : syncRules, cmd.group, cmd.find);
 
     const localResult = await chrome.storage.local.get(["local"]);
     const localRules = localResult["local"] ?? {};
-    runRule(localRules, cmd.find);
+    runRule(cmd.group ? localRules[cmd.group] : localRules, cmd.group, cmd.find);
 
     chrome.runtime.sendMessage({ replaceCount: replaceCount });
   } else if (cmd.type == kRunTest) {
