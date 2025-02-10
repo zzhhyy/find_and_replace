@@ -1,3 +1,27 @@
+if (typeof originNodeValues === "undefined") {
+  originNodeValues = new Map();
+}
+
+function GetXPath(node) {
+  if (node.id) {
+    return '//*[@id="' + node.id + '"]';
+  }
+  if (node === document.body) {
+    return "/html/body";
+  }
+  let ix = 0;
+  const siblings = node.parentNode.childNodes;
+  for (let i = 0; i < siblings.length; i++) {
+    const sibling = siblings[i];
+    if (sibling === node) {
+      return GetXPath(node.parentNode) + "/" + node.tagName + "[" + (ix + 1) + "]";
+    }
+    if (sibling.nodeType === 1 && sibling.tagName === node.tagName) {
+      ix++;
+    }
+  }
+}
+
 function GetReplacedText(text, find, findRegex, ignoreCase, replace) {
   if (text == null) {
     return "";
@@ -95,6 +119,10 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
         } else if (check) {
           //do nothing
         } else {
+          const path = GetXPath(element);
+          if (!originNodeValues.has(path)) {
+            originNodeValues.set(path, { node: element, value: text });
+          }
           element.value = GetReplacedText(text, find, findRegex, ignoreCase, replace);
         }
       }
@@ -116,6 +144,10 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
             } else if (check) {
               // do nothing
             } else {
+              const path = GetXPath(node);
+              if (!originNodeValues.has(path)) {
+                originNodeValues.set(path, { node: node, value: text });
+              }
               node.nodeValue = GetReplacedText(text, find, findRegex, ignoreCase, replace);
             }
           }
@@ -228,6 +260,7 @@ async function main() {
   const kRunTest = "run_test";
   const kRunCheck = "run_check";
   const kHighLight = "run_highlight";
+  const kRunRecover = "run_recover";
 
   const kCmd = "cmd";
   const kTmp = "tmp";
@@ -292,7 +325,7 @@ async function main() {
 
     const localResult = await chrome.storage.local.get(["local"]);
     const localRules = localResult["local"] ?? {};
-    runRule(cmd.group == null ? localRules : localRules[cmd.group], cmd.group, cmd.find);
+    runRule(cmd.group == null ? localRules : localRules[cmd.group] ?? {}, cmd.group, cmd.find);
 
     chrome.runtime.sendMessage({ replaceCount: replaceCount });
   } else if (cmd.type == kRunTest) {
@@ -332,6 +365,14 @@ async function main() {
       return;
     }
     FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, false, true);
+  } else if (cmd.type == kRunRecover) {
+    for (let value of originNodeValues.values()) {
+      if (value.node.nodeType === Node.TEXT_NODE) {
+        value.node.nodeValue = value.value;
+      } else {
+        value.node.value = value.value;
+      }
+    }
   }
 }
 

@@ -20,6 +20,14 @@ chrome.runtime.onStartup.addListener(() => {
   });
 });
 
+chrome.tabs.onActivated.addListener(() => {
+  chrome.storage.local.get(["tmp"], result => {
+    if (result["tmp"] != null && result["tmp"].mode == "normal") {
+      chrome.storage.local.remove(["tmp"]);
+    }
+  });
+});
+
 chrome.action.onClicked.addListener(tab => {
   chrome.storage.local.get(["settings.general.open_mode"], result => {
     if (result["settings.general.open_mode"] === "side_panel") {

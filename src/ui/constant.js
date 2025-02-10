@@ -13,10 +13,11 @@ export const CMD = {
   RUN_CHECK: "run_check",
   RUN_HIGHLIGHT: "run_highlight",
   CLEAR_HIGHLIGHT: "clear_highlight",
+  RUN_RECOVER: "run_recover",
 };
 
 export const SETTINGS = {
-  GENERAL: { OPEN_MODE: "settings.general.open_mode" },
+  GENERAL: { MODE: "mode", OPEN_MODE: "settings.general.open_mode" },
   CONTEXT_MENU: {
     RUN_ALL: "settings.context_menu.run_all",
     RUN_GROUP: "settings.context_menu.run_group",
@@ -28,6 +29,11 @@ export const SETTINGS = {
     CMD3: "settings.keyboard_shortcut.cmd3",
     CMD4: "settings.keyboard_shortcut.cmd4",
   },
+};
+
+export const MODE = {
+  NORMAL: "normal",
+  ADVANCED: "advanced",
 };
 
 export const OPEN_MODE = {
