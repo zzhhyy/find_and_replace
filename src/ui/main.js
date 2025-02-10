@@ -21,7 +21,7 @@ import MainIcon from "./image/find_and_replace.png";
 import { Settings } from "./settings.js";
 import { Rule, RuleTable } from "./rule_table.js";
 import { RunCommand, CreateContextMenu } from "./utils.js";
-import { KEY, CMD, SETTINGS, OPEN_MODE } from "./constant.js";
+import { KEY, CMD, SETTINGS, MODE, OPEN_MODE } from "./constant.js";
 import { DeleteGroup, DeleteRule, ReadGroup, ReadRule, WriteRule } from "./rule.js";
 import i18n from "./i18n/i18n.js";
 import R from "./i18n/R.js";
@@ -41,8 +41,15 @@ export class Main extends React.Component {
       headerHeight: 0,
       tableWidth: 328,
       domainFieldWidth: 120,
-      generalFieldWidth: 200,
+      advancedFieldWidth: 200,
+      normalFieldWidth: 0,
       showLanguageList: false,
+      mode: localStorage.getItem(SETTINGS.GENERAL.MODE)
+        ? localStorage.getItem(SETTINGS.GENERAL.MODE)
+        : localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE)
+          ? MODE.ADVANCED
+          : MODE.NORMAL,
+      isSidePanel: localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE) === OPEN_MODE.SIDE_PANEL,
     };
 
     this.editMode = false;
@@ -54,7 +61,6 @@ export class Main extends React.Component {
     this.findCount = 0;
     this.replaceCount = 0;
     this.receivedFrames = new Set();
-    this.isSidePanel = localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE) === OPEN_MODE.SIDE_PANEL;
 
     this.domainInputRef = React.createRef();
     this.domainCheckRef = React.createRef();
@@ -69,7 +75,16 @@ export class Main extends React.Component {
     this.headerRef = React.createRef();
     this.bodyRef = React.createRef();
 
+    this.normalFindRef = React.createRef();
+    this.normalRegCheckRef = React.createRef();
+    this.normalCaseCheckRef = React.createRef();
+    this.normalReplaceRef = React.createRef();
+
     this.resizeObserver = new ResizeObserver(this.handleSizeChange);
+
+    if (!localStorage.getItem(SETTINGS.GENERAL.MODE)) {
+      localStorage.setItem(SETTINGS.GENERAL.MODE, localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE) ? MODE.ADVANCED : MODE.NORMAL);
+    }
 
     i18n.init();
   }
@@ -80,20 +95,27 @@ export class Main extends React.Component {
     this.updateCurrentRules("");
     chrome.storage.local.get([KEY.TMP], result => {
       if (result[KEY.TMP] != null) {
-        this.showAddRuleBox(result[KEY.TMP].group, result[KEY.TMP].find, result[KEY.TMP].value);
-        this.updateFindCount();
-        chrome.storage.local.get([KEY.EDIT_MODE], result => {
-          const value = result[KEY.EDIT_MODE];
-          if (value != null) {
-            this.editMode = value;
-          }
-        });
-        chrome.storage.local.get([KEY.EDIT_GROUP], result => {
-          this.editingGroup = result[KEY.EDIT_GROUP];
-        });
-        chrome.storage.local.get([KEY.EDIT_FIND], result => {
-          this.editingFind = result[KEY.EDIT_FIND];
-        });
+        if (result[KEY.TMP].mode == "normal") {
+          this.normalFindRef.current.value = result[KEY.TMP].find;
+          this.normalRegCheckRef.current.checked = result[KEY.TMP].value.regex;
+          this.normalCaseCheckRef.current.checked = result[KEY.TMP].value.ignoreCase;
+          this.normalReplaceRef.current.value = result[KEY.TMP].value.replace;
+        } else {
+          this.showAddRuleBox(result[KEY.TMP].group, result[KEY.TMP].find, result[KEY.TMP].value);
+          this.updateFindCount();
+          chrome.storage.local.get([KEY.EDIT_MODE], result => {
+            const value = result[KEY.EDIT_MODE];
+            if (value != null) {
+              this.editMode = value;
+            }
+          });
+          chrome.storage.local.get([KEY.EDIT_GROUP], result => {
+            this.editingGroup = result[KEY.EDIT_GROUP];
+          });
+          chrome.storage.local.get([KEY.EDIT_FIND], result => {
+            this.editingFind = result[KEY.EDIT_FIND];
+          });
+        }
       }
     });
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -136,7 +158,8 @@ export class Main extends React.Component {
         this.setState({
           tableWidth: entry.contentRect.width - 32,
           domainFieldWidth: domainWidth,
-          generalFieldWidth: generalWidth,
+          advancedFieldWidth: generalWidth,
+          normalFieldWidth: bodyWidth - 130,
         });
       } else if (entry.target === this.headerRef.current) {
         this.setState({ headerHeight: entry.contentRect.height });
@@ -306,6 +329,36 @@ export class Main extends React.Component {
     if (this.addingRule) {
       this.saveTmpRule(false);
     }
+  };
+
+  onClickNormalReplace = () => {
+    let find = this.normalFindRef.current.value.trim();
+    if (find.length === 0) {
+      return;
+    }
+    let regex = this.normalRegCheckRef.current.checked;
+    let ignoreCase = this.normalCaseCheckRef.current.checked;
+    let replace = this.normalReplaceRef.current.value;
+    const rule = {
+      valid: true,
+      group: "",
+      find: find,
+      value: {
+        domain: null,
+        regex: regex,
+        ignoreCase: ignoreCase,
+        replace: replace,
+        runtype: "Manual",
+        disabled: false,
+      },
+      mode: MODE.NORMAL,
+    };
+    chrome.storage.local.set({ [KEY.TMP]: rule });
+    RunCommand(CMD.RUN_TEST, null, null, null, null);
+  };
+
+  onClickNormalRecover = () => {
+    RunCommand(CMD.RUN_RECOVER, null, null, null, null);
   };
 
   /* Rules function */
@@ -497,7 +550,7 @@ export class Main extends React.Component {
               size="small"
               defaultValue={this.state.presetRule ? this.state.presetRule.find : ""}
               onChange={this.onFindChange}
-              style={{ width: this.state.generalFieldWidth }}
+              style={{ width: this.state.advancedFieldWidth }}
             />
           </div>
           <div style={vertical}>
@@ -533,7 +586,7 @@ export class Main extends React.Component {
               size="small"
               defaultValue={this.state.presetRule ? this.state.presetRule.value.replace : ""}
               placeholder={i18n.T(R.UseParam)}
-              style={{ width: this.state.generalFieldWidth }}
+              style={{ width: this.state.advancedFieldWidth }}
             />
           </div>
           <div style={space}></div>
@@ -544,7 +597,7 @@ export class Main extends React.Component {
               size="small"
               inputProps={{ list: "groups" }}
               defaultValue={this.state.presetRule ? this.state.presetRule.group : ""}
-              style={{ width: this.state.generalFieldWidth }}
+              style={{ width: this.state.advancedFieldWidth }}
             />
             <datalist id={"groups"}>
               {this.state.groups.map(group => (
@@ -591,18 +644,62 @@ export class Main extends React.Component {
     );
   }
 
-  renderMain() {
+  renderNormal() {
+    const vertical = { display: "flex", alignItems: "center" };
+    const label = { width: "68px", textAlign: "right" };
+    const space = { height: "4px" };
     return (
-      <div style={{ marginLeft: "16px", marginRight: "16px" }}>
-        <div id={"header"} ref={this.headerRef} style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}>
-          <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
-            <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
-            <h3 style={{ marginLeft: "8px", fontSize: "medium" }}>{i18n.T(R.AppName)}</h3>
-            <IconButton style={{ marginLeft: "auto" }} onClick={this.onShowSettings}>
-              <SettingsIcon />
-            </IconButton>
+      <div style={{ display: this.state.mode === MODE.NORMAL ? "block" : "none" }}>
+        <div style={{ marginTop: "64px" }}>
+          <div style={vertical}>
+            <div style={label}>{i18n.T(R.Find)}&nbsp;&nbsp;</div>
+            <TextField inputRef={this.normalFindRef} size="small" style={{ width: this.state.normalFieldWidth }} />
           </div>
-          <div style={{ marginTop: "8px" }}>
+          <div style={vertical}>
+            <label style={label}></label>
+            <FormControlLabel
+              control={<Checkbox inputRef={this.normalRegCheckRef} size="small" />}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
+            />
+          </div>
+          <div style={vertical}>
+            <label style={label}></label>
+            <FormControlLabel
+              control={<Checkbox inputRef={this.normalCaseCheckRef} size="small" />}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
+            />
+          </div>
+          <div style={space}></div>
+          <div style={vertical}>
+            <label style={label}>{i18n.T(R.Replace)}&nbsp;&nbsp;</label>
+            <TextField
+              inputRef={this.normalReplaceRef}
+              size="small"
+              placeholder={i18n.T(R.UseParam)}
+              title={i18n.T(R.UseParam)}
+              style={{ width: this.state.normalFieldWidth }}
+            />
+          </div>
+        </div>
+        <div style={{ height: "32px" }} />
+        <div style={{ textAlign: "right", marginRight: "32px" }}>
+          <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickNormalReplace}>
+            {i18n.T(R.Replace)}
+          </Button>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickNormalRecover}>
+            Recover
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  renderAdvanced() {
+    return (
+      <div style={{ display: this.state.mode === MODE.ADVANCED ? "block" : "none" }}>
+        <div id={"header"} ref={this.headerRef} style={{ position: "fixed", top: "64px", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}>
+          <div>
             <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickAddRule}>
               {i18n.T(R.AddRule)}
             </Button>
@@ -638,12 +735,30 @@ export class Main extends React.Component {
             </RuleTable>
           }
         </div>
-        <div
-          style={{
-            width: "100%",
-            height: "32px",
-          }}
-        ></div>
+      </div>
+    );
+  }
+
+  renderMain() {
+    return (
+      <div style={{ marginLeft: "16px", marginRight: "16px" }}>
+        {/* Header start */}
+        <div style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)", height: "56px", zIndex: "999" }}>
+          <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
+            <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
+            <h3 style={{ marginLeft: "8px", fontSize: "18px" }}>{i18n.T(R.AppName)}</h3>
+            <IconButton style={{ marginLeft: "auto" }} onClick={this.onShowSettings}>
+              <SettingsIcon />
+            </IconButton>
+          </div>
+          <div style={{ width: "100%", height: "8px" }} />
+        </div>
+        <div style={{ width: "100%", height: "64px" }}></div>
+        {/* Header end */}
+        {this.renderNormal()}
+        {this.renderAdvanced()}
+        {/* Footer start */}
+        <div style={{ width: "100%", height: "32px" }} />
         <div
           style={{
             width: "calc(100% - 32px)",
@@ -656,7 +771,20 @@ export class Main extends React.Component {
             justifyContent: "flex-end",
           }}
         >
-          <span style={{ marginRight: "32px" }}>{this.state.replaceCount}</span>
+          {this.state.mode === MODE.ADVANCED && <span style={{ marginRight: "32px" }}>{this.state.replaceCount}</span>}
+          <span style={{ marginRight: "16px" }}>
+            <Select
+              style={{ height: "24px" }}
+              value={this.state.mode}
+              onChange={event => {
+                localStorage.setItem(SETTINGS.GENERAL.MODE, event.target.value);
+                this.setState({ mode: event.target.value });
+              }}
+            >
+              <MenuItem value={MODE.NORMAL}>Normal</MenuItem>
+              <MenuItem value={MODE.ADVANCED}>Advanced</MenuItem>
+            </Select>
+          </span>
           <span
             style={{ marginRight: "16px", display: "flex", alignItems: "center", cursor: "pointer" }}
             onClick={() => {
@@ -668,6 +796,7 @@ export class Main extends React.Component {
             {i18n.T(R.Language)}
           </span>
         </div>
+        {/* Footer end */}
       </div>
     );
   }
@@ -677,8 +806,8 @@ export class Main extends React.Component {
       <div ref={this.bodyRef} style={{ width: "100%" }}>
         <div
           style={{
-            width: this.isSidePanel ? "auto" : "640px",
-            height: this.isSidePanel ? "auto" : "480px",
+            width: this.state.isSidePanel ? "auto" : this.state.mode === MODE.NORMAL ? "360px" : "640px",
+            height: this.state.isSidePanel ? "auto" : "480px",
           }}
         >
           {this.renderMain()}
