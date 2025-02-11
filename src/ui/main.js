@@ -44,6 +44,8 @@ export class Main extends React.Component {
       advancedFieldWidth: 200,
       normalFieldWidth: 0,
       showLanguageList: false,
+      normalRegChecked: false,
+      normalCaseChecked: false,
       mode: localStorage.getItem(SETTINGS.GENERAL.MODE)
         ? localStorage.getItem(SETTINGS.GENERAL.MODE)
         : localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE)
@@ -97,9 +99,8 @@ export class Main extends React.Component {
       if (result[KEY.TMP] != null) {
         if (result[KEY.TMP].mode == "normal") {
           this.normalFindRef.current.value = result[KEY.TMP].find;
-          this.normalRegCheckRef.current.checked = result[KEY.TMP].value.regex;
-          this.normalCaseCheckRef.current.checked = result[KEY.TMP].value.ignoreCase;
           this.normalReplaceRef.current.value = result[KEY.TMP].value.replace;
+          this.setState({ normalRegChecked: result[KEY.TMP].value.regex, normalCaseChecked: result[KEY.TMP].value.ignoreCase });
         } else {
           this.showAddRuleBox(result[KEY.TMP].group, result[KEY.TMP].find, result[KEY.TMP].value);
           this.updateFindCount();
@@ -658,14 +659,32 @@ export class Main extends React.Component {
           <div style={vertical}>
             <label style={label}></label>
             <FormControlLabel
-              control={<Checkbox inputRef={this.normalRegCheckRef} size="small" />}
+              control={
+                <Checkbox
+                  inputRef={this.normalRegCheckRef}
+                  checked={this.state.normalRegChecked}
+                  size="small"
+                  onChange={event => {
+                    this.setState({ normalRegChecked: event.target.checked });
+                  }}
+                />
+              }
               label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
             />
           </div>
           <div style={vertical}>
             <label style={label}></label>
             <FormControlLabel
-              control={<Checkbox inputRef={this.normalCaseCheckRef} size="small" />}
+              control={
+                <Checkbox
+                  inputRef={this.normalCaseCheckRef}
+                  checked={this.state.normalCaseChecked}
+                  size="small"
+                  onChange={event => {
+                    this.setState({ normalCaseChecked: event.target.checked });
+                  }}
+                />
+              }
               label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
             />
           </div>
