@@ -47,4 +47,7 @@ export const ar = {
   DuplicateRule: "قاعدة مكررة، فشل الحفظ!",
   SyncStorageFull: "مساحة تخزين نوع المزامنة غير كافية، فشل الاستيراد.",
   Rules: "قواعد",
+  Recover: "استعادة",
+  Normal: "عادي",
+  Advanced: "متقدم",
 };

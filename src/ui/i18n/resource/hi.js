@@ -47,4 +47,7 @@ export const hi = {
   DuplicateRule: "नियम दोहराए गए और सेव विफल रहा!",
   SyncStorageFull: "सिंक प्रकार संग्रहण स्थान पर्याप्त नहीं है, आयात विफल हुआ.",
   Rules: "नियम",
+  Recover: "वापस पाना",
+  Normal: "सामान्य",
+  Advanced: "विकसित",
 };
