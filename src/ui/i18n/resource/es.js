@@ -47,4 +47,7 @@ export const es = {
   DuplicateRule: "¡Regla duplicada, error al guardar!",
   SyncStorageFull: "El espacio de almacenamiento del tipo de sincronización no es suficiente, la importación falló.",
   Rules: "Reglas",
+  Recover: "Recuperar",
+  Normal: "Normal",
+  Advanced: "Avanzado",
 };

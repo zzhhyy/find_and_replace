@@ -688,7 +688,7 @@ export class Main extends React.Component {
           </Button>
           <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
           <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickNormalRecover}>
-            Recover
+            {i18n.T(R.Recover)}
           </Button>
         </div>
       </div>
@@ -781,8 +781,8 @@ export class Main extends React.Component {
                 this.setState({ mode: event.target.value });
               }}
             >
-              <MenuItem value={MODE.NORMAL}>Normal</MenuItem>
-              <MenuItem value={MODE.ADVANCED}>Advanced</MenuItem>
+              <MenuItem value={MODE.NORMAL}>{i18n.T(R.Normal)}</MenuItem>
+              <MenuItem value={MODE.ADVANCED}>{i18n.T(R.Advanced)}</MenuItem>
             </Select>
           </span>
           <span

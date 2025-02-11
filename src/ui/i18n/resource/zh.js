@@ -47,4 +47,7 @@ export const zh = {
   DuplicateRule: "规则重复，保存失败！",
   SyncStorageFull: "同步类型存储空间不足，导入失败。",
   Rules: "规则",
+  Recover: "复原",
+  Normal: "普通",
+  Advanced: "高级",
 };

@@ -47,4 +47,7 @@ export const en = {
   DuplicateRule: "Duplicate rule, save failed!",
   SyncStorageFull: "The sync type storage space is not enough, import failed.",
   Rules: "Rules",
+  Recover: "Recover",
+  Normal: "Normal",
+  Advanced: "Advanced",
 };

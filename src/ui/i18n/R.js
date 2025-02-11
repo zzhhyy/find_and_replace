@@ -47,5 +47,8 @@ const R = {
   DuplicateRule: "DuplicateRule",
   SyncStorageFull: "SyncStorageFull",
   Rules: "Rules",
+  Recover: "Recover",
+  Normal: "Normal",
+  Advanced: "Advanced",
 };
 export default R;
