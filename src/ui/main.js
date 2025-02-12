@@ -70,7 +70,6 @@ export class Main extends React.Component {
     this.groupInputRef = React.createRef();
     this.runSelectRef = React.createRef();
     this.disableCheckRef = React.createRef();
-    this.headerRef = React.createRef();
     this.bodyRef = React.createRef();
 
     this.normalFindRef = React.createRef();
@@ -84,7 +83,6 @@ export class Main extends React.Component {
   }
 
   componentDidMount() {
-    this.resizeObserver.observe(this.headerRef.current);
     this.resizeObserver.observe(this.bodyRef.current);
     this.updateCurrentRules("");
     chrome.storage.local.get([KEY.TMP], result => {
@@ -133,7 +131,6 @@ export class Main extends React.Component {
   }
 
   componentWillUnmount() {
-    this.resizeObserver.unobserve(this.headerRef.current);
     this.resizeObserver.unobserve(this.bodyRef.current);
   }
 
@@ -149,8 +146,6 @@ export class Main extends React.Component {
           advancedFieldWidth: generalWidth,
           normalFieldWidth: bodyWidth - 130,
         });
-      } else if (entry.target === this.headerRef.current) {
-        this.setState({ headerHeight: entry.contentRect.height });
       }
     }
   };
@@ -635,7 +630,6 @@ export class Main extends React.Component {
   renderNormal() {
     const vertical = { display: "flex", alignItems: "center" };
     const label = { width: "68px", textAlign: "right" };
-    const space = { height: "4px" };
     return (
       <div style={{ display: this.state.mode === MODE.NORMAL ? "block" : "none" }}>
         <div style={{ marginTop: "64px" }}>
@@ -675,7 +669,6 @@ export class Main extends React.Component {
               label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
             />
           </div>
-          <div style={space}></div>
           <div style={vertical}>
             <label style={label}>{i18n.T(R.Replace)}&nbsp;&nbsp;</label>
             <TextField
@@ -704,7 +697,7 @@ export class Main extends React.Component {
   renderAdvanced() {
     return (
       <div style={{ display: this.state.mode === MODE.ADVANCED ? "block" : "none" }}>
-        <div id={"header"} ref={this.headerRef} style={{ position: "fixed", top: "64px", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}>
+        <div id={"header"} style={{ position: "fixed", top: "72px", backgroundColor: "white", width: "calc(100% - 32px)", height: "60px", zIndex: "999" }}>
           <div>
             <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickAddRule}>
               {i18n.T(R.AddRule)}
@@ -720,7 +713,7 @@ export class Main extends React.Component {
           </div>
           <div style={{ height: "16px" }}></div>
         </div>
-        <div id={"header_placeholder"} style={{ width: "100%", height: this.state.headerHeight }}></div>
+        <div id={"header_placeholder"} style={{ width: "100%", height: "60px" }}></div>
         <div style={{ marginTop: "16px" }}>
           {
             <RuleTable width={this.state.tableWidth}>
@@ -749,7 +742,7 @@ export class Main extends React.Component {
     return (
       <div style={{ marginLeft: "16px", marginRight: "16px" }}>
         {/* Header start */}
-        <div style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)", height: "56px", zIndex: "999" }}>
+        <div style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)", height: "72px", zIndex: "999" }}>
           <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
             <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
             <h3 style={{ marginLeft: "8px", fontSize: "18px" }}>{i18n.T(R.AppName)}</h3>
@@ -757,9 +750,8 @@ export class Main extends React.Component {
               <SettingsIcon />
             </IconButton>
           </div>
-          <div style={{ width: "100%", height: "8px" }} />
         </div>
-        <div style={{ width: "100%", height: "64px" }}></div>
+        <div style={{ width: "100%", height: "72px" }}></div>
         {/* Header end */}
         {this.renderNormal()}
         {this.renderAdvanced()}
