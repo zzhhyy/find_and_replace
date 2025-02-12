@@ -98,7 +98,7 @@ export class Settings extends React.Component {
     super();
     this.state = {
       tabIndex: 0,
-      isSidePanel: false,
+      openMode: "",
       isRunAllMenuOn: false,
       isRunGroupMenuOn: false,
       isRunRuleMenuOn: false,
@@ -118,14 +118,14 @@ export class Settings extends React.Component {
     const localSettings = await chrome.storage.local.get(null);
     const groups = await ReadGroup();
 
-    const isSidePanel = localSettings[SETTINGS.GENERAL.OPEN_MODE] === OPEN_MODE.SIDE_PANEL;
+    const openMode = localSettings[SETTINGS.GENERAL.OPEN_MODE] ?? OPEN_MODE.POP_UP;
     const run_all = localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] ?? false;
     const run_group = localSettings[SETTINGS.CONTEXT_MENU.RUN_GROUP] ?? false;
     const run_rule = localSettings[SETTINGS.CONTEXT_MENU.RUN_RULE] ?? false;
 
     this.setState({
       tabIndex: 0,
-      isSidePanel: isSidePanel,
+      openMode: openMode,
       isRunAllMenuOn: run_all,
       isRunGroupMenuOn: run_group,
       isRunRuleMenuOn: run_rule,
@@ -138,13 +138,8 @@ export class Settings extends React.Component {
   };
 
   onOpenModeChange = event => {
-    if (event.target.value === OPEN_MODE.SIDE_PANEL) {
-      chrome.storage.local.set({ [SETTINGS.GENERAL.OPEN_MODE]: OPEN_MODE.SIDE_PANEL });
-      chrome.action.setPopup({ popup: "" });
-    } else {
-      chrome.storage.local.set({ [SETTINGS.GENERAL.OPEN_MODE]: OPEN_MODE.POP_UP });
-      chrome.action.setPopup({ popup: "index.html" });
-    }
+    chrome.action.setPopup({ popup: event.target.value === OPEN_MODE.POP_UP ? "index.html" : "" });
+    chrome.storage.local.set({ [SETTINGS.GENERAL.OPEN_MODE]: event.target.value });
     localStorage.setItem(SETTINGS.GENERAL.OPEN_MODE, event.target.value);
   };
 
@@ -250,7 +245,7 @@ export class Settings extends React.Component {
       <div>
         <FormControl>
           <FormLabel>{i18n.T(R.OpenIn)}</FormLabel>
-          <RadioGroup row defaultValue={this.state.isSidePanel ? OPEN_MODE.SIDE_PANEL : OPEN_MODE.POP_UP} onChange={this.onOpenModeChange}>
+          <RadioGroup row defaultValue={this.state.openMode} onChange={this.onOpenModeChange}>
             <FormControlLabel
               style={{ fontSize: "1rem" }}
               value={OPEN_MODE.POP_UP}

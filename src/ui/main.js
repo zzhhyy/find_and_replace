@@ -46,12 +46,8 @@ export class Main extends React.Component {
       showLanguageList: false,
       normalRegChecked: false,
       normalCaseChecked: false,
-      mode: localStorage.getItem(SETTINGS.GENERAL.MODE)
-        ? localStorage.getItem(SETTINGS.GENERAL.MODE)
-        : localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE)
-          ? MODE.ADVANCED
-          : MODE.NORMAL,
-      isSidePanel: localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE) === OPEN_MODE.SIDE_PANEL,
+      mode: localStorage.getItem(SETTINGS.GENERAL.MODE) ?? MODE.NORMAL,
+      openMode: localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE) ?? OPEN_MODE.POP_UP,
     };
 
     this.editMode = false;
@@ -83,10 +79,6 @@ export class Main extends React.Component {
     this.normalReplaceRef = React.createRef();
 
     this.resizeObserver = new ResizeObserver(this.handleSizeChange);
-
-    if (!localStorage.getItem(SETTINGS.GENERAL.MODE)) {
-      localStorage.setItem(SETTINGS.GENERAL.MODE, localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE) ? MODE.ADVANCED : MODE.NORMAL);
-    }
 
     i18n.init();
   }
@@ -136,11 +128,6 @@ export class Main extends React.Component {
           this.replaceCount = this.replaceCount + replaceCount;
           this.setState({ replaceCount: this.replaceCount + " places were replaced" });
         }
-      }
-    });
-    chrome.storage.local.get([SETTINGS.GENERAL.OPEN_MODE], result => {
-      if (result[SETTINGS.GENERAL.OPEN_MODE] !== localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE)) {
-        localStorage.setItem(SETTINGS.GENERAL.OPEN_MODE, result[SETTINGS.GENERAL.OPEN_MODE]);
       }
     });
   }
@@ -825,8 +812,8 @@ export class Main extends React.Component {
       <div ref={this.bodyRef} style={{ width: "100%" }}>
         <div
           style={{
-            width: this.state.isSidePanel ? "auto" : this.state.mode === MODE.NORMAL ? "360px" : "640px",
-            height: this.state.isSidePanel ? "auto" : "480px",
+            width: this.state.openMode === OPEN_MODE.SIDE_PANEL ? "auto" : this.state.mode === MODE.NORMAL ? "360px" : "640px",
+            height: this.state.openMode === OPEN_MODE.SIDE_PANEL ? "auto" : "480px",
           }}
         >
           {this.renderMain()}
