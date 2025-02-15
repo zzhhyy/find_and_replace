@@ -2,6 +2,10 @@ if (typeof originNodeValues === "undefined") {
   originNodeValues = new Map();
 }
 
+if (typeof executedNodeValues === "undefined") {
+  executedNodeValues = new Map();
+}
+
 function GetXPath(node) {
   if (node.id) {
     return '//*[@id="' + node.id + '"]';
@@ -22,84 +26,35 @@ function GetXPath(node) {
   }
 }
 
-function GetReplacedText(text, find, findRegex, ignoreCase, replace) {
+function GetReplacedText(text, find, findRegex, replace) {
   if (text == null) {
-    return "";
+    return null;
   }
-
-  let findResult = null;
-  if (findRegex) {
-    findResult = findRegex.exec(text);
-  } else {
-    let index;
-    if (ignoreCase) {
-      index = text.toLowerCase().indexOf(find.toLowerCase());
-    } else {
-      index = text.indexOf(find);
-    }
-    if (index != -1) {
-      findResult = new Array();
-      findResult.push(text.substring(index, index + find.length));
-    }
-  }
-  if (findResult == null || findResult.length == 0) {
-    return text;
+  findRegex.lastIndex = 0;
+  const findResult = findRegex.exec(text);
+  if (findResult == null) {
+    return null;
   }
   let realReplace = replace;
   for (let k = 0; k < findResult.length; k++) {
     const param = "$" + k;
-    if (realReplace.indexOf(param) != -1) {
-      realReplace = realReplace.replaceAll(param, findResult[k]);
-    }
+    realReplace = realReplace.replaceAll(param, findResult[k]);
   }
-  const index = text.indexOf(findResult[0]) + findResult[0].length;
+  const index = findResult.index + findResult[0].length;
   const firstPart = text.substring(0, index);
   const secondPart = text.substring(index);
-  return firstPart.replaceAll(findResult[0], realReplace) + GetReplacedText(secondPart, find, findRegex, ignoreCase, replace);
+  const firstResult = firstPart.substring(0, findResult.index) + realReplace + firstPart.substring(index);
+  const secondResult = GetReplacedText(secondPart, find, findRegex, replace) ?? secondPart;
+  return firstResult + secondResult;
 }
 
-function GetReplaceResult(text, find, findRegex, ignoreCase, replace) {
-  if (text == null) {
-    return null;
-  }
-
-  let findResult = null;
-  if (findRegex) {
-    findResult = findRegex.exec(text);
-  } else {
-    let index;
-    if (ignoreCase) {
-      index = text.toLowerCase().indexOf(find.toLowerCase());
-    } else {
-      index = text.indexOf(find);
-    }
-    if (index != -1) {
-      findResult = new Array();
-      findResult.push(text.substring(index, index + find.length));
-    }
-  }
-  if (findResult == null || findResult.length == 0) {
-    return null;
-  }
-  let realReplace = replace;
-  for (let k = 0; k < findResult.length; k++) {
-    const param = "$" + k;
-    if (realReplace.indexOf(param) != -1) {
-      realReplace = realReplace.replaceAll(param, findResult[k]);
-    }
-  }
-  let result = new Array();
-  result.push(findResult[0]);
-  result.push(realReplace);
-  return result;
-}
-
-function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check, highlight) {
+function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight) {
   const elements = rootNode.querySelectorAll("*");
   let findCount = 0;
   for (const element of elements) {
     const tagName = element.tagName.toLowerCase();
-    if (tagName == "script" || tagName == "style" || tagName == "img") {
+    const exceptTagName = new Set(["head", "script", "style", "meta", "img", "link", "iframe", "title", "noscript", "base", "header", "nav", "article"]);
+    if (exceptTagName.has(tagName)) {
       continue;
     }
     const visible = element.offsetWidth > 0 && element.offsetHeight > 0 && getComputedStyle(element).visibility == "visible";
@@ -108,54 +63,58 @@ function DoTaskForElements(rootNode, find, findRegex, ignoreCase, replace, check
     }
     if (tagName == "input" || tagName == "textarea") {
       const text = element.value;
-      const result = GetReplaceResult(text, find, findRegex, ignoreCase, replace);
-      if (result == null) {
+      const result = GetReplacedText(text, find, findRegex, replace);
+      if (result == null || result == text) {
         continue;
       }
-      if (replace == result[1] || text.indexOf(result[1]) == -1) {
-        findCount = findCount + 1;
-        if (highlight) {
-          //do nothing
-        } else if (check) {
-          //do nothing
-        } else {
-          const path = GetXPath(element);
-          if (!originNodeValues.has(path)) {
-            originNodeValues.set(path, { node: element, value: text });
-          }
-          element.value = GetReplacedText(text, find, findRegex, ignoreCase, replace);
+      findCount = findCount + 1;
+      if (highlight) {
+        //do nothing
+      } else if (check) {
+        //do nothing
+      } else {
+        const path = GetXPath(element);
+        if (!originNodeValues.has(path)) {
+          originNodeValues.set(path, { node: element, value: text });
+        }
+        const ruleKey = find + replace;
+        if (executedNodeValues.get(ruleKey).get(path) != text) {
+          executedNodeValues.get(ruleKey).set(path, result);
+          element.value = result;
         }
       }
     } else if (element.childNodes.length > 0) {
       for (const node of element.childNodes) {
         if (node.nodeType === Node.TEXT_NODE) {
           const text = node.nodeValue;
-          const result = GetReplaceResult(text, find, findRegex, ignoreCase, replace);
-          if (result == null) {
+          const result = GetReplacedText(text, find, findRegex, replace);
+          if (result == null || result == text) {
             continue;
           }
-          if (replace == result[1] || text.indexOf(result[1]) == -1) {
-            findCount = findCount + 1;
-            if (highlight) {
-              const html = element.innerHTML;
-              const newHtml = html.replaceAll(result[0], `<span class="class_hl_find_and_replace" style="background-color:yellow">${result[0]}</span>`);
-              element.innerHTML = newHtml;
-              break;
-            } else if (check) {
-              // do nothing
-            } else {
-              const path = GetXPath(node);
-              if (!originNodeValues.has(path)) {
-                originNodeValues.set(path, { node: node, value: text });
-              }
-              node.nodeValue = GetReplacedText(text, find, findRegex, ignoreCase, replace);
+          findCount = findCount + 1;
+          if (highlight) {
+            const html = element.innerHTML;
+            const newHtml = html.replace(findRegex, match => `<span class="class_hl_find_and_replace" style="background-color:yellow">${match}</span>`);
+            element.innerHTML = newHtml;
+            break;
+          } else if (check) {
+            // do nothing
+          } else {
+            const path = GetXPath(node);
+            if (!originNodeValues.has(path)) {
+              originNodeValues.set(path, { node: node, value: text });
+            }
+            const ruleKey = find + replace;
+            if (executedNodeValues.get(ruleKey).get(path) != text) {
+              executedNodeValues.get(ruleKey).set(path, result);
+              node.nodeValue = result;
             }
           }
         }
       }
     }
     if (element.shadowRoot) {
-      findCount = findCount + DoTaskForElements(element.shadowRoot, find, findRegex, ignoreCase, replace, check, highlight);
+      findCount = findCount + DoTaskForElements(element.shadowRoot, find, findRegex, replace, check, highlight);
     }
   }
   return findCount;
@@ -175,17 +134,21 @@ function RemoveHighLightElements() {
   }
 }
 
-function FindTextAndDo(find, regex, ignoreCase, replace, check, highlight) {
-  let findRegex = null;
-  if (regex) {
-    try {
-      const mode = ignoreCase === true ? "mi" : "m";
-      findRegex = new RegExp(find, mode);
-    } catch (e) {
-      return 0;
-    }
+function FindTextAndDo(find, value, check, highlight) {
+  const ruleKey = find + value.replace;
+  if (!executedNodeValues.has(ruleKey)) {
+    executedNodeValues.set(ruleKey, new Map());
   }
-  return DoTaskForElements(document.body, find, findRegex, ignoreCase, replace, check, highlight);
+  let findRegex = null;
+  try {
+    const escapeFind = value.regex === true ? find : find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const targetFind = value.wholeWord === true ? `\\b${escapeFind}\\b` : escapeFind;
+    const mode = value.ignoreCase === true ? "gi" : "g";
+    findRegex = new RegExp(targetFind, mode);
+  } catch (e) {
+    return 0;
+  }
+  return DoTaskForElements(document.body, find, findRegex, value.replace, check, highlight);
 }
 
 function RepeatReplace(times) {
@@ -202,7 +165,7 @@ function RepeatReplace(times) {
           if (value.disabled == true) {
             continue;
           }
-          FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+          FindTextAndDo(find, value, false, false);
         }
       };
 
@@ -235,7 +198,7 @@ function RealtimeReplace() {
         if (value.disabled == true) {
           continue;
         }
-        FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+        FindTextAndDo(find, value, false, false);
       }
     };
 
@@ -290,7 +253,7 @@ async function main() {
             if (value.disabled == true) {
               continue;
             }
-            replaceCount = replaceCount + FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+            replaceCount = replaceCount + FindTextAndDo(find, value, false, false);
           }
         }
       } else {
@@ -302,7 +265,7 @@ async function main() {
             if (value.disabled == true) {
               continue;
             }
-            replaceCount = replaceCount + FindTextAndDo(find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+            replaceCount = replaceCount + FindTextAndDo(find, value, false, false);
           }
         } else {
           const value = result[cmdFind];
@@ -315,7 +278,7 @@ async function main() {
           if (value.disabled == true) {
             return;
           }
-          replaceCount = replaceCount + FindTextAndDo(cmdFind, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+          replaceCount = replaceCount + FindTextAndDo(cmdFind, value, false, false);
         }
       }
     };
@@ -338,19 +301,15 @@ async function main() {
     if (value.domain != null && value.domain != window.location.host) {
       return;
     }
-    FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, false, false);
+    FindTextAndDo(rule.find, value, false, false);
   } else if (cmd.type == kRunCheck) {
     const result = await chrome.storage.local.get([kTmp]);
     const rule = result[kTmp];
     let findCount = 0;
-    if (rule == null || rule.valid == false) {
-      findCount = 0;
-    } else {
+    if (rule && rule.valid != false) {
       const value = rule.value;
-      if (value.domain != null && value.domain != window.location.host) {
-        findCount = 0;
-      } else {
-        findCount = FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, true, false);
+      if (value.domain == null || value.domain == window.location.host) {
+        findCount = FindTextAndDo(rule.find, value, true, false);
       }
     }
     chrome.runtime.sendMessage({ findCount: findCount });
@@ -364,7 +323,7 @@ async function main() {
     if (value.domain != null && value.domain != window.location.host) {
       return;
     }
-    FindTextAndDo(rule.find, value.regex === true, value.ignoreCase === true, value.replace, false, true);
+    FindTextAndDo(rule.find, value, false, true);
   } else if (cmd.type == kRunRecover) {
     for (let value of originNodeValues.values()) {
       if (value.node.nodeType === Node.TEXT_NODE) {
