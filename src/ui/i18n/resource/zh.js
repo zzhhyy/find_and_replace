@@ -21,7 +21,7 @@ export const zh = {
   Cancel: "取消",
   Regex: "正则表达式",
   IgnoreCase: "忽略大小写",
-  WholeWord: "匹配全部",
+  WholeWord: "匹配整个单词",
   UseParam: "使用$0,$1,$2..作为搜索结果",
   Auto: "自动",
   Manual: "手动",

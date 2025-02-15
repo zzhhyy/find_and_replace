@@ -581,7 +581,7 @@ export class Main extends React.Component {
                       onChange={this.onFindChange}
                     />
                   }
-                  label={<div style={{ fontSize: "14px" }}>Match whole word</div>}
+                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.WholeWord)}</div>}
                 />
               </div>
             </>
@@ -626,7 +626,7 @@ export class Main extends React.Component {
                       onChange={this.onFindChange}
                     />
                   }
-                  label={<div style={{ fontSize: "14px" }}>Match whole word</div>}
+                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.WholeWord)}</div>}
                 />
               </div>
             </>
@@ -752,7 +752,7 @@ export class Main extends React.Component {
                   }}
                 />
               }
-              label={<div style={{ fontSize: "14px" }}>Match whole word</div>}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.WholeWord)}</div>}
             />
           </div>
           <div style={vertical}>
