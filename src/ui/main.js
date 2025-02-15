@@ -46,6 +46,7 @@ export class Main extends React.Component {
       showLanguageList: false,
       normalRegChecked: false,
       normalCaseChecked: false,
+      normalWordChecked: false,
       mode: localStorage.getItem(SETTINGS.GENERAL.MODE) ?? MODE.NORMAL,
       openMode: localStorage.getItem(SETTINGS.GENERAL.OPEN_MODE) ?? OPEN_MODE.POP_UP,
     };
@@ -65,7 +66,7 @@ export class Main extends React.Component {
     this.findInputRef = React.createRef();
     this.regCheckRef = React.createRef();
     this.caseCheckRef = React.createRef();
-    this.wholeWordRef = React.createRef();
+    this.wordCheckRef = React.createRef();
     this.replaceInputRef = React.createRef();
     this.groupInputRef = React.createRef();
     this.runSelectRef = React.createRef();
@@ -75,6 +76,7 @@ export class Main extends React.Component {
     this.normalFindRef = React.createRef();
     this.normalRegCheckRef = React.createRef();
     this.normalCaseCheckRef = React.createRef();
+    this.normalWordCheckRef = React.createRef();
     this.normalReplaceRef = React.createRef();
 
     this.resizeObserver = new ResizeObserver(this.handleSizeChange);
@@ -90,7 +92,11 @@ export class Main extends React.Component {
         if (result[KEY.TMP].mode == "normal") {
           this.normalFindRef.current.value = result[KEY.TMP].find;
           this.normalReplaceRef.current.value = result[KEY.TMP].value.replace;
-          this.setState({ normalRegChecked: result[KEY.TMP].value.regex, normalCaseChecked: result[KEY.TMP].value.ignoreCase });
+          this.setState({
+            normalRegChecked: result[KEY.TMP].value.regex,
+            normalCaseChecked: result[KEY.TMP].value.ignoreCase,
+            normalWordChecked: result[KEY.TMP].value.wholeWord,
+          });
         } else {
           this.showAddRuleBox(result[KEY.TMP].group, result[KEY.TMP].find, result[KEY.TMP].value);
           this.updateFindCount();
@@ -321,6 +327,7 @@ export class Main extends React.Component {
     }
     let regex = this.normalRegCheckRef.current.checked;
     let ignoreCase = this.normalCaseCheckRef.current.checked;
+    let wholeWord = this.normalWordCheckRef.current.checked;
     let replace = this.normalReplaceRef.current.value;
     const rule = {
       valid: true,
@@ -330,6 +337,7 @@ export class Main extends React.Component {
         domain: null,
         regex: regex,
         ignoreCase: ignoreCase,
+        wholeWord: wholeWord,
         replace: replace,
         runtype: "Manual",
         disabled: false,
@@ -358,6 +366,7 @@ export class Main extends React.Component {
     }
     let regex = this.regCheckRef.current.checked;
     let ignoreCase = this.caseCheckRef.current.checked;
+    let wholeWord = this.wordCheckRef.current.checked;
     let replace = this.replaceInputRef.current.value;
     let group = this.groupInputRef.current.value.trim();
     let runtype = this.runSelectRef.current.value;
@@ -369,6 +378,7 @@ export class Main extends React.Component {
         domain: domain,
         regex: regex,
         ignoreCase: ignoreCase,
+        wholeWord: wholeWord,
         replace: replace,
         runtype: runtype,
         disabled: false,
@@ -500,11 +510,11 @@ export class Main extends React.Component {
 
   renderAddRule() {
     const vertical = { display: "flex", alignItems: "center" };
-    const label = { width: "80px", textAlign: "right" };
+    const label = { width: "88px", textAlign: "right" };
     const space = { height: "4px" };
     return (
-      <Dialog open={this.state.showAddRule} PaperProps={{ style: { margin: "8px" } }}>
-        <div style={{ padding: "8px", fontSize: "medium" }} onMouseLeave={this.onMouseLeave}>
+      <Dialog open={this.state.showAddRule} PaperProps={{ style: { margin: "4px" } }}>
+        <div style={{ padding: "4px", fontSize: "medium" }} onMouseLeave={this.onMouseLeave}>
           <h3 style={{ textAlign: "center" }}>{i18n.T(R.AddRule)}</h3>
           <div style={vertical}>
             <div style={label}>{i18n.T(R.Domains)}&nbsp;&nbsp;</div>
@@ -536,31 +546,91 @@ export class Main extends React.Component {
               style={{ width: this.state.advancedFieldWidth }}
             />
           </div>
-          <div style={vertical}>
-            <label style={label}></label>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  inputRef={this.regCheckRef}
-                  size="small"
-                  defaultChecked={this.state.presetRule ? this.state.presetRule.value.regex : false}
-                  onChange={this.onFindChange}
+          {this.state.openMode === OPEN_MODE.POP_UP ? (
+            <>
+              <div style={vertical}>
+                <label style={label}></label>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      inputRef={this.regCheckRef}
+                      size="small"
+                      defaultChecked={this.state.presetRule ? this.state.presetRule.value.regex : false}
+                      onChange={this.onFindChange}
+                    />
+                  }
+                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
                 />
-              }
-              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  inputRef={this.caseCheckRef}
-                  size="small"
-                  defaultChecked={this.state.presetRule ? this.state.presetRule.value.ignoreCase : false}
-                  onChange={this.onFindChange}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      inputRef={this.caseCheckRef}
+                      size="small"
+                      defaultChecked={this.state.presetRule ? this.state.presetRule.value.ignoreCase : false}
+                      onChange={this.onFindChange}
+                    />
+                  }
+                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
                 />
-              }
-              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
-            />
-          </div>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      inputRef={this.wordCheckRef}
+                      size="small"
+                      defaultChecked={this.state.presetRule ? this.state.presetRule.value.wholeWord : false}
+                      onChange={this.onFindChange}
+                    />
+                  }
+                  label={<div style={{ fontSize: "14px" }}>Match whole word</div>}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={vertical}>
+                <label style={label}></label>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      inputRef={this.regCheckRef}
+                      size="small"
+                      defaultChecked={this.state.presetRule ? this.state.presetRule.value.regex : false}
+                      onChange={this.onFindChange}
+                    />
+                  }
+                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
+                />
+              </div>
+              <div style={vertical}>
+                <label style={label}></label>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      inputRef={this.caseCheckRef}
+                      size="small"
+                      defaultChecked={this.state.presetRule ? this.state.presetRule.value.ignoreCase : false}
+                      onChange={this.onFindChange}
+                    />
+                  }
+                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
+                />
+              </div>
+              <div style={vertical}>
+                <label style={label}></label>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      inputRef={this.wordCheckRef}
+                      size="small"
+                      defaultChecked={this.state.presetRule ? this.state.presetRule.value.wholeWord : false}
+                      onChange={this.onFindChange}
+                    />
+                  }
+                  label={<div style={{ fontSize: "14px" }}>Match whole word</div>}
+                />
+              </div>
+            </>
+          )}
           <div style={space}></div>
           <div style={vertical}>
             <label style={label}>{i18n.T(R.Replace)}&nbsp;&nbsp;</label>
@@ -667,6 +737,22 @@ export class Main extends React.Component {
                 />
               }
               label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
+            />
+          </div>
+          <div style={vertical}>
+            <label style={label}></label>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  inputRef={this.normalWordCheckRef}
+                  checked={this.state.normalWordChecked}
+                  size="small"
+                  onChange={event => {
+                    this.setState({ normalWordChecked: event.target.checked });
+                  }}
+                />
+              }
+              label={<div style={{ fontSize: "14px" }}>Match whole word</div>}
             />
           </div>
           <div style={vertical}>
