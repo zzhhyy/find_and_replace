@@ -495,6 +495,7 @@ export class Main extends React.Component {
                 <ListItemButton
                   onClick={() => {
                     i18n.SetLanguage(item.code);
+                    chrome.storage.local.set({ [SETTINGS.GENERAL.LANGUAGE]: item.code });
                     this.setState({ showLanguageList: false });
                   }}
                 >

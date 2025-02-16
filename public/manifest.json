@@ -20,7 +20,7 @@
   },
   "content_scripts": [
     {
-      "js": ["content.js"],
+      "js": ["content.js", "in_page.js"],
       "matches": ["<all_urls>"]
     }
   ],
@@ -42,5 +42,11 @@
       "description": "4"
     }
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["images/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "default_locale": "en"
 }

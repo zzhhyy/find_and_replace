@@ -6,6 +6,17 @@ if (typeof executedNodeValues === "undefined") {
   executedNodeValues = new Map();
 }
 
+function IsInPageElement(element) {
+  let parent = element.parentElement;
+  while (parent !== null) {
+    if (parent.id === "find_and_replace_in_page") {
+      return true;
+    }
+    parent = parent.parentElement;
+  }
+  return false;
+}
+
 function GetXPath(node) {
   if (node.id) {
     return '//*[@id="' + node.id + '"]';
@@ -52,6 +63,9 @@ function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight)
   const elements = rootNode.querySelectorAll("*");
   let findCount = 0;
   for (const element of elements) {
+    if (IsInPageElement(element)) {
+      continue;
+    }
     const tagName = element.tagName.toLowerCase();
     const exceptTagName = new Set(["head", "script", "style", "meta", "img", "link", "iframe", "title", "noscript", "base", "header", "nav", "article"]);
     if (exceptTagName.has(tagName)) {

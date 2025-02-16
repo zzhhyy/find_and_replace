@@ -258,6 +258,12 @@ export class Settings extends React.Component {
               control={<Radio size="md" />}
               label={<div style={{ fontSize: "14px" }}>{i18n.T(R.SidePanel)}</div>}
             />
+            <FormControlLabel
+              style={{ fontSize: "1rem" }}
+              value={OPEN_MODE.IN_PAGE}
+              control={<Radio size="md" />}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.InPage)}</div>}
+            />
           </RadioGroup>
         </FormControl>
       </div>

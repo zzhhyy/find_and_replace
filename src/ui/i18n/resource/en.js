@@ -34,6 +34,7 @@ export const en = {
   OpenIn: "Open in",
   Popup: "Pop up",
   SidePanel: "Side panel",
+  InPage: "Inside the page",
   RunGroup: "Run group",
   RunRule: "Run rule",
   NotSet: "Not set",

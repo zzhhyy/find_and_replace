@@ -34,6 +34,7 @@ export const ar = {
   OpenIn: "طريقة مفتوحة",
   Popup: "يظهر فجأة",
   SidePanel: "الشريط الجانبي",
+  InPage: "داخل الصفحة",
   RunGroup: "تشغيل المجموعة",
   RunRule: "تشغيل القواعد",
   NotSet: "لم يتم ضبطه",

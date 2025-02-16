@@ -4,9 +4,8 @@ chrome.runtime.onInstalled.addListener(details => {
   }
   if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
     chrome.storage.local.get(["settings.general.open_mode"], result => {
-      if (result["settings.general.open_mode"] !== "side_panel") {
-        chrome.action.setPopup({ popup: "index.html" });
-      }
+      const openMode = result["settings.general.open_mode"];
+      chrome.action.setPopup({ popup: openMode !== "side_panel" && openMode !== "in_page" ? "index.html" : "" });
     });
     CreateContextMenu(true, true, true);
   }
@@ -14,9 +13,8 @@ chrome.runtime.onInstalled.addListener(details => {
 
 chrome.runtime.onStartup.addListener(() => {
   chrome.storage.local.get(["settings.general.open_mode"], result => {
-    if (result["settings.general.open_mode"] !== "side_panel") {
-      chrome.action.setPopup({ popup: "index.html" });
-    }
+    const openMode = result["settings.general.open_mode"];
+    chrome.action.setPopup({ popup: openMode !== "side_panel" && openMode !== "in_page" ? "index.html" : "" });
   });
 });
 
@@ -30,12 +28,56 @@ chrome.tabs.onActivated.addListener(() => {
 
 chrome.action.onClicked.addListener(tab => {
   chrome.storage.local.get(["settings.general.open_mode"], result => {
-    if (result["settings.general.open_mode"] === "side_panel") {
+    const openMode = result["settings.general.open_mode"];
+    if (openMode === "side_panel") {
       chrome.sidePanel.open({ windowId: tab.windowId });
+    } else if (openMode === "in_page") {
+      if (tab.url.startsWith("chrome://") || tab.url.startsWith("edge://")) {
+        return;
+      }
+      chrome.storage.local.set({ in_page: true, url: tab.url }, () => {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["in_page.js"],
+        });
+      });
     } else {
       chrome.action.setPopup({ popup: "index.html" });
     }
   });
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  const cmd = request.cmd;
+  if (cmd == "open_mode") {
+    const value = request.value;
+    chrome.storage.local.set({ "settings.general.open_mode": value });
+    chrome.action.setPopup({ popup: value !== "side_panel" && value !== "in_page" ? "index.html" : "" });
+  } else if (cmd == "replace") {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      if (tabs[0].url.startsWith("chrome://") || tabs[0].url.startsWith("edge://")) {
+        return;
+      }
+      chrome.storage.local.set({ cmd: { type: "run_test" }, tmp: request.rule }, () => {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id, allFrames: true },
+          files: ["content.js"],
+        });
+      });
+    });
+  } else if (cmd == "revocer") {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      if (tabs[0].url.startsWith("chrome://") || tabs[0].url.startsWith("edge://")) {
+        return;
+      }
+      chrome.storage.local.set({ cmd: { type: "run_recover" } }, () => {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id, allFrames: true },
+          files: ["content.js"],
+        });
+      });
+    });
+  }
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {

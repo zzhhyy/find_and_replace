@@ -34,6 +34,7 @@ export const zh = {
   OpenIn: "打开方式",
   Popup: "弹出窗口",
   SidePanel: "侧面板",
+  InPage: "页面内部",
   RunGroup: "运行组",
   RunRule: "运行规则",
   NotSet: "未设置",
