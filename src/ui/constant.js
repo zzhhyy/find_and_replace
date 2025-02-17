@@ -17,7 +17,7 @@ export const CMD = {
 };
 
 export const SETTINGS = {
-  GENERAL: { MODE: "mode", OPEN_MODE: "settings.general.open_mode" },
+  GENERAL: { MODE: "mode", OPEN_MODE: "settings.general.open_mode", LANGUAGE: "settings.general.language" },
   CONTEXT_MENU: {
     RUN_ALL: "settings.context_menu.run_all",
     RUN_GROUP: "settings.context_menu.run_group",
@@ -39,6 +39,7 @@ export const MODE = {
 export const OPEN_MODE = {
   POP_UP: "pop_up",
   SIDE_PANEL: "side_panel",
+  IN_PAGE: "in_page",
 };
 
 export const CONTEXT_MENU_ID = {

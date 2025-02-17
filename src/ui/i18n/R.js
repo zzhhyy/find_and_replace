@@ -34,6 +34,7 @@ const R = {
   OpenIn: "OpenIn",
   Popup: "Popup",
   SidePanel: "SidePanel",
+  InPage: "InPage",
   RunGroup: "RunGroup",
   RunRule: "RunRule",
   NotSet: "NotSet",

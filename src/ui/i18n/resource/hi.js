@@ -34,6 +34,7 @@ export const hi = {
   OpenIn: "में खोलें",
   Popup: "पॉप अप",
   SidePanel: "साइड पैनल",
+  InPage: "पेज के अंदर",
   RunGroup: "समूह चलाएँ",
   RunRule: "नियम चलाएँ",
   NotSet: "सेट नहीं",

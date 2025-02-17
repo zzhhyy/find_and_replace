@@ -34,6 +34,7 @@ export const es = {
   OpenIn: "método abierto",
   Popup: "ventana emergente",
   SidePanel: "barra lateral",
+  InPage: "Dentro de la página",
   RunGroup: "Grupo de ejecución",
   RunRule: "Ejecutar reglas",
   NotSet: "no establecido",
