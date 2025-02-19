@@ -38,7 +38,7 @@ export class Main extends React.Component {
       groups: [],
       presetRule: null,
       showSettings: false,
-      headerHeight: 0,
+      actionsHeight: 0,
       tableWidth: 328,
       domainFieldWidth: 120,
       advancedFieldWidth: 200,
@@ -72,6 +72,7 @@ export class Main extends React.Component {
     this.runSelectRef = React.createRef();
     this.disableCheckRef = React.createRef();
     this.bodyRef = React.createRef();
+    this.actionsRef = React.createRef();
 
     this.normalFindRef = React.createRef();
     this.normalRegCheckRef = React.createRef();
@@ -87,6 +88,7 @@ export class Main extends React.Component {
 
   componentDidMount() {
     this.resizeObserver.observe(this.bodyRef.current);
+    this.resizeObserver.observe(this.actionsRef.current);
     this.updateCurrentRules("");
     chrome.storage.local.get([KEY.TMP], result => {
       if (result[KEY.TMP] != null) {
@@ -139,6 +141,7 @@ export class Main extends React.Component {
 
   componentWillUnmount() {
     this.resizeObserver.unobserve(this.bodyRef.current);
+    this.resizeObserver.unobserve(this.actionsRef.current);
   }
 
   syncSettings = () => {
@@ -163,6 +166,8 @@ export class Main extends React.Component {
           advancedFieldWidth: generalWidth,
           normalFieldWidth: bodyWidth - 130,
         });
+      } else if (entry.target === this.actionsRef.current) {
+        this.setState({ actionsHeight: entry.contentRect.height });
       }
     }
   };
@@ -247,6 +252,10 @@ export class Main extends React.Component {
 
   onClickRunAll = () => {
     RunCommand(CMD.RUN_RULE, null, null, this.clearRecivedData, null);
+  };
+
+  onClickRecover = () => {
+    RunCommand(CMD.RUN_RECOVER, null, null, null, null);
   };
 
   onClickBack = () => {
@@ -688,19 +697,23 @@ export class Main extends React.Component {
           </div>
           <div style={{ width: "100%", height: "8px" }}></div>
           <div style={{ textAlign: "right" }}>
-            <Button variant="contained" color="success" style={{ textTransform: "none" }} onClick={this.onClickHighlight}>
+            <Button variant="contained" color="success" style={{ textTransform: "none", marginTop: "8px" }} onClick={this.onClickRecover}>
+              {i18n.T(R.Recover)}
+            </Button>
+            <span>&nbsp;&nbsp;</span>
+            <Button variant="contained" color="success" style={{ textTransform: "none", marginTop: "8px" }} onClick={this.onClickHighlight}>
               {i18n.T(R.Highlight)}
             </Button>
             <span>&nbsp;&nbsp;</span>
-            <Button variant="contained" color="success" style={{ textTransform: "none" }} onClick={this.onClickTest}>
+            <Button variant="contained" color="success" style={{ textTransform: "none", marginTop: "8px" }} onClick={this.onClickTest}>
               {i18n.T(R.Test)}
             </Button>
             <span>&nbsp;&nbsp;</span>
-            <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickSave}>
+            <Button variant="contained" style={{ textTransform: "none", marginTop: "8px" }} onClick={this.onClickSave}>
               {i18n.T(R.Save)}
             </Button>
             <span>&nbsp;&nbsp;</span>
-            <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickCancel}>
+            <Button variant="contained" style={{ textTransform: "none", marginTop: "8px" }} onClick={this.onClickCancel}>
               {i18n.T(R.Cancel)}
             </Button>
           </div>
@@ -795,23 +808,26 @@ export class Main extends React.Component {
   renderAdvanced() {
     return (
       <div style={{ display: this.state.mode === MODE.ADVANCED ? "block" : "none" }}>
-        <div id={"header"} style={{ position: "fixed", top: "72px", backgroundColor: "white", width: "calc(100% - 32px)", height: "60px", zIndex: "999" }}>
+        <div ref={this.actionsRef} style={{ position: "fixed", top: "72px", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}>
           <div>
-            <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickAddRule}>
+            <Button variant="contained" style={{ textTransform: "none", marginTop: "8px" }} onClick={this.onClickAddRule}>
               {i18n.T(R.AddRule)}
             </Button>
-            <Button variant="contained" style={{ textTransform: "none", marginLeft: "16px" }} onClick={this.onClickRunAll}>
+            <Button variant="contained" style={{ textTransform: "none", marginLeft: "16px", marginTop: "8px" }} onClick={this.onClickRunAll}>
               {i18n.T(R.RunAll)}
             </Button>
+            <Button variant="contained" style={{ textTransform: "none", marginLeft: "16px", marginTop: "8px" }} onClick={this.onClickRecover}>
+              {i18n.T(R.Recover)}
+            </Button>
             {this.state.currentGroup !== "" && (
-              <Button variant="contained" style={{ textTransform: "none", marginLeft: "16px" }} onClick={this.onClickBack}>
+              <Button variant="contained" style={{ textTransform: "none", marginLeft: "16px", marginTop: "8px" }} onClick={this.onClickBack}>
                 {i18n.T(R.Back)}
               </Button>
             )}
           </div>
           <div style={{ height: "16px" }}></div>
         </div>
-        <div id={"header_placeholder"} style={{ width: "100%", height: "60px" }}></div>
+        <div style={{ width: "100%", height: this.state.actionsHeight }}></div>
         <div style={{ marginTop: "16px" }}>
           {
             <RuleTable width={this.state.tableWidth}>
