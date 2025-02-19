@@ -82,6 +82,7 @@ export class Main extends React.Component {
     this.resizeObserver = new ResizeObserver(this.handleSizeChange);
 
     i18n.init();
+    this.syncSettings();
   }
 
   componentDidMount() {
@@ -139,6 +140,16 @@ export class Main extends React.Component {
   componentWillUnmount() {
     this.resizeObserver.unobserve(this.bodyRef.current);
   }
+
+  syncSettings = () => {
+    chrome.storage.local.get([SETTINGS.GENERAL.OPEN_MODE], result => {
+      const openMode = result[SETTINGS.GENERAL.OPEN_MODE];
+      if (openMode != null && openMode.length > 0) {
+        localStorage.setItem(SETTINGS.GENERAL.OPEN_MODE, openMode);
+        this.setState({ openMode: openMode });
+      }
+    });
+  };
 
   handleSizeChange = entries => {
     for (const entry of entries) {
@@ -462,7 +473,7 @@ export class Main extends React.Component {
   };
 
   onCloseSettings = () => {
-    this.setState({ showSettings: false });
+    this.setState({ showSettings: false, mode: localStorage.getItem(SETTINGS.GENERAL.MODE) });
   };
 
   onRuleUpdated = () => {
@@ -857,19 +868,6 @@ export class Main extends React.Component {
           }}
         >
           {this.state.mode === MODE.ADVANCED && <span style={{ marginRight: "32px" }}>{this.state.replaceCount}</span>}
-          <span style={{ marginRight: "16px" }}>
-            <Select
-              style={{ height: "24px" }}
-              value={this.state.mode}
-              onChange={event => {
-                localStorage.setItem(SETTINGS.GENERAL.MODE, event.target.value);
-                this.setState({ mode: event.target.value });
-              }}
-            >
-              <MenuItem value={MODE.NORMAL}>{i18n.T(R.Normal)}</MenuItem>
-              <MenuItem value={MODE.ADVANCED}>{i18n.T(R.Advanced)}</MenuItem>
-            </Select>
-          </span>
           <span
             style={{ marginRight: "16px", display: "flex", alignItems: "center", cursor: "pointer" }}
             onClick={() => {

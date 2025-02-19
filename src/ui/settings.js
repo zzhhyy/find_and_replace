@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 
-import { CONTEXT_MENU_ID, OPEN_MODE, SETTINGS } from "./constant";
+import { CONTEXT_MENU_ID, MODE, OPEN_MODE, SETTINGS } from "./constant";
 import { CreateContextMenu, IsChrome } from "./utils";
 import { ReadGroup } from "./rule";
 import i18n from "./i18n/i18n";
@@ -118,6 +118,7 @@ export class Settings extends React.Component {
     const localSettings = await chrome.storage.local.get(null);
     const groups = await ReadGroup();
 
+    const mode = localStorage.getItem(SETTINGS.GENERAL.MODE);
     const openMode = localSettings[SETTINGS.GENERAL.OPEN_MODE] ?? OPEN_MODE.POP_UP;
     const run_all = localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] ?? false;
     const run_group = localSettings[SETTINGS.CONTEXT_MENU.RUN_GROUP] ?? false;
@@ -125,6 +126,7 @@ export class Settings extends React.Component {
 
     this.setState({
       tabIndex: 0,
+      mode: mode,
       openMode: openMode,
       isRunAllMenuOn: run_all,
       isRunGroupMenuOn: run_group,
@@ -135,6 +137,10 @@ export class Settings extends React.Component {
 
   onTabChange = (event, newValue) => {
     this.setState({ tabIndex: newValue });
+  };
+
+  onModeChange = event => {
+    localStorage.setItem(SETTINGS.GENERAL.MODE, event.target.value);
   };
 
   onOpenModeChange = event => {
@@ -244,8 +250,24 @@ export class Settings extends React.Component {
     return (
       <div>
         <FormControl>
+          <FormLabel>Mode</FormLabel>
+          <RadioGroup style={{ marginLeft: "16px" }} defaultValue={this.state.mode} onChange={this.onModeChange}>
+            <FormControlLabel
+              style={{ fontSize: "1rem" }}
+              value={MODE.NORMAL}
+              control={<Radio size="md" />}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Normal)}</div>}
+            />
+            <FormControlLabel
+              style={{ fontSize: "1rem" }}
+              value={MODE.ADVANCED}
+              control={<Radio size="md" />}
+              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Advanced)}</div>}
+            />
+          </RadioGroup>
+          <div style={{ width: "100%", height: "16px" }} />
           <FormLabel>{i18n.T(R.OpenIn)}</FormLabel>
-          <RadioGroup row defaultValue={this.state.openMode} onChange={this.onOpenModeChange}>
+          <RadioGroup style={{ marginLeft: "16px" }} defaultValue={this.state.openMode} onChange={this.onOpenModeChange}>
             <FormControlLabel
               style={{ fontSize: "1rem" }}
               value={OPEN_MODE.POP_UP}

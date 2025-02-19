@@ -65,6 +65,9 @@ async function appendBox() {
   const mainIcon = chrome.runtime.getURL("images/find_and_replace.png");
   const closeIcon = chrome.runtime.getURL("images/close.png");
   const language = await far_language();
+  if (document.getElementById("find_and_replace_in_page") != null) {
+    return;
+  }
   const stringData = {
     ar: {
       AppName: "البحث والاستبدال",
@@ -77,6 +80,7 @@ async function appendBox() {
       IgnoreCase: "تجاهل الحالة",
       WholeWord: "تطابق الكلمة بأكملها",
       Recover: "استعادة",
+      UseParam: "استخدم $0،$1،$2.. كنتائج بحث",
     },
     en: {
       AppName: "Find and replace",
@@ -89,6 +93,7 @@ async function appendBox() {
       IgnoreCase: "Ignore case",
       WholeWord: "Match whole word",
       Recover: "Recover",
+      UseParam: "use $0,$1,$2.. as search result",
     },
     es: {
       AppName: "Buscar y reemplazar",
@@ -101,6 +106,7 @@ async function appendBox() {
       IgnoreCase: "ignorar caso",
       WholeWord: "Coincidir con la palabra completa",
       Recover: "Recuperar",
+      UseParam: "Utilice $0,$1,$2.. como resultados de búsqueda",
     },
     hi: {
       AppName: "ढूँढें और बदलें",
@@ -113,6 +119,7 @@ async function appendBox() {
       IgnoreCase: "मामले को नजरअंदाज करें",
       WholeWord: "पूरे शब्द का मिलान करें",
       Recover: "वापस पाना",
+      UseParam: "खोज परिणामों के रूप में $0,$1,$2.. का उपयोग करें",
     },
     zh: {
       AppName: "查找和替换",
@@ -125,6 +132,7 @@ async function appendBox() {
       IgnoreCase: "忽略大小写",
       WholeWord: "匹配整个单词",
       Recover: "复原",
+      UseParam: "使用$0,$1,$2..作为搜索结果",
     },
   };
   const baseDiv = document.createElement("div");
@@ -135,6 +143,7 @@ async function appendBox() {
   baseDiv.style.top = localStorage.getItem("far_newTop") ?? "16px";
   baseDiv.style.right = localStorage.getItem("far_newRight") ?? "16px";
   baseDiv.style.zIndex = "99999";
+  baseDiv.style.color = "black";
   baseDiv.style.backgroundColor = "white";
   baseDiv.style.borderRadius = "4px";
   baseDiv.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.4)";
@@ -147,7 +156,7 @@ async function appendBox() {
       <img src=${mainIcon} style="width: 32px; height:32px;" draggable="false"/>
       <div style="margin-left: 8px; font-size: 14px; font-weight: bold;">${stringData[language].AppName}</div>
       <div style="display: flex; align-items: center; margin-left: auto;">
-        <select id="find_and_replace_select" style="margin-right: 16px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">
+        <select id="find_and_replace_select" style="margin-right: 16px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; color: black;">
           <option value="in_page">${stringData[language].InPage}</option>
           <option value="pop_up">${stringData[language].Popup}</option>
           <option value="side_panel">${stringData[language].SidePanel}</option>
@@ -160,19 +169,19 @@ async function appendBox() {
       <input id="find_and_replace_find" style="width: 100%; padding: 4px; margin: 4px 8px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 4px; font-size: 12px; transition: border-color 0.3s;" type="text"/>
     </div>
     <div style="display: flex; align-items: center; justify-content: end; padding-left: 16px; margin-top: 4px;font-size: 12px;">
-      <label style="display: flex; align-items: center;">
+      <label style="display: flex; align-items: center; color: black;">
         <input id="find_and_replace_regex" type="checkbox"/>${stringData[language].Regex}&nbsp;&nbsp;
       </label>
-      <label style="display: flex; align-items: center;">
+      <label style="display: flex; align-items: center; color: black;">
         <input id="find_and_replace_case_check" type="checkbox"/>${stringData[language].IgnoreCase}&nbsp;&nbsp;
       </label>
-      <label style="display: flex; align-items: center;">
+      <label style="display: flex; align-items: center; color: black;">
         <input id="find_and_replace_whole_word" type="checkbox"/>${stringData[language].WholeWord}&nbsp;&nbsp;
       </label>
     </div>
     <div style="display: flex; align-items: center; margin-top: 4px;">
       <span style="width: 80px; text-align: right; font-size: 12px;">${stringData[language].Replace}</span>
-      <input id="find_and_replace_replace" style="width: 100%; padding: 4px; margin: 4px 8px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 4px; font-size: 12px; transition: border-color 0.3s;" type="text"/>
+      <input id="find_and_replace_replace" style="width: 100%; padding: 4px; margin: 4px 8px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 4px; font-size: 12px; transition: border-color 0.3s;" type="text" placeholder=\"${stringData[language].UseParam}\" />
     </div>
     <div style="display: flex; justify-content: end; margin-top: 8px;font-size: 14px">
       <div id="find_and_replace_do_replace" style="padding: 8px; margin-right: 16px; background-color: rgb(46, 125, 50); color: white; border-radius: 4px; cursor: pointer">${stringData[language].Replace}</div>
@@ -215,7 +224,7 @@ async function appendBox() {
               chrome.runtime.sendMessage({ cmd: "revocer" });
             };
             document.getElementById("find_and_replace_close").onclick = () => {
-              document.getElementById("find_and_replace_in_page").style.visibility = "hidden";
+              document.getElementById("find_and_replace_in_page").remove();
             };
           }
         });
@@ -234,12 +243,7 @@ async function far_in_page_main() {
   if (in_page != true || url != location.href) {
     return;
   }
-  const baseDiv = document.getElementById("find_and_replace_in_page");
-  if (baseDiv) {
-    baseDiv.style.visibility = "visible";
-  } else {
-    appendBox();
-  }
+  appendBox();
 }
 
 far_in_page_main();
