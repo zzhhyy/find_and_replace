@@ -51,4 +51,5 @@ export const ar = {
   Recover: "استعادة",
   Normal: "عادي",
   Advanced: "متقدم",
+  ModeTooltip: "تم نقل إعدادات الوضع إلى هنا",
 };

@@ -50,5 +50,6 @@
   "Rules": "Rules",
   "Recover": "Recover",
   "Normal": "Normal",
-  "Advanced": "Advanced"
+  "Advanced": "Advanced",
+  "ModeTooltip": "Mode settings have moved here"
 }

@@ -12,6 +12,7 @@ import {
   TextField,
   Checkbox,
   Select,
+  Tooltip,
   FormControlLabel,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -20,7 +21,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import MainIcon from "./image/find_and_replace.png";
 import { Settings } from "./settings.js";
 import { Rule, RuleTable } from "./rule_table.js";
-import { RunCommand, CreateContextMenu } from "./utils.js";
+import { RunCommand, CreateContextMenu, IsFirstRun } from "./utils.js";
 import { KEY, CMD, SETTINGS, MODE, OPEN_MODE } from "./constant.js";
 import { DeleteGroup, DeleteRule, ReadGroup, ReadRule, WriteRule } from "./rule.js";
 import i18n from "./i18n/i18n.js";
@@ -38,6 +39,7 @@ export class Main extends React.Component {
       groups: [],
       presetRule: null,
       showSettings: false,
+      showTooltip: localStorage.getItem("tooltip") ? false : localStorage.getItem(SETTINGS.GENERAL.MODE) ? true : false,
       actionsHeight: 0,
       tableWidth: 328,
       domainFieldWidth: 120,
@@ -84,6 +86,7 @@ export class Main extends React.Component {
 
     i18n.init();
     this.syncSettings();
+    IsFirstRun();
   }
 
   componentDidMount() {
@@ -137,6 +140,11 @@ export class Main extends React.Component {
         }
       }
     });
+
+    setTimeout(() => {
+      this.setState({ showTooltip: false });
+    }, 8000);
+    localStorage.setItem("tooltip", true);
   }
 
   componentWillUnmount() {
@@ -478,11 +486,11 @@ export class Main extends React.Component {
   /* Settings */
 
   onShowSettings = () => {
-    this.setState({ showSettings: true });
+    this.setState({ showSettings: true, showTooltip: false });
   };
 
   onCloseSettings = () => {
-    this.setState({ showSettings: false, mode: localStorage.getItem(SETTINGS.GENERAL.MODE) });
+    this.setState({ showSettings: false, mode: localStorage.getItem(SETTINGS.GENERAL.MODE) ?? MODE.NORMAL });
   };
 
   onRuleUpdated = () => {
@@ -861,7 +869,13 @@ export class Main extends React.Component {
             <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
             <h3 style={{ marginLeft: "8px", fontSize: "18px" }}>{i18n.T(R.AppName)}</h3>
             <IconButton style={{ marginLeft: "auto" }} onClick={this.onShowSettings}>
-              <SettingsIcon />
+              {this.state.showTooltip ? (
+                <Tooltip title={i18n.T(R.ModeTooltip)} arrow open>
+                  <SettingsIcon />
+                </Tooltip>
+              ) : (
+                <SettingsIcon />
+              )}
             </IconButton>
           </div>
         </div>

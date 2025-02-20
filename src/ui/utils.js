@@ -133,3 +133,14 @@ export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn
     }
   }
 }
+
+let internalIsFirstRun = null;
+export function IsFirstRun() {
+  if (internalIsFirstRun == null) {
+    internalIsFirstRun = localStorage.getItem("first_run") == null;
+    if (internalIsFirstRun) {
+      localStorage.setItem("first_run", "inited");
+    }
+  }
+  return internalIsFirstRun;
+}

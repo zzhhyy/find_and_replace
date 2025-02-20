@@ -118,7 +118,7 @@ export class Settings extends React.Component {
     const localSettings = await chrome.storage.local.get(null);
     const groups = await ReadGroup();
 
-    const mode = localStorage.getItem(SETTINGS.GENERAL.MODE);
+    const mode = localStorage.getItem(SETTINGS.GENERAL.MODE) ?? MODE.NORMAL;
     const openMode = localSettings[SETTINGS.GENERAL.OPEN_MODE] ?? OPEN_MODE.POP_UP;
     const run_all = localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] ?? false;
     const run_group = localSettings[SETTINGS.CONTEXT_MENU.RUN_GROUP] ?? false;

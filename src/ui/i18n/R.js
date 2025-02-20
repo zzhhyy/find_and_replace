@@ -51,5 +51,6 @@ const R = {
   Recover: "Recover",
   Normal: "Normal",
   Advanced: "Advanced",
+  ModeTooltip: "ModeTooltip",
 };
 export default R;
