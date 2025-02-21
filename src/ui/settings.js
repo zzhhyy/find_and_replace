@@ -141,12 +141,14 @@ export class Settings extends React.Component {
 
   onModeChange = event => {
     localStorage.setItem(SETTINGS.GENERAL.MODE, event.target.value);
+    this.setState({ mode: event.target.value });
   };
 
   onOpenModeChange = event => {
     chrome.action.setPopup({ popup: event.target.value === OPEN_MODE.POP_UP ? "index.html" : "" });
     chrome.storage.local.set({ [SETTINGS.GENERAL.OPEN_MODE]: event.target.value });
     localStorage.setItem(SETTINGS.GENERAL.OPEN_MODE, event.target.value);
+    this.setState({ openMode: event.target.value });
   };
 
   onRunAllContextMenuChange = event => {
@@ -250,7 +252,7 @@ export class Settings extends React.Component {
     return (
       <div>
         <FormControl>
-          <FormLabel>Mode</FormLabel>
+          <FormLabel>{i18n.T(R.Mode)}</FormLabel>
           <RadioGroup style={{ marginLeft: "16px" }} defaultValue={this.state.mode} onChange={this.onModeChange}>
             <FormControlLabel
               style={{ fontSize: "1rem" }}
