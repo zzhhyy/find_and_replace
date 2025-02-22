@@ -8,6 +8,9 @@ if (typeof far_init === "undefined") {
 }
 
 function far_onMouseDown(e) {
+  if (e.target == document.getElementById("find_and_replace_select")) {
+    return;
+  }
   const baseDiv = document.getElementById("find_and_replace_in_page");
   const rect = baseDiv.getBoundingClientRect();
   const x = e.clientX - rect.left;
