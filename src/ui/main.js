@@ -12,7 +12,6 @@ import {
   TextField,
   Checkbox,
   Select,
-  Tooltip,
   FormControlLabel,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -39,7 +38,6 @@ export class Main extends React.Component {
       groups: [],
       presetRule: null,
       showSettings: false,
-      showTooltip: localStorage.getItem("tooltip") ? false : localStorage.getItem(SETTINGS.GENERAL.MODE) ? true : false,
       actionsHeight: 0,
       tableWidth: 328,
       domainFieldWidth: 120,
@@ -140,11 +138,6 @@ export class Main extends React.Component {
         }
       }
     });
-
-    setTimeout(() => {
-      this.setState({ showTooltip: false });
-    }, 8000);
-    localStorage.setItem("tooltip", true);
   }
 
   componentWillUnmount() {
@@ -172,7 +165,7 @@ export class Main extends React.Component {
           tableWidth: entry.contentRect.width - 32,
           domainFieldWidth: domainWidth,
           advancedFieldWidth: generalWidth,
-          normalFieldWidth: bodyWidth - 130,
+          normalFieldWidth: bodyWidth - 80,
         });
       } else if (entry.target === this.actionsRef.current) {
         this.setState({ actionsHeight: entry.contentRect.height });
@@ -486,7 +479,7 @@ export class Main extends React.Component {
   /* Settings */
 
   onShowSettings = () => {
-    this.setState({ showSettings: true, showTooltip: false });
+    this.setState({ showSettings: true });
   };
 
   onCloseSettings = () => {
@@ -561,7 +554,7 @@ export class Main extends React.Component {
                   defaultChecked={this.state.presetRule ? this.state.presetRule.value.domain == null : false}
                 />
               }
-              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.AllDomains)}</div>}
+              label={<div style={{ fontSize: "0.8rem" }}>{i18n.T(R.AllDomains)}</div>}
             />
           </div>
           <div style={space}></div>
@@ -588,7 +581,7 @@ export class Main extends React.Component {
                       onChange={this.onFindChange}
                     />
                   }
-                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
+                  label={<div style={{ fontSize: "0.8rem" }}>{i18n.T(R.Regex)}</div>}
                 />
                 <FormControlLabel
                   control={
@@ -599,7 +592,7 @@ export class Main extends React.Component {
                       onChange={this.onFindChange}
                     />
                   }
-                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
+                  label={<div style={{ fontSize: "0.8rem" }}>{i18n.T(R.IgnoreCase)}</div>}
                 />
                 <FormControlLabel
                   control={
@@ -610,7 +603,7 @@ export class Main extends React.Component {
                       onChange={this.onFindChange}
                     />
                   }
-                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.WholeWord)}</div>}
+                  label={<div style={{ fontSize: "0.8rem" }}>{i18n.T(R.WholeWord)}</div>}
                 />
               </div>
             </>
@@ -627,7 +620,7 @@ export class Main extends React.Component {
                       onChange={this.onFindChange}
                     />
                   }
-                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
+                  label={<div style={{ fontSize: "0.8rem" }}>{i18n.T(R.Regex)}</div>}
                 />
               </div>
               <div style={vertical}>
@@ -641,7 +634,7 @@ export class Main extends React.Component {
                       onChange={this.onFindChange}
                     />
                   }
-                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
+                  label={<div style={{ fontSize: "0.8rem" }}>{i18n.T(R.IgnoreCase)}</div>}
                 />
               </div>
               <div style={vertical}>
@@ -655,7 +648,7 @@ export class Main extends React.Component {
                       onChange={this.onFindChange}
                     />
                   }
-                  label={<div style={{ fontSize: "14px" }}>{i18n.T(R.WholeWord)}</div>}
+                  label={<div style={{ fontSize: "0.8rem" }}>{i18n.T(R.WholeWord)}</div>}
                 />
               </div>
             </>
@@ -731,61 +724,58 @@ export class Main extends React.Component {
   }
 
   renderNormal() {
-    const vertical = { display: "flex", alignItems: "center" };
+    const vertical = { display: "flex", alignItems: "center", justifyContent: "end" };
     const label = { width: "68px", textAlign: "right" };
     return (
       <div style={{ display: this.state.mode === MODE.NORMAL ? "block" : "none" }}>
-        <div style={{ marginTop: "64px" }}>
+        <div>
           <div style={vertical}>
             <div style={label}>{i18n.T(R.Find)}&nbsp;&nbsp;</div>
-            <TextField inputRef={this.normalFindRef} size="small" style={{ width: this.state.normalFieldWidth }} />
+            <TextField inputRef={this.normalFindRef} size="small" style={{ width: this.state.normalFieldWidth }} InputProps={{ style: { height: "32px" } }} />
           </div>
-          <div style={vertical}>
-            <label style={label}></label>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "end" }}>
             <FormControlLabel
               control={
                 <Checkbox
                   inputRef={this.normalRegCheckRef}
                   checked={this.state.normalRegChecked}
                   size="small"
+                  style={{ padding: "6px" }}
                   onChange={event => {
                     this.setState({ normalRegChecked: event.target.checked });
                   }}
                 />
               }
-              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Regex)}</div>}
+              label={<div style={{ fontSize: "0.7rem" }}>{i18n.T(R.Regex)}</div>}
             />
-          </div>
-          <div style={vertical}>
-            <label style={label}></label>
             <FormControlLabel
               control={
                 <Checkbox
                   inputRef={this.normalCaseCheckRef}
                   checked={this.state.normalCaseChecked}
                   size="small"
+                  style={{ padding: "6px" }}
                   onChange={event => {
                     this.setState({ normalCaseChecked: event.target.checked });
                   }}
                 />
               }
-              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.IgnoreCase)}</div>}
+              label={<div style={{ fontSize: "0.7rem" }}>{i18n.T(R.IgnoreCase)}</div>}
             />
-          </div>
-          <div style={vertical}>
-            <label style={label}></label>
             <FormControlLabel
+              style={{ marginRight: "0px", paddingRight: "0px" }}
               control={
                 <Checkbox
                   inputRef={this.normalWordCheckRef}
                   checked={this.state.normalWordChecked}
                   size="small"
+                  style={{ padding: "6px" }}
                   onChange={event => {
                     this.setState({ normalWordChecked: event.target.checked });
                   }}
                 />
               }
-              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.WholeWord)}</div>}
+              label={<div style={{ fontSize: "0.7rem" }}>{i18n.T(R.WholeWord)}</div>}
             />
           </div>
           <div style={vertical}>
@@ -796,19 +786,21 @@ export class Main extends React.Component {
               placeholder={i18n.T(R.UseParam)}
               title={i18n.T(R.UseParam)}
               style={{ width: this.state.normalFieldWidth }}
+              InputProps={{ style: { height: "32px" } }}
             />
           </div>
         </div>
-        <div style={{ height: "32px" }} />
-        <div style={{ textAlign: "right", marginRight: "32px" }}>
-          <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickNormalReplace}>
+        <div style={{ height: "8px" }} />
+        <div style={{ textAlign: "right", marginRight: "0px" }}>
+          <Button variant="contained" style={{ textTransform: "none", fontSize: "0.8rem", padding: "4px 8px 4px 8px" }} onClick={this.onClickNormalReplace}>
             {i18n.T(R.Replace)}
           </Button>
           <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-          <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onClickNormalRecover}>
+          <Button variant="contained" style={{ textTransform: "none", fontSize: "0.8rem", padding: "4px 8px 4px 8px" }} onClick={this.onClickNormalRecover}>
             {i18n.T(R.Recover)}
           </Button>
         </div>
+        <div style={{ height: "8px" }} />
       </div>
     );
   }
@@ -816,7 +808,7 @@ export class Main extends React.Component {
   renderAdvanced() {
     return (
       <div style={{ display: this.state.mode === MODE.ADVANCED ? "block" : "none" }}>
-        <div ref={this.actionsRef} style={{ position: "fixed", top: "72px", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}>
+        <div ref={this.actionsRef} style={{ position: "fixed", top: "44px", backgroundColor: "white", width: "calc(100% - 32px)", zIndex: "999" }}>
           <div>
             <Button variant="contained" style={{ textTransform: "none", marginTop: "8px" }} onClick={this.onClickAddRule}>
               {i18n.T(R.AddRule)}
@@ -836,7 +828,7 @@ export class Main extends React.Component {
           <div style={{ height: "16px" }}></div>
         </div>
         <div style={{ width: "100%", height: this.state.actionsHeight }}></div>
-        <div style={{ marginTop: "16px" }}>
+        <div style={{ marginTop: "8px" }}>
           {
             <RuleTable width={this.state.tableWidth}>
               {this.state.currentRules.map(rule =>
@@ -864,51 +856,69 @@ export class Main extends React.Component {
     return (
       <div style={{ marginLeft: "16px", marginRight: "16px" }}>
         {/* Header start */}
-        <div style={{ position: "fixed", backgroundColor: "white", width: "calc(100% - 32px)", height: "72px", zIndex: "999" }}>
-          <div style={{ display: "flex", alignItems: "center", marginTop: "8px" }}>
-            <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
-            <h3 style={{ marginLeft: "8px", fontSize: "18px" }}>{i18n.T(R.AppName)}</h3>
-            <IconButton style={{ marginLeft: "auto" }} onClick={this.onShowSettings}>
-              {this.state.showTooltip ? (
-                <Tooltip title={i18n.T(R.ModeTooltip)} arrow open>
-                  <SettingsIcon />
-                </Tooltip>
-              ) : (
-                <SettingsIcon />
-              )}
-            </IconButton>
-          </div>
-        </div>
-        <div style={{ width: "100%", height: "72px" }}></div>
-        {/* Header end */}
-        {this.renderNormal()}
-        {this.renderAdvanced()}
-        {/* Footer start */}
-        <div style={{ width: "100%", height: "32px" }} />
+        <div style={{ position: "fixed", top: "0", width: "calc(100% - 32px)", height: "52px", backgroundColor: "white", zIndex: "99" }} />
         <div
           style={{
-            width: "calc(100% - 32px)",
-            height: "32px",
             position: "fixed",
-            bottom: "0",
-            alignItems: "center",
-            backgroundColor: "white",
             display: "flex",
-            justifyContent: "flex-end",
+            alignItems: "center",
+            justifyContent: "start",
+            width: "calc(100% - 32px)",
+            height: "40px",
+            top: "6px",
+            zIndex: "999",
           }}
         >
-          {this.state.mode === MODE.ADVANCED && <span style={{ marginRight: "32px" }}>{this.state.replaceCount}</span>}
-          <span
-            style={{ marginRight: "16px", display: "flex", alignItems: "center", cursor: "pointer" }}
+          <img src={MainIcon} style={{ width: "32px", height: "32px" }} alt={""} />
+          <div style={{ marginLeft: "8px", fontSize: "1rem", fontWeight: "bold" }}>{i18n.T(R.AppName)}</div>
+        </div>
+        <div
+          style={{
+            position: "fixed",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "end",
+            width: "calc(100% - 32px)",
+            height: "40px",
+            top: "6px",
+            zIndex: "999",
+          }}
+        >
+          <IconButton
             onClick={() => {
               this.setState({ showLanguageList: true });
             }}
           >
             <LanguageIcon />
-            &nbsp;&nbsp;
-            {i18n.T(R.Language)}
-          </span>
+          </IconButton>
+          <IconButton onClick={this.onShowSettings}>
+            <SettingsIcon />
+          </IconButton>
         </div>
+        <div style={{ width: "100%", height: "52px" }}></div>
+        {/* Header end */}
+        {this.renderNormal()}
+        {this.renderAdvanced()}
+        {/* Footer start */}
+        {this.state.mode === MODE.ADVANCED && (
+          <>
+            <div style={{ width: "100%", height: "32px" }} />
+            <div
+              style={{
+                width: "calc(100% - 32px)",
+                height: "32px",
+                position: "fixed",
+                bottom: "0",
+                alignItems: "center",
+                backgroundColor: "white",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <span style={{ marginRight: "32px" }}>{this.state.replaceCount}</span>
+            </div>
+          </>
+        )}
         {/* Footer end */}
       </div>
     );
@@ -916,11 +926,11 @@ export class Main extends React.Component {
 
   render() {
     return (
-      <div ref={this.bodyRef} style={{ width: "100%" }}>
+      <div ref={this.bodyRef} style={{ width: "100%", backgroundColor: "white" }}>
         <div
           style={{
             width: this.state.openMode === OPEN_MODE.SIDE_PANEL ? "auto" : this.state.mode === MODE.NORMAL ? "360px" : "640px",
-            height: this.state.openMode === OPEN_MODE.SIDE_PANEL ? "auto" : "480px",
+            height: this.state.openMode === OPEN_MODE.SIDE_PANEL ? "auto" : this.state.mode === MODE.NORMAL ? "auto" : "480px",
           }}
         >
           {this.renderMain()}

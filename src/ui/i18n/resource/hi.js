@@ -51,6 +51,5 @@ export const hi = {
   Recover: "वापस पाना",
   Normal: "सामान्य",
   Advanced: "विकसित",
-  Mode: "मोड",
-  ModeTooltip: "मोड सेटिंग यहां स्थानांतरित कर दी गई हैं",
+  Mode: "मोड"
 };

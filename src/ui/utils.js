@@ -46,6 +46,10 @@ export function IsChrome() {
   return !navigator.userAgent.includes("Edg");
 }
 
+export function IsSafari() {
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && /apple/i.test(navigator.vendor);
+}
+
 export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run_rule) {
   const localSettings = await chrome.storage.local.get(null);
   const syncRules = await chrome.storage.sync.get(null);

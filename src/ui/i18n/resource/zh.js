@@ -51,6 +51,5 @@ export const zh = {
   Recover: "复原",
   Normal: "普通",
   Advanced: "高级",
-  Mode: "模式",
-  ModeTooltip: "模式设置已移至此处",
+  Mode: "模式"
 };

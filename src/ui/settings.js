@@ -19,7 +19,7 @@ import {
 import { Close as CloseIcon } from "@mui/icons-material";
 
 import { CONTEXT_MENU_ID, MODE, OPEN_MODE, SETTINGS } from "./constant";
-import { CreateContextMenu, IsChrome } from "./utils";
+import { CreateContextMenu, IsChrome, IsSafari } from "./utils";
 import { ReadGroup } from "./rule";
 import i18n from "./i18n/i18n";
 import R from "./i18n/R";
@@ -276,12 +276,14 @@ export class Settings extends React.Component {
               control={<Radio size="md" />}
               label={<div style={{ fontSize: "14px" }}>{i18n.T(R.Popup)}</div>}
             />
-            <FormControlLabel
-              style={{ fontSize: "1rem" }}
-              value={OPEN_MODE.SIDE_PANEL}
-              control={<Radio size="md" />}
-              label={<div style={{ fontSize: "14px" }}>{i18n.T(R.SidePanel)}</div>}
-            />
+            {!IsSafari() && (
+              <FormControlLabel
+                style={{ fontSize: "1rem" }}
+                value={OPEN_MODE.SIDE_PANEL}
+                control={<Radio size="md" />}
+                label={<div style={{ fontSize: "14px" }}>{i18n.T(R.SidePanel)}</div>}
+              />
+            )}
             <FormControlLabel
               style={{ fontSize: "1rem" }}
               value={OPEN_MODE.IN_PAGE}

@@ -51,6 +51,5 @@ export const en = {
   Recover: "Recover",
   Normal: "Normal",
   Advanced: "Advanced",
-  Mode: "Mode",
-  ModeTooltip: "Mode settings have been moved here",
+  Mode: "Mode"
 };

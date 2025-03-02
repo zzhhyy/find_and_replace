@@ -52,6 +52,5 @@ const R = {
   Normal: "Normal",
   Advanced: "Advanced",
   Mode: "Mode",
-  ModeTooltip: "ModeTooltip",
 };
 export default R;
