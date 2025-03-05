@@ -792,11 +792,21 @@ export class Main extends React.Component {
         </div>
         <div style={{ height: "8px" }} />
         <div style={{ textAlign: "right", marginRight: "0px" }}>
-          <Button variant="contained" style={{ textTransform: "none", fontSize: "0.8rem", padding: "4px 8px 4px 8px" }} onClick={this.onClickNormalReplace}>
+          <Button
+            variant="contained"
+            color="success"
+            style={{ textTransform: "none", fontSize: "0.8rem", padding: "4px 8px 4px 8px" }}
+            onClick={this.onClickNormalReplace}
+          >
             {i18n.T(R.Replace)}
           </Button>
           <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
-          <Button variant="contained" style={{ textTransform: "none", fontSize: "0.8rem", padding: "4px 8px 4px 8px" }} onClick={this.onClickNormalRecover}>
+          <Button
+            variant="contained"
+            color="success"
+            style={{ textTransform: "none", fontSize: "0.8rem", padding: "4px 8px 4px 8px" }}
+            onClick={this.onClickNormalRecover}
+          >
             {i18n.T(R.Recover)}
           </Button>
         </div>
