@@ -12,8 +12,8 @@ export default class i18n {
 
   static init() {
     this.translations = new LocalizedStrings({
-      ar: ar,
       en: en,
+      ar: ar,
       es: es,
       hi: hi,
       zh: zh,
