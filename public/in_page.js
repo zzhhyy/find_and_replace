@@ -187,8 +187,8 @@ async function appendBox() {
       <input id="find_and_replace_replace" style="width: 100%; padding: 4px; margin: 4px 8px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 4px; font-size: 12px; transition: border-color 0.3s;" type="text" placeholder=\"${stringData[language].UseParam}\" />
     </div>
     <div style="display: flex; justify-content: end; margin-top: 8px;font-size: 14px">
-      <div id="find_and_replace_do_replace" style="padding: 8px; margin-right: 16px; background-color: rgb(46, 125, 50); color: white; border-radius: 4px; cursor: pointer">${stringData[language].Replace}</div>
-      <div id="find_and_replace_do_recover" style="padding: 8px; margin-right: 16px; background-color: rgb(46, 125, 50); color: white; border-radius: 4px; cursor: pointer">${stringData[language].Recover}</div>
+      <div id="find_and_replace_do_replace" style="padding: 8px; margin-right: 16px; background-color: rgb(22, 95, 199); color: white; border-radius: 4px; cursor: pointer">${stringData[language].Replace}</div>
+      <div id="find_and_replace_do_recover" style="padding: 8px; margin-right: 16px; background-color: rgb(22, 95, 199); color: white; border-radius: 4px; cursor: pointer">${stringData[language].Recover}</div>
     </div>
   `;
 
