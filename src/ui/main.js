@@ -90,7 +90,6 @@ export class Main extends React.Component {
   componentDidMount() {
     this.resizeObserver.observe(this.bodyRef.current);
     this.resizeObserver.observe(this.actionsRef.current);
-    this.updateCurrentRules("");
     chrome.storage.local.get([KEY.TMP], result => {
       if (result[KEY.TMP] != null) {
         if (result[KEY.TMP].mode == "normal") {
@@ -138,6 +137,29 @@ export class Main extends React.Component {
         }
       }
     });
+    const migrate = "migrated_sync";
+    if (localStorage.getItem(migrate)) {
+      this.updateCurrentRules("");
+    } else {
+      localStorage.setItem(migrate, "migrated_sync");
+      try {
+        chrome.storage.local.get([KEY.LOCAL], localResult => {
+          let localRules = localResult[KEY.LOCAL] ?? {};
+          chrome.storage.sync.get(null, syncResult => {
+            for (let [group, rules] of Object.entries(syncResult)) {
+              let tmpRules = localRules[group] ?? {};
+              localRules[group] = { ...tmpRules, ...rules };
+            }
+            chrome.storage.local.set({ [KEY.LOCAL]: localRules });
+            chrome.storage.sync.clear(() => {
+              this.updateCurrentRules("");
+            });
+          });
+        });
+      } catch (e) {
+        this.updateCurrentRules("");
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -181,40 +203,21 @@ export class Main extends React.Component {
   };
 
   updateCurrentRules = async group => {
-    let key = group;
-    if (key === "") {
-      key = null;
-    }
     let data = [];
-    let groups = new Set();
 
-    const syncRules = await chrome.storage.sync.get(key);
     const localResult = await chrome.storage.local.get([KEY.LOCAL]);
     const localRules = localResult[KEY.LOCAL] ?? {};
-    if (key === null) {
-      for (let group in syncRules) {
-        if (group.length > 0) {
-          groups.add(group);
+    if (group === "") {
+      for (const tmpGroup of Object.keys(localRules)) {
+        if (tmpGroup.length > 0) {
+          data.push({ group: tmpGroup, find: null, disabled: false });
         }
-      }
-      for (let group in localRules) {
-        if (group.length > 0) {
-          groups.add(group);
-        }
-      }
-      for (const group of groups) {
-        data.push({ group: group, find: null, disabled: false });
       }
     }
 
-    if (syncRules[group] != null) {
-      for (let [find, value] of Object.entries(syncRules[group])) {
+    if (localRules.hasOwnProperty(group)) {
+      for (const [find, value] of Object.entries(localRules[group])) {
         data.push({ group: group, find: find, disabled: value.disabled });
-      }
-    }
-    if (localRules[group] != null) {
-      for (let [find, value] of Object.entries(localRules[group])) {
-        data.push({ group: group, find: find, disabled: value.disabled, local: true });
       }
     }
 

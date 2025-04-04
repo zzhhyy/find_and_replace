@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 
-import { CONTEXT_MENU_ID, MODE, OPEN_MODE, SETTINGS } from "./constant";
+import { CONTEXT_MENU_ID, KEY, MODE, OPEN_MODE, SETTINGS } from "./constant";
 import { CreateContextMenu, IsChrome, IsSafari } from "./utils";
 import { ReadGroup } from "./rule";
 import i18n from "./i18n/i18n";
@@ -191,11 +191,22 @@ export class Settings extends React.Component {
   };
 
   onWriteRules = async rules => {
-    const importSyncRules = rules["sync"];
-    const importLocalRules = rules["local"];
     try {
-      await chrome.storage.sync.set(importSyncRules);
-      await chrome.storage.local.set({ local: importLocalRules });
+      if (rules.hasOwnProperty("sync") && rules.hasOwnProperty("local")) {
+        const importSyncRules = rules["sync"];
+        const importLocalRules = rules["local"];
+        for (let [group, rules] of Object.entries(importSyncRules)) {
+          if (importLocalRules.hasOwnProperty(group)) {
+            importLocalRules[group] = { ...importLocalRules[group], ...rules };
+          } else {
+            importLocalRules[group] = rules;
+          }
+        }
+        await chrome.storage.local.set({ [KEY.LOCAL]: importLocalRules });
+      } else {
+        await chrome.storage.local.set({ [KEY.LOCAL]: rules });
+      }
+
       this.props.onRuleUpdated();
     } catch (_) {
       alert(i18n.T(R.SyncStorageFull));
@@ -208,12 +219,10 @@ export class Settings extends React.Component {
     reader.onload = async event => {
       try {
         const rules = JSON.parse(event.target.result);
-        const syncRules = await chrome.storage.sync.get(null);
-        const localRules = await chrome.storage.local.get(["local"]);
-        if (Object.keys(syncRules).length > 0 || Object.keys(localRules).length > 0) {
+        const localRules = await chrome.storage.local.get([KEY.LOCAL]);
+        if (Object.keys(localRules).length > 0) {
           if (window.confirm(i18n.T(R.ClearOldRule))) {
-            await chrome.storage.sync.clear();
-            await chrome.storage.local.remove(["local"]);
+            await chrome.storage.local.remove([KEY.LOCAL]);
             this.onWriteRules(rules);
           }
         } else {
@@ -231,9 +240,8 @@ export class Settings extends React.Component {
   };
 
   onExportRules = async () => {
-    const syncRules = await chrome.storage.sync.get(null);
-    const localRules = await chrome.storage.local.get("local");
-    const rules = { sync: syncRules, local: localRules.local ? localRules.local : {} };
+    const localRules = await chrome.storage.local.get([KEY.LOCAL]);
+    const rules = { sync: {}, local: localRules.local ? localRules.local : {} };
 
     let data = JSON.stringify(rules, null, 2);
     let blob = new Blob([data], { type: "application/json" });
