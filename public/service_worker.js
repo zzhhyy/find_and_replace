@@ -160,7 +160,6 @@ const CONTEXT_MENU_ID = {
 
 async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run_rule) {
   const localSettings = await chrome.storage.local.get(null);
-  const syncRules = await chrome.storage.sync.get(null);
   const localResult = await chrome.storage.local.get("local");
   const localRules = localResult["local"] ?? {};
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] === true) {
@@ -185,26 +184,16 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
       id: CONTEXT_MENU_ID.RUN_GROUP,
     });
 
-    let groups = new Set();
-
-    for (const group of Object.keys(syncRules)) {
-      if (group.length > 0) {
-        groups.add(group);
-      }
-    }
     for (const group of Object.keys(localRules)) {
       if (group.length > 0) {
-        groups.add(group);
+        chrome.contextMenus.create({
+          title: "Group " + group,
+          contexts: ["all"],
+          type: "normal",
+          id: CONTEXT_MENU_ID.RUN_GROUP + "\\n" + group,
+          parentId: parent,
+        });
       }
-    }
-    for (const group of Array.from(groups)) {
-      chrome.contextMenus.create({
-        title: "Group " + group,
-        contexts: ["all"],
-        type: "normal",
-        id: CONTEXT_MENU_ID.RUN_GROUP + "\\n" + group,
-        parentId: parent,
-      });
     }
   }
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_RULE] === true) {
@@ -218,7 +207,7 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
       id: CONTEXT_MENU_ID.RUN_RULE,
     });
 
-    const addRuleMenu = (group, childRules) => {
+    for (const [group, childRules] of Object.entries(localRules)) {
       let secondParent = parent;
       if (group !== "") {
         secondParent = chrome.contextMenus.create({
@@ -237,24 +226,6 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
           id: CONTEXT_MENU_ID.RUN_RULE + "\\n" + group + "\\n" + find,
           parentId: secondParent,
         });
-      }
-    };
-
-    let groups = new Set();
-
-    for (const group of Object.keys(syncRules)) {
-      groups.add(group);
-    }
-    for (const group of Object.keys(localRules)) {
-      groups.add(group);
-    }
-    for (const group of Array.from(groups)) {
-      if (syncRules.hasOwnProperty(group) && localRules.hasOwnProperty(group)) {
-        addRuleMenu(group, { ...syncRules[group], ...localRules[group] });
-      } else if (syncRules.hasOwnProperty(group)) {
-        addRuleMenu(group, syncRules[group]);
-      } else {
-        addRuleMenu(group, localRules[group]);
       }
     }
   }

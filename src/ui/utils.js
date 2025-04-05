@@ -1,6 +1,6 @@
 /*global chrome*/
 
-import { CONTEXT_MENU_ID, SETTINGS } from "./constant";
+import { CONTEXT_MENU_ID, KEY, SETTINGS } from "./constant";
 
 export function CutString(str, len) {
   let str_length = 0;
@@ -52,9 +52,8 @@ export function IsSafari() {
 
 export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run_rule) {
   const localSettings = await chrome.storage.local.get(null);
-  const syncRules = await chrome.storage.sync.get(null);
-  const localResult = await chrome.storage.local.get("local");
-  const localRules = localResult["local"] ?? {};
+  const localResult = await chrome.storage.local.get([KEY.LOCAL]);
+  const localRules = localResult[KEY.LOCAL] ?? {};
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] === true) {
     if (turn_on_run_all === false) {
       chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_ALL);
@@ -77,7 +76,7 @@ export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn
       id: CONTEXT_MENU_ID.RUN_GROUP,
     });
 
-    const addGroupMenu = group => {
+    for (const group of Object.keys(localRules)) {
       if (group.length > 0) {
         chrome.contextMenus.create({
           title: "Group " + group,
@@ -87,12 +86,6 @@ export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn
           parentId: parent,
         });
       }
-    };
-    for (const group of Object.keys(syncRules)) {
-      addGroupMenu(group);
-    }
-    for (const group of Object.keys(localRules)) {
-      addGroupMenu(group);
     }
   }
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_RULE] === true) {
@@ -106,7 +99,7 @@ export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn
       id: CONTEXT_MENU_ID.RUN_RULE,
     });
 
-    const addRuleMenu = (group, childRules) => {
+    for (const [group, childRules] of Object.entries(localRules)) {
       let secondParent = parent;
       if (group !== "") {
         secondParent = chrome.contextMenus.create({
@@ -126,14 +119,6 @@ export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn
           parentId: secondParent,
         });
       }
-    };
-
-    for (const [group, childRules] of Object.entries(syncRules)) {
-      addRuleMenu(group, childRules);
-    }
-
-    for (const [group, childRules] of Object.entries(localRules)) {
-      addRuleMenu(group, childRules);
     }
   }
 }

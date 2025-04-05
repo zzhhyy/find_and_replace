@@ -168,7 +168,9 @@ function FindTextAndDo(find, value, check, highlight) {
 function RepeatReplace(times) {
   if (times <= 4) {
     setTimeout(async function () {
-      const runRule = rules => {
+      const localResult = await chrome.storage.local.get(["local"]);
+      const localRules = localResult["local"] ?? {};
+      for (const rules of Object.values(localRules)) {
         for (const [find, value] of Object.entries(rules)) {
           if (value.domain != null && value.domain != window.location.host) {
             continue;
@@ -181,19 +183,7 @@ function RepeatReplace(times) {
           }
           FindTextAndDo(find, value, false, false);
         }
-      };
-
-      const syncRules = await chrome.storage.sync.get(null);
-      for (const rules of Object.values(syncRules)) {
-        runRule(rules);
       }
-
-      const localResult = await chrome.storage.local.get(["local"]);
-      const localRules = localResult["local"] ?? {};
-      for (const rules of Object.values(localRules)) {
-        runRule(rules);
-      }
-
       RepeatReplace(times + 1);
     }, times * 1000);
   }
@@ -201,7 +191,9 @@ function RepeatReplace(times) {
 
 function RealtimeReplace() {
   setTimeout(async function () {
-    const runRule = rules => {
+    const localResult = await chrome.storage.local.get(["local"]);
+    const localRules = localResult["local"] ?? {};
+    for (const rules of Object.values(localRules)) {
       for (const [find, value] of Object.entries(rules)) {
         if (value.domain != null && value.domain != window.location.host) {
           continue;
@@ -214,19 +206,7 @@ function RealtimeReplace() {
         }
         FindTextAndDo(find, value, false, false);
       }
-    };
-
-    const syncRules = await chrome.storage.sync.get(null);
-    for (const rules of Object.values(syncRules)) {
-      runRule(rules);
     }
-
-    const localResult = await chrome.storage.local.get(["local"]);
-    const localRules = localResult["local"] ?? {};
-    for (const rules of Object.values(localRules)) {
-      runRule(rules);
-    }
-
     RealtimeReplace();
   }, 1500);
 }
@@ -257,52 +237,45 @@ async function main() {
   if (cmd.type == kRunRule) {
     let replaceCount = 0;
 
-    const runRule = (result, cmdGroup, cmdFind) => {
-      if (cmdGroup == null) {
-        for (const rules of Object.values(result)) {
-          for (const [find, value] of Object.entries(rules)) {
-            if (value.domain != null && value.domain != window.location.host) {
-              continue;
-            }
-            if (value.disabled == true) {
-              continue;
-            }
-            replaceCount = replaceCount + FindTextAndDo(find, value, false, false);
-          }
-        }
-      } else {
-        if (cmdFind == null) {
-          for (const [find, value] of Object.entries(result)) {
-            if (value.domain != null && value.domain != window.location.host) {
-              continue;
-            }
-            if (value.disabled == true) {
-              continue;
-            }
-            replaceCount = replaceCount + FindTextAndDo(find, value, false, false);
-          }
-        } else {
-          const value = result[cmdFind];
-          if (!value) {
-            return;
-          }
-          if (value.domain != null && value.domain != window.location.host) {
-            return;
-          }
-          if (value.disabled == true) {
-            return;
-          }
-          replaceCount = replaceCount + FindTextAndDo(cmdFind, value, false, false);
-        }
-      }
-    };
-
-    const syncRules = await chrome.storage.sync.get(cmd.group);
-    runRule(cmd.group == null ? syncRules : syncRules[cmd.group], cmd.group, cmd.find);
-
     const localResult = await chrome.storage.local.get(["local"]);
     const localRules = localResult["local"] ?? {};
-    runRule(cmd.group == null ? localRules : localRules[cmd.group] ?? {}, cmd.group, cmd.find);
+    if (cmd.group == null) {
+      for (const rules of Object.values(localRules)) {
+        for (const [find, value] of Object.entries(rules)) {
+          if (value.domain != null && value.domain != window.location.host) {
+            continue;
+          }
+          if (value.disabled == true) {
+            continue;
+          }
+          replaceCount = replaceCount + FindTextAndDo(find, value, false, false);
+        }
+      }
+    } else {
+      if (cmd.find == null) {
+        for (const [find, value] of Object.entries(localRules[cmd.group])) {
+          if (value.domain != null && value.domain != window.location.host) {
+            continue;
+          }
+          if (value.disabled == true) {
+            continue;
+          }
+          replaceCount = replaceCount + FindTextAndDo(find, value, false, false);
+        }
+      } else {
+        const value = localRules[cmd.group][cmd.find];
+        if (!value) {
+          return;
+        }
+        if (value.domain != null && value.domain != window.location.host) {
+          return;
+        }
+        if (value.disabled == true) {
+          return;
+        }
+        replaceCount = replaceCount + FindTextAndDo(cmd.find, value, false, false);
+      }
+    }
 
     chrome.runtime.sendMessage({ replaceCount: replaceCount });
   } else if (cmd.type == kRunTest) {
