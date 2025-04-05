@@ -72,3 +72,35 @@ export function DeleteGroup(group) {
     resolve();
   });
 }
+
+export function EnableGroup(group) {
+  return new Promise(async (resolve, _) => {
+    const localResult = await chrome.storage.local.get([KEY.LOCAL]);
+    let localRules = localResult[KEY.LOCAL] ?? {};
+    if (localRules.hasOwnProperty(group)) {
+      let rules = localRules[group];
+      for (const find in rules) {
+        rules[find].disabled = false;
+      }
+      localRules[group] = rules;
+      await chrome.storage.local.set({ [KEY.LOCAL]: localRules });
+    }
+    resolve();
+  });
+}
+
+export function DisableGroup(group) {
+  return new Promise(async (resolve, _) => {
+    const localResult = await chrome.storage.local.get([KEY.LOCAL]);
+    let localRules = localResult[KEY.LOCAL] ?? {};
+    if (localRules.hasOwnProperty(group)) {
+      let rules = localRules[group];
+      for (const find in rules) {
+        rules[find].disabled = true;
+      }
+      localRules[group] = rules;
+      await chrome.storage.local.set({ [KEY.LOCAL]: localRules });
+    }
+    resolve();
+  });
+}

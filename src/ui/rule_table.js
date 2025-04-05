@@ -59,9 +59,17 @@ export class Rule extends React.Component {
 
   onClickDisable = () => {
     if (this.isDisbaled()) {
-      this.props.enableRule(this.props.rule);
+      if (this.isGroup()) {
+        this.props.enableGroup(this.props.rule);
+      } else {
+        this.props.enableRule(this.props.rule);
+      }
     } else {
-      this.props.disableRule(this.props.rule);
+      if (this.isGroup()) {
+        this.props.disableGroup(this.props.rule);
+      } else {
+        this.props.disableRule(this.props.rule);
+      }
     }
     this.onCloseMenu();
   };
@@ -89,7 +97,7 @@ export class Rule extends React.Component {
       <>
         {this.state.menuAnchor && (
           <Menu anchorEl={this.state.menuAnchor} open={true} onClose={this.onCloseMenu} disableScrollLock={true}>
-            {!this.isGroup() && <MenuItem onClick={this.onClickDisable}>{this.isDisbaled() ? i18n.T(R.Enable) : i18n.T(R.Disable)}</MenuItem>}
+            <MenuItem onClick={this.onClickDisable}>{this.isDisbaled() ? i18n.T(R.Enable) : i18n.T(R.Disable)}</MenuItem>
             <MenuItem onClick={this.onClickDelete}>{i18n.T(R.Delete)}</MenuItem>
           </Menu>
         )}
@@ -121,7 +129,13 @@ export class Rule extends React.Component {
           </Button>
         </div>
         <div style={{ width: "68px", paddingLeft: this.state.paddingSize, paddingRight: this.state.paddingSize }}>
-          <Button variant="contained" disabled={this.isDisbaled()} color="success" style={{ textTransform: "none" }} onClick={this.onClickOpenOrEdit}>
+          <Button
+            variant="contained"
+            disabled={!this.isGroup() && this.isDisbaled()}
+            color="success"
+            style={{ textTransform: "none" }}
+            onClick={this.onClickOpenOrEdit}
+          >
             {this.isGroup() ? i18n.T(R.Open) : i18n.T(R.Edit)}
           </Button>
         </div>
