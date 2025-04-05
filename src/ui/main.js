@@ -22,7 +22,7 @@ import { Settings } from "./settings.js";
 import { Rule, RuleTable } from "./rule_table.js";
 import { RunCommand, CreateContextMenu, IsFirstRun } from "./utils.js";
 import { KEY, CMD, SETTINGS, MODE, OPEN_MODE } from "./constant.js";
-import { DeleteGroup, DeleteRule, ReadGroup, ReadRule, WriteRule } from "./rule.js";
+import { DeleteGroup, DeleteRule, DisableGroup, EnableGroup, ReadGroup, ReadRule, WriteRule } from "./rule.js";
 import i18n from "./i18n/i18n.js";
 import R from "./i18n/R.js";
 
@@ -210,7 +210,11 @@ export class Main extends React.Component {
     if (group === "") {
       for (const tmpGroup of Object.keys(localRules)) {
         if (tmpGroup.length > 0) {
-          data.push({ group: tmpGroup, find: null, disabled: false });
+          let disabled = true;
+          for (const rule of Object.values(localRules[tmpGroup])) {
+            disabled = disabled && rule.disabled;
+          }
+          data.push({ group: tmpGroup, find: null, disabled: disabled });
         }
       }
     }
@@ -432,6 +436,26 @@ export class Main extends React.Component {
     this.updateCurrentRules(rule.group);
   };
 
+  enableGroup = rule => {
+    EnableGroup(rule.group).then(_ => {
+      this.updateCurrentRules("");
+    });
+  };
+
+  disableGroup = rule => {
+    DisableGroup(rule.group).then(_ => {
+      this.updateCurrentRules("");
+    });
+  };
+
+  deleteGroup = rule => {
+    if (window.confirm(i18n.F(R.DeleteGroup, rule.group))) {
+      DeleteGroup(rule.group).then(_ => {
+        this.updateCurrentRules("");
+      });
+    }
+  };
+
   editRule = rule => {
     ReadRule(rule.group, rule.find).then(value => {
       this.editMode = true;
@@ -443,14 +467,6 @@ export class Main extends React.Component {
         this.updateFindCount();
       }, 1000);
     });
-  };
-
-  deleteGroup = rule => {
-    if (window.confirm(i18n.F(R.DeleteGroup, rule.group))) {
-      DeleteGroup(rule.group).then(_ => {
-        this.updateCurrentRules("");
-      });
-    }
   };
 
   deleteRule = rule => {
@@ -843,6 +859,8 @@ export class Main extends React.Component {
                   deleteRule: this.deleteRule,
                   deleteGroup: this.deleteGroup,
                   openGroup: this.openGroup,
+                  enableGroup: this.enableGroup,
+                  disableGroup: this.disableGroup,
                   editRule: this.editRule,
                   enableRule: this.enableRule,
                   disableRule: this.disableRule,
