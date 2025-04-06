@@ -51,5 +51,5 @@ export const hi = {
   Recover: "वापस पाना",
   Normal: "सामान्य",
   Advanced: "विकसित",
-  Mode: "मोड"
+  Mode: "मोड",
 };

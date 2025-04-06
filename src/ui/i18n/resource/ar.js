@@ -51,5 +51,5 @@ export const ar = {
   Recover: "استعادة",
   Normal: "عادي",
   Advanced: "متقدم",
-  Mode: "نموذج"
+  Mode: "نموذج",
 };
