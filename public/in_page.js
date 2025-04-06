@@ -56,7 +56,7 @@ async function far_language() {
     return result[languageKey];
   }
   let language = navigator.language || navigator.userLanguage;
-  const la = language ? language.substring(0, 2) : "en";
+  let la = language ? language.substring(0, 2) : "en";
   const supportLanguage = new Set(["ar", "de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "pt", "ru", "vi", "zh"]);
   if (!supportLanguage.has(la)) {
     la = "en";
