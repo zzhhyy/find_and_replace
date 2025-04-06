@@ -8,7 +8,7 @@ export const id = {
   Open: "Membuka",
   Edit: "Sunting",
   Enable: "Memungkinkan",
-  Disable: "Cacat",
+  Disable: "Nonaktifkan",
   Delete: "Menghapus",
   Domains: "Domain",
   AllDomains: "Semua domain",
