@@ -52,4 +52,5 @@ export const es = {
   Normal: "Normal",
   Advanced: "Avanzado",
   Mode: "Modo",
+  IgnoreInput: "Ignorar la entrada",
 };

@@ -52,4 +52,5 @@ export const vi = {
   Normal: "Bình thường",
   Advanced: "Trình độ cao",
   Mode: "Cách thức",
+  IgnoreInput: "Bỏ qua đầu vào",
 };

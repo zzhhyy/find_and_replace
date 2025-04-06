@@ -22,6 +22,7 @@ export const en = {
   Regex: "Regex",
   IgnoreCase: "Ignore case",
   WholeWord: "Match whole word",
+  IgnoreInput: "Ignore input",
   UseParam: "use $0,$1,$2.. as search result",
   Auto: "Auto",
   Manual: "Manual",

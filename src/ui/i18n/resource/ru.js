@@ -52,4 +52,5 @@ export const ru = {
   Normal: "Нормальный",
   Advanced: "Передовой",
   Mode: "Режим",
+  IgnoreInput: "Игнорировать ввод",
 };

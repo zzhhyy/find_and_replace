@@ -52,4 +52,5 @@ export const pt = {
   Normal: "Normal",
   Advanced: "Avançado",
   Mode: "Modo",
+  IgnoreInput: "Ignorar entrada",
 };

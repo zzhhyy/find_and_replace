@@ -52,4 +52,5 @@ export const id = {
   Normal: "Normal",
   Advanced: "Canggih",
   Mode: "Mode",
+  IgnoreInput: "Abaikan masukan",
 };

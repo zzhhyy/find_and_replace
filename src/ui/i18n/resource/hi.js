@@ -52,4 +52,5 @@ export const hi = {
   Normal: "सामान्य",
   Advanced: "विकसित",
   Mode: "मोड",
+  IgnoreInput: "इनपुट अनदेखा करें",
 };

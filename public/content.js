@@ -59,7 +59,7 @@ function GetReplacedText(text, find, findRegex, replace) {
   return firstResult + secondResult;
 }
 
-function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight) {
+function DoTaskForElements(rootNode, find, findRegex, replace, ignoreInput, check, highlight) {
   const elements = rootNode.querySelectorAll("*");
   let findCount = 0;
   for (const element of elements) {
@@ -75,7 +75,7 @@ function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight)
     if (!visible) {
       continue;
     }
-    if (tagName == "input" || tagName == "textarea") {
+    if (!ignoreInput && (tagName == "input" || tagName == "textarea")) {
       const text = element.value;
       const result = GetReplacedText(text, find, findRegex, replace);
       if (result == null || result == text) {
@@ -128,7 +128,7 @@ function DoTaskForElements(rootNode, find, findRegex, replace, check, highlight)
       }
     }
     if (element.shadowRoot) {
-      findCount = findCount + DoTaskForElements(element.shadowRoot, find, findRegex, replace, check, highlight);
+      findCount = findCount + DoTaskForElements(element.shadowRoot, find, findRegex, replace, ignoreInput, check, highlight);
     }
   }
   return findCount;
@@ -162,7 +162,7 @@ function FindTextAndDo(find, value, check, highlight) {
   } catch (e) {
     return 0;
   }
-  return DoTaskForElements(document.body, find, findRegex, value.replace, check, highlight);
+  return DoTaskForElements(document.body, find, findRegex, value.replace, value.ignoreInput === true, check, highlight);
 }
 
 function RepeatReplace(times) {

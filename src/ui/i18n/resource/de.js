@@ -52,4 +52,5 @@ export const de = {
   Normal: "Normal",
   Advanced: "Fortschrittlich",
   Mode: "Modus",
+  IgnoreInput: "Eingabe ignorieren",
 };

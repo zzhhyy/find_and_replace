@@ -67,6 +67,7 @@ export class Main extends React.Component {
     this.regCheckRef = React.createRef();
     this.caseCheckRef = React.createRef();
     this.wordCheckRef = React.createRef();
+    this.ignoreInputRef = React.createRef();
     this.replaceInputRef = React.createRef();
     this.groupInputRef = React.createRef();
     this.runSelectRef = React.createRef();
@@ -395,6 +396,7 @@ export class Main extends React.Component {
     let regex = this.regCheckRef.current.checked;
     let ignoreCase = this.caseCheckRef.current.checked;
     let wholeWord = this.wordCheckRef.current.checked;
+    let ignoreInput = this.ignoreInputRef.current.checked;
     let replace = this.replaceInputRef.current.value;
     let group = this.groupInputRef.current.value.trim();
     let runtype = this.runSelectRef.current.value;
@@ -407,6 +409,7 @@ export class Main extends React.Component {
         regex: regex,
         ignoreCase: ignoreCase,
         wholeWord: wholeWord,
+        ignoreInput: ignoreInput,
         replace: replace,
         runtype: runtype,
         disabled: false,
@@ -563,9 +566,11 @@ export class Main extends React.Component {
     const label = { width: "88px", textAlign: "right" };
     const space = { height: "4px" };
     return (
-      <Dialog open={this.state.showAddRule} PaperProps={{ style: { margin: "4px" } }}>
+      <Dialog open={this.state.showAddRule}>
         <div style={{ padding: "4px", fontSize: "medium" }} onMouseLeave={this.onMouseLeave}>
-          <h3 style={{ textAlign: "center" }}>{i18n.T(R.AddRule)}</h3>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "40px", fontSize: "18px", fontWeight: "bold" }}>
+            {i18n.T(R.AddRule)}
+          </div>
           <div style={vertical}>
             <div style={label}>{i18n.T(R.Domains)}&nbsp;&nbsp;</div>
             <TextField
@@ -681,6 +686,19 @@ export class Main extends React.Component {
               </div>
             </>
           )}
+          <div style={vertical}>
+            <label style={label}></label>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  inputRef={this.ignoreInputRef}
+                  size="small"
+                  defaultChecked={this.state.presetRule ? this.state.presetRule.value.ignoreInput : false}
+                />
+              }
+              label={<div style={{ fontSize: "0.8rem" }}>{i18n.T(R.IgnoreInput)}</div>}
+            />
+          </div>
           <div style={space}></div>
           <div style={vertical}>
             <label style={label}>{i18n.T(R.Replace)}&nbsp;&nbsp;</label>
@@ -719,12 +737,11 @@ export class Main extends React.Component {
               <MenuItem value={"Realtime"}>{i18n.T(R.Realtime)}</MenuItem>
             </Select>
           </div>
-          <div style={{ width: "100%", height: "8px" }}></div>
+          <div style={{ width: "100%", height: "4px" }}></div>
           <div style={{ textAlign: "right" }}>
             <span>{this.state.findCount}</span>
             <span>&nbsp;&nbsp;</span>
           </div>
-          <div style={{ width: "100%", height: "8px" }}></div>
           <div style={{ textAlign: "right" }}>
             <Button variant="contained" color="success" style={{ textTransform: "none", marginTop: "8px" }} onClick={this.onClickRecover}>
               {i18n.T(R.Recover)}

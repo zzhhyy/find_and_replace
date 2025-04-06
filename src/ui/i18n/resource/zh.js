@@ -52,4 +52,5 @@ export const zh = {
   Normal: "普通",
   Advanced: "高级",
   Mode: "模式",
+  IgnoreInput: "忽略输入",
 };
