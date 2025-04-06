@@ -52,4 +52,5 @@ export const ar = {
   Normal: "عادي",
   Advanced: "متقدم",
   Mode: "نموذج",
+  IgnoreInput: "تجاهل الإدخال",
 };

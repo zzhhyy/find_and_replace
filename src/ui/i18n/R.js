@@ -22,6 +22,7 @@ const R = {
   Regex: "Regex",
   IgnoreCase: "IgnoreCase",
   WholeWord: "WholeWord",
+  IgnoreInput: "IgnoreInput",
   UseParam: "UseParam",
   Auto: "Auto",
   Manual: "Manual",

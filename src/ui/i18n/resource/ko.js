@@ -52,4 +52,5 @@ export const ko = {
   Normal: "정상",
   Advanced: "고급의",
   Mode: "방법",
+  IgnoreInput: "입력 무시",
 };

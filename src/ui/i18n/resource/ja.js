@@ -52,4 +52,5 @@ export const ja = {
   Normal: "普通",
   Advanced: "高度な",
   Mode: "モード",
+  IgnoreInput: "入力を無視",
 };

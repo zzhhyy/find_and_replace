@@ -52,4 +52,5 @@ export const fr = {
   Normal: "Normale",
   Advanced: "Avancé",
   Mode: "Mode",
+  IgnoreInput: "Ignorer l&#39;entrée",
 };
