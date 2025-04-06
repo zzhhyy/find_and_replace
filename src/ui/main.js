@@ -524,7 +524,7 @@ export class Main extends React.Component {
       { language: "Indonesia", code: "id" },
       { language: "Italiano", code: "it" },
       { language: "日本語", code: "ja" },
-      { language: "한국인", code: "ko" },
+      { language: "한국어", code: "ko" },
       { language: "Português", code: "pt" },
       { language: "Русский", code: "ru" },
       { language: "Tiếng Việt", code: "vi" },

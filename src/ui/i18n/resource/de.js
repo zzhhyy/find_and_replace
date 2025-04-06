@@ -48,7 +48,7 @@ export const de = {
   DuplicateRule: "Doppelte Regel, Speichern fehlgeschlagen!",
   SyncStorageFull: "Der Speicherplatz für den Synchronisierungstyp reicht nicht aus, der Import ist fehlgeschlagen.",
   Rules: "Regeln",
-  Recover: "Genesen",
+  Recover: "Wiederherstellen",
   Normal: "Normal",
   Advanced: "Fortschrittlich",
   Mode: "Modus",
