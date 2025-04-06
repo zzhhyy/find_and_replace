@@ -51,5 +51,5 @@ export const zh = {
   Recover: "复原",
   Normal: "普通",
   Advanced: "高级",
-  Mode: "模式"
+  Mode: "模式",
 };

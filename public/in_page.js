@@ -57,11 +57,11 @@ async function far_language() {
   }
   let language = navigator.language || navigator.userLanguage;
   const la = language ? language.substring(0, 2) : "en";
-  if (la == "ar" || la == "en" || la == "es" || la == "hi" || la == "zh") {
-    return la;
-  } else {
-    return "en";
+  const supportLanguage = new Set(["ar", "de", "en", "es", "fr", "hi", "id", "it", "ja", "ko", "pt", "ru", "vi", "zh"]);
+  if (!supportLanguage.has(la)) {
+    la = "en";
   }
+  return la;
 }
 
 async function appendBox() {
@@ -84,6 +84,19 @@ async function appendBox() {
       WholeWord: "تطابق الكلمة بأكملها",
       Recover: "استعادة",
       UseParam: "استخدم $0،$1،$2.. كنتائج بحث",
+    },
+    de: {
+      AppName: "Suchen und Ersetzen",
+      Popup: "Pop-up",
+      SidePanel: "Seitenwand",
+      InPage: "Innerhalb der Seite",
+      Find: "Finden",
+      Replace: "Ersetzen",
+      Regex: "Regulärer Ausdruck",
+      IgnoreCase: "Groß-/Kleinschreibung ignorieren",
+      WholeWord: "Ganzes Wort abgleichen",
+      Recover: "Genesen",
+      UseParam: "Verwenden Sie $0,$1,$2.. als Suchergebnis",
     },
     en: {
       AppName: "Find and replace",
@@ -111,6 +124,19 @@ async function appendBox() {
       Recover: "Recuperar",
       UseParam: "Utilice $0,$1,$2.. como resultados de búsqueda",
     },
+    fr: {
+      AppName: "Rechercher et remplacer",
+      Popup: "Surgir",
+      SidePanel: "Panneau latéral",
+      InPage: "À l&#39;intérieur de la page",
+      Find: "Trouver",
+      Replace: "Remplacer",
+      Regex: "expression régulière",
+      IgnoreCase: "Ignorer la casse",
+      WholeWord: "Associer le mot entier",
+      Recover: "Récupérer",
+      UseParam: "utilisez $0,$1,$2.. comme résultat de recherche",
+    },
     hi: {
       AppName: "ढूँढें और बदलें",
       Popup: "पॉप अप",
@@ -123,6 +149,97 @@ async function appendBox() {
       WholeWord: "पूरे शब्द का मिलान करें",
       Recover: "वापस पाना",
       UseParam: "खोज परिणामों के रूप में $0,$1,$2.. का उपयोग करें",
+    },
+    id: {
+      AppName: "Temukan dan ganti",
+      Popup: "Muncul",
+      SidePanel: "Panel samping",
+      InPage: "Di dalam halaman",
+      Find: "Menemukan",
+      Replace: "Mengganti",
+      Regex: "Ekspresi reguler",
+      IgnoreCase: "Abaikan kasus",
+      WholeWord: "Cocokkan seluruh kata",
+      Recover: "Pulih",
+      UseParam: "gunakan $0,$1,$2.. sebagai hasil pencarian",
+    },
+    it: {
+      AppName: "Trova e sostituisci",
+      Popup: "Apparire",
+      SidePanel: "Pannello laterale",
+      InPage: "All&#39;interno della pagina",
+      Find: "Trovare",
+      Replace: "Sostituire",
+      Regex: "Espressione regolare",
+      IgnoreCase: "Ignora maiuscole/minuscole",
+      WholeWord: "Abbina la parola intera",
+      Recover: "Recuperare",
+      UseParam: "usa $0,$1,$2.. come risultato della ricerca",
+    },
+    ja: {
+      AppName: "検索と置換",
+      Popup: "ポップアップ",
+      SidePanel: "サイドパネル",
+      InPage: "ページ内",
+      Find: "探す",
+      Replace: "交換する",
+      Regex: "正規表現",
+      IgnoreCase: "大文字と小文字を区別しない",
+      WholeWord: "単語全体を一致",
+      Recover: "回復する",
+      UseParam: "検索結果として$0、$1、$2などを使用する",
+    },
+    ko: {
+      AppName: "찾아서 바꾸기",
+      Popup: "팝업",
+      SidePanel: "사이드 패널",
+      InPage: "페이지 내부",
+      Find: "찾다",
+      Replace: "바꾸다",
+      Regex: "정규식",
+      IgnoreCase: "대소문자 구분 안 함",
+      WholeWord: "전체 단어 일치",
+      Recover: "다시 덮다",
+      UseParam: "검색 결과로 $0,$1,$2..를 사용하세요",
+    },
+    pt: {
+      AppName: "Localizar e substituir",
+      Popup: "Aparecer",
+      SidePanel: "Painel lateral",
+      InPage: "Dentro da página",
+      Find: "Encontrar",
+      Replace: "Substituir",
+      Regex: "Expressão regular",
+      IgnoreCase: "Ignorar maiúsculas e minúsculas",
+      WholeWord: "Corresponder a palavra inteira",
+      Recover: "Recuperar",
+      UseParam: "use $0,$1,$2.. como resultado da pesquisa",
+    },
+    ru: {
+      AppName: "Найти и заменить",
+      Popup: "Неожиданно возникнуть",
+      SidePanel: "Боковая панель",
+      InPage: "Внутри страницы",
+      Find: "Находить",
+      Replace: "Заменять",
+      Regex: "Регулярное выражение",
+      IgnoreCase: "Игнорировать регистр",
+      WholeWord: "Совпадение целого слова",
+      Recover: "Восстанавливаться",
+      UseParam: "использовать $0,$1,$2.. как результат поиска",
+    },
+    vi: {
+      AppName: "Tìm và thay thế",
+      Popup: "Bật lên",
+      SidePanel: "Bảng điều khiển bên",
+      InPage: "Bên trong trang",
+      Find: "Tìm thấy",
+      Replace: "Thay thế",
+      Regex: "Biểu thức chính quy",
+      IgnoreCase: "Bỏ qua trường hợp",
+      WholeWord: "Ghép toàn bộ từ",
+      Recover: "Hồi phục",
+      UseParam: "sử dụng $0,$1,$2.. làm kết quả tìm kiếm",
     },
     zh: {
       AppName: "查找和替换",

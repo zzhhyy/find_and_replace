@@ -516,9 +516,18 @@ export class Main extends React.Component {
   renderSelectLanguage() {
     const languages = [
       { language: "عربي", code: "ar" },
+      { language: "Deutsch", code: "de" },
       { language: "English", code: "en" },
       { language: "español", code: "es" },
+      { language: "Français", code: "fr" },
       { language: "हिंदी", code: "hi" },
+      { language: "Indonesia", code: "id" },
+      { language: "Italiano", code: "it" },
+      { language: "日本語", code: "ja" },
+      { language: "한국인", code: "ko" },
+      { language: "Português", code: "pt" },
+      { language: "Русский", code: "ru" },
+      { language: "Tiếng Việt", code: "vi" },
       { language: "中文", code: "zh" },
     ];
     return (
