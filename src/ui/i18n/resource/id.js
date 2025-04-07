@@ -53,4 +53,7 @@ export const id = {
   Advanced: "Canggih",
   Mode: "Mode",
   IgnoreInput: "Abaikan masukan",
+  Feedback: "Masukan",
+  ReportTranslationBug: "Laporkan bug terjemahan",
+  ReportBug: "Laporkan bug",
 };

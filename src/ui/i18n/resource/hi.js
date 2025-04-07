@@ -53,4 +53,7 @@ export const hi = {
   Advanced: "विकसित",
   Mode: "मोड",
   IgnoreInput: "इनपुट अनदेखा करें",
+  Feedback: "प्रतिक्रिया",
+  ReportTranslationBug: "अनुवाद त्रुटि की रिपोर्ट करें",
+  ReportBug: "रिपोर्ट बग",
 };

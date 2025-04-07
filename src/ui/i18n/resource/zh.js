@@ -53,4 +53,7 @@ export const zh = {
   Advanced: "高级",
   Mode: "模式",
   IgnoreInput: "忽略输入",
+  Feedback: "反馈",
+  ReportTranslationBug: "报告翻译错误",
+  ReportBug: "报告错误",
 };

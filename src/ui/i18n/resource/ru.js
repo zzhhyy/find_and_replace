@@ -53,4 +53,7 @@ export const ru = {
   Advanced: "Передовой",
   Mode: "Режим",
   IgnoreInput: "Игнорировать ввод",
+  Feedback: "Обратная связь",
+  ReportTranslationBug: "Сообщить об ошибке перевода",
+  ReportBug: "Сообщить об ошибке",
 };

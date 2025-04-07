@@ -53,4 +53,7 @@ export const ar = {
   Advanced: "متقدم",
   Mode: "نموذج",
   IgnoreInput: "تجاهل الإدخال",
+  Feedback: "تعليق",
+  ReportTranslationBug: "الإبلاغ عن خطأ الترجمة",
+  ReportBug: "الإبلاغ عن خطأ",
 };

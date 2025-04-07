@@ -53,4 +53,7 @@ export const ja = {
   Advanced: "高度な",
   Mode: "モード",
   IgnoreInput: "入力を無視",
+  Feedback: "フィードバック",
+  ReportTranslationBug: "翻訳のバグを報告する",
+  ReportBug: "バグを報告する",
 };
