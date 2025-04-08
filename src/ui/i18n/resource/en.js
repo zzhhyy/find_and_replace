@@ -53,4 +53,7 @@ export const en = {
   Normal: "Normal",
   Advanced: "Advanced",
   Mode: "Mode",
+  Feedback: "Feedback",
+  ReportTranslationBug: "Report translation bug",
+  ReportBug: "Report bug",
 };

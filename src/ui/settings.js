@@ -356,6 +356,34 @@ export class Settings extends React.Component {
     );
   }
 
+  renderFeedback() {
+    return (
+      <div style={{ width: "100%", textAlign: "center" }}>
+        <a
+          style={{ fontSize: "16px" }}
+          href="javascript:void(0)"
+          onClick={() => {
+            chrome.tabs.create({ url: "https://forms.gle/wKEPdkBK4rGB6bma6" });
+          }}
+        >
+          {i18n.T(R.ReportBug)}
+        </a>
+        <br />
+        <div style={{ width: "100%", height: "16px" }} />
+        <br />
+        <a
+          style={{ fontSize: "16px" }}
+          href="javascript:void(0)"
+          onClick={() => {
+            chrome.tabs.create({ url: "https://forms.gle/p9XmzJZmn9nQbuoBA" });
+          }}
+        >
+          {i18n.T(R.ReportTranslationBug)}
+        </a>
+      </div>
+    );
+  }
+
   render() {
     return (
       <Dialog open={this.props.showSettings} onClose={this.props.onCloseSettings} disableScrollLock={true}>
@@ -370,6 +398,7 @@ export class Settings extends React.Component {
             <Tab label={i18n.T(R.ContextMenu)} style={{ textTransform: "none" }} />
             <Tab label={i18n.T(R.KeyboardShortcuts)} style={{ textTransform: "none" }} />
             <Tab label={i18n.T(R.ImportExport)} style={{ textTransform: "none" }} />
+            <Tab label={i18n.T(R.Feedback)} style={{ textTransform: "none" }} />
           </Tabs>
           <TabPanel index={0} value={this.state.tabIndex}>
             {this.renderGeneral()}
@@ -382,6 +411,9 @@ export class Settings extends React.Component {
           </TabPanel>
           <TabPanel index={3} value={this.state.tabIndex}>
             {this.renderImportExport()}
+          </TabPanel>
+          <TabPanel index={4} value={this.state.tabIndex}>
+            {this.renderFeedback()}
           </TabPanel>
         </Box>
       </Dialog>

@@ -53,4 +53,7 @@ export const pt = {
   Advanced: "Avançado",
   Mode: "Modo",
   IgnoreInput: "Ignorar entrada",
+  Feedback: "Opinião",
+  ReportTranslationBug: "Reportar erro de tradução",
+  ReportBug: "Reportar erro",
 };

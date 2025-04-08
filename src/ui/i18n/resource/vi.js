@@ -53,4 +53,7 @@ export const vi = {
   Advanced: "Trình độ cao",
   Mode: "Cách thức",
   IgnoreInput: "Bỏ qua đầu vào",
+  Feedback: "Nhận xét",
+  ReportTranslationBug: "Báo lỗi dịch thuật",
+  ReportBug: "Báo lỗi",
 };

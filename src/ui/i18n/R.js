@@ -53,5 +53,8 @@ const R = {
   Normal: "Normal",
   Advanced: "Advanced",
   Mode: "Mode",
+  Feedback: "Feedback",
+  ReportTranslationBug: "ReportTranslationBug",
+  ReportBug: "ReportBug",
 };
 export default R;

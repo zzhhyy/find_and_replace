@@ -53,4 +53,7 @@ export const ko = {
   Advanced: "고급의",
   Mode: "방법",
   IgnoreInput: "입력 무시",
+  Feedback: "피드백",
+  ReportTranslationBug: "번역 버그 신고",
+  ReportBug: "버그 신고",
 };

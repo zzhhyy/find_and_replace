@@ -53,4 +53,7 @@ export const fr = {
   Advanced: "Avancé",
   Mode: "Mode",
   IgnoreInput: "Ignorer l&#39;entrée",
+  Feedback: "Retour",
+  ReportTranslationBug: "Signaler un bug de traduction",
+  ReportBug: "Signaler un bug",
 };

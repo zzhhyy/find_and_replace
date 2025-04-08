@@ -52,5 +52,8 @@
   "Recover": "Recover",
   "Normal": "Normal",
   "Advanced": "Advanced",
-  "Mode": "Mode"
+  "Mode": "Mode",
+  "Feedback": "Feedback",
+  "ReportTranslationBug": "Report translation bug",
+  "ReportBug": "Report bug"
 }
