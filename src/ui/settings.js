@@ -219,7 +219,8 @@ export class Settings extends React.Component {
     reader.onload = async event => {
       try {
         const rules = JSON.parse(event.target.result);
-        const localRules = await chrome.storage.local.get([KEY.LOCAL]);
+        const localResult = await chrome.storage.local.get([KEY.LOCAL]);
+        const localRules = localResult[KEY.LOCAL] ?? {};
         if (Object.keys(localRules).length > 0) {
           if (window.confirm(i18n.T(R.ClearOldRule))) {
             await chrome.storage.local.remove([KEY.LOCAL]);
@@ -241,7 +242,7 @@ export class Settings extends React.Component {
 
   onExportRules = async () => {
     const localRules = await chrome.storage.local.get([KEY.LOCAL]);
-    const rules = { sync: {}, local: localRules.local ? localRules.local : {} };
+    const rules = localRules[KEY.LOCAL] ?? {};
 
     let data = JSON.stringify(rules, null, 2);
     let blob = new Blob([data], { type: "application/json" });
