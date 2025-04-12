@@ -157,7 +157,7 @@ function FindTextAndDo(find, value, check, highlight) {
   try {
     const escapeFind = value.regex === true ? find : find.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const targetFind = value.wholeWord === true ? `\\b${escapeFind}\\b` : escapeFind;
-    const mode = value.ignoreCase === true ? "gi" : "g";
+    const mode = value.ignoreCase === true ? "gmi" : "gm";
     findRegex = new RegExp(targetFind, mode);
   } catch (e) {
     return 0;
