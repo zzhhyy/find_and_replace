@@ -92,32 +92,37 @@ export class Main extends React.Component {
     this.resizeObserver.observe(this.bodyRef.current);
     this.resizeObserver.observe(this.actionsRef.current);
     chrome.storage.local.get([KEY.TMP], result => {
-      if (result[KEY.TMP] != null) {
-        if (result[KEY.TMP].mode == "normal") {
-          this.normalFindRef.current.value = result[KEY.TMP].find;
-          this.normalReplaceRef.current.value = result[KEY.TMP].value.replace;
+      if (result[KEY.TMP] != null && result[KEY.TMP].mode != "normal") {
+        this.showAddRuleBox(result[KEY.TMP].group, result[KEY.TMP].find, result[KEY.TMP].value);
+        this.updateFindCount();
+        chrome.storage.local.get([KEY.EDIT_MODE], result => {
+          const value = result[KEY.EDIT_MODE];
+          if (value != null) {
+            this.editMode = value;
+          }
+        });
+        chrome.storage.local.get([KEY.EDIT_GROUP], result => {
+          this.editingGroup = result[KEY.EDIT_GROUP];
+        });
+        chrome.storage.local.get([KEY.EDIT_FIND], result => {
+          this.editingFind = result[KEY.EDIT_FIND];
+        });
+      }
+    });
+    chrome.storage.local.get([KEY.NORMAL], result => {
+      let normalRules = result[KEY.NORMAL] ?? {};
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        const rule = normalRules[tabs[0].url];
+        if (rule != null) {
+          this.normalFindRef.current.value = rule.find;
+          this.normalReplaceRef.current.value = rule.value.replace;
           this.setState({
-            normalRegChecked: result[KEY.TMP].value.regex,
-            normalCaseChecked: result[KEY.TMP].value.ignoreCase,
-            normalWordChecked: result[KEY.TMP].value.wholeWord,
-          });
-        } else {
-          this.showAddRuleBox(result[KEY.TMP].group, result[KEY.TMP].find, result[KEY.TMP].value);
-          this.updateFindCount();
-          chrome.storage.local.get([KEY.EDIT_MODE], result => {
-            const value = result[KEY.EDIT_MODE];
-            if (value != null) {
-              this.editMode = value;
-            }
-          });
-          chrome.storage.local.get([KEY.EDIT_GROUP], result => {
-            this.editingGroup = result[KEY.EDIT_GROUP];
-          });
-          chrome.storage.local.get([KEY.EDIT_FIND], result => {
-            this.editingFind = result[KEY.EDIT_FIND];
+            normalRegChecked: rule.value.regex,
+            normalCaseChecked: rule.value.ignoreCase,
+            normalWordChecked: rule.value.wholeWord,
           });
         }
-      }
+      });
     });
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (this.receivedFrames.has(sender.frameId) === false) {
@@ -347,6 +352,9 @@ export class Main extends React.Component {
     if (this.addingRule) {
       this.saveTmpRule(false);
     }
+    if (this.state.mode === MODE.NORMAL) {
+      this.saveNormalRule();
+    }
   };
 
   onClickNormalReplace = () => {
@@ -374,6 +382,7 @@ export class Main extends React.Component {
       mode: MODE.NORMAL,
     };
     chrome.storage.local.set({ [KEY.TMP]: rule });
+    this.saveNormalRule();
     RunCommand(CMD.RUN_TEST, null, null, null, null);
   };
 
@@ -428,6 +437,36 @@ export class Main extends React.Component {
     chrome.storage.local.set({ [KEY.EDIT_MODE]: this.editMode });
     chrome.storage.local.set({ [KEY.EDIT_GROUP]: this.editingGroup });
     chrome.storage.local.set({ [KEY.EDIT_FIND]: this.editingFind });
+  }
+
+  saveNormalRule() {
+    let find = this.normalFindRef.current.value.trim();
+    let regex = this.normalRegCheckRef.current.checked;
+    let ignoreCase = this.normalCaseCheckRef.current.checked;
+    let wholeWord = this.normalWordCheckRef.current.checked;
+    let replace = this.normalReplaceRef.current.value;
+    const rule = {
+      valid: true,
+      group: "",
+      find: find,
+      value: {
+        domain: null,
+        regex: regex,
+        ignoreCase: ignoreCase,
+        wholeWord: wholeWord,
+        replace: replace,
+        runtype: "Manual",
+        disabled: false,
+      },
+      mode: MODE.NORMAL,
+    };
+    chrome.storage.local.get([KEY.NORMAL], result => {
+      let normalRules = result[KEY.NORMAL] ?? {};
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        normalRules[tabs[0].url] = rule;
+        chrome.storage.local.set({ [KEY.NORMAL]: normalRules });
+      });
+    });
   }
 
   /* Actions */
@@ -772,7 +811,7 @@ export class Main extends React.Component {
     const vertical = { display: "flex", alignItems: "center", justifyContent: "end" };
     const label = { width: "68px", textAlign: "right" };
     return (
-      <div style={{ display: this.state.mode === MODE.NORMAL ? "block" : "none" }}>
+      <div style={{ display: this.state.mode === MODE.NORMAL ? "block" : "none" }} onMouseLeave={this.onMouseLeave}>
         <div>
           <div style={vertical}>
             <div style={label}>{i18n.T(R.Find)}&nbsp;&nbsp;</div>

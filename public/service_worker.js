@@ -16,14 +16,7 @@ chrome.runtime.onStartup.addListener(() => {
     const openMode = result["settings.general.open_mode"];
     chrome.action.setPopup({ popup: openMode !== "side_panel" && openMode !== "in_page" ? "index.html" : "" });
   });
-});
-
-chrome.tabs.onActivated.addListener(() => {
-  chrome.storage.local.get(["tmp"], result => {
-    if (result["tmp"] != null && result["tmp"].mode == "normal") {
-      chrome.storage.local.remove(["tmp"]);
-    }
-  });
+  chrome.storage.local.remove(["normal"]);
 });
 
 chrome.action.onClicked.addListener(tab => {

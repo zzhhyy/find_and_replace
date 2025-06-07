@@ -64,6 +64,28 @@ async function far_language() {
   return la;
 }
 
+function saveNormalRule() {
+  const rule = {
+    valid: true,
+    group: "",
+    find: document.getElementById("find_and_replace_find").value.trim(),
+    value: {
+      domain: null,
+      regex: document.getElementById("find_and_replace_regex").checked,
+      ignoreCase: document.getElementById("find_and_replace_case_check").checked,
+      wholeWord: document.getElementById("find_and_replace_whole_word").checked,
+      replace: document.getElementById("find_and_replace_replace").value,
+      runtype: "Manual",
+      disabled: false,
+    },
+  };
+  chrome.storage.local.get(["normal"], result => {
+    let normalRules = result["normal"] ?? {};
+    normalRules[location.href] = rule;
+    chrome.storage.local.set({ normal: normalRules });
+  });
+}
+
 async function appendBox() {
   const mainIcon = chrome.runtime.getURL("images/find_and_replace.png");
   const closeIcon = chrome.runtime.getURL("images/close.png");
@@ -317,6 +339,10 @@ async function appendBox() {
             observer.disconnect();
             document.getElementById("find_and_replace_select").onchange = event => {
               chrome.runtime.sendMessage({ cmd: "open_mode", value: event.target.value });
+              if (event.target.value != "in_page") {
+                saveNormalRule();
+                document.getElementById("find_and_replace_in_page").remove();
+              }
             };
             document.getElementById("find_and_replace_do_replace").onclick = () => {
               const find = document.getElementById("find_and_replace_find").value.trim();
@@ -344,6 +370,7 @@ async function appendBox() {
               chrome.runtime.sendMessage({ cmd: "revocer" });
             };
             document.getElementById("find_and_replace_close").onclick = () => {
+              saveNormalRule();
               document.getElementById("find_and_replace_in_page").remove();
             };
           }
@@ -353,6 +380,17 @@ async function appendBox() {
   });
   observer.observe(document.body, { childList: true, subtree: true });
   document.body.append(baseDiv);
+  chrome.storage.local.get(["normal"], result => {
+    let normalRules = result["normal"] ?? {};
+    const rule = normalRules[location.href];
+    if (rule != null) {
+      document.getElementById("find_and_replace_find").value = rule.find || "";
+      document.getElementById("find_and_replace_replace").value = rule.value.replace || "";
+      document.getElementById("find_and_replace_regex").checked = rule.value.regex || false;
+      document.getElementById("find_and_replace_case_check").checked = rule.value.ignoreCase || false;
+      document.getElementById("find_and_replace_whole_word").checked = rule.value.wholeWord || false;
+    }
+  });
 }
 
 async function far_in_page_main() {

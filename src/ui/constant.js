@@ -5,6 +5,7 @@ export const KEY = {
   EDIT_FIND: "edit_find",
   LOCAL: "local",
   VALUE: "value",
+  NORMAL: "normal",
 };
 
 export const CMD = {
