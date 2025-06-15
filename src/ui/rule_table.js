@@ -81,7 +81,7 @@ export class Rule extends React.Component {
       this.props.deleteRule(this.props.rule);
     }
     this.onCloseMenu();
-    CreateContextMenu(false, false, false);
+    CreateContextMenu();
   };
 
   onClickMenu = event => {

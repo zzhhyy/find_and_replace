@@ -165,31 +165,19 @@ export class Settings extends React.Component {
 
   onRunAllContextMenuChange = event => {
     chrome.storage.local.set({ [SETTINGS.CONTEXT_MENU.RUN_ALL]: event.target.checked }, () => {
-      if (event.target.checked) {
-        CreateContextMenu(true, false, false);
-      } else {
-        chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_ALL);
-      }
+      CreateContextMenu();
     });
   };
 
   onRunGroupContextMenuChange = event => {
     chrome.storage.local.set({ [SETTINGS.CONTEXT_MENU.RUN_GROUP]: event.target.checked }, () => {
-      if (event.target.checked) {
-        CreateContextMenu(false, true, false);
-      } else {
-        chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_GROUP);
-      }
+      CreateContextMenu();
     });
   };
 
   onRunRuleContextMenuChange = event => {
     chrome.storage.local.set({ [SETTINGS.CONTEXT_MENU.RUN_RULE]: event.target.checked }, () => {
-      if (event.target.checked) {
-        CreateContextMenu(false, false, true);
-      } else {
-        chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_RULE);
-      }
+      CreateContextMenu();
     });
   };
 
@@ -329,7 +317,7 @@ export class Settings extends React.Component {
   onSyncNow = () => {
     GetRule().then(() => {
       this.props.onRuleUpdated();
-      alert("Sync completed");
+      alert(i18n.T(R.SyncComplete));
     });
   };
 

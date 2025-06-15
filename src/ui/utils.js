@@ -50,14 +50,12 @@ export function IsSafari() {
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && /apple/i.test(navigator.vendor);
 }
 
-export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run_rule) {
+export async function CreateContextMenu() {
   const localSettings = await chrome.storage.local.get(null);
   const localResult = await chrome.storage.local.get([KEY.LOCAL]);
   const localRules = localResult[KEY.LOCAL] ?? {};
+  chrome.contextMenus.removeAll();
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] === true) {
-    if (turn_on_run_all === false) {
-      chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_ALL);
-    }
     chrome.contextMenus.create({
       title: "Run all",
       contexts: ["all"],
@@ -66,9 +64,6 @@ export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn
     });
   }
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_GROUP] === true) {
-    if (turn_on_run_group === false) {
-      chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_GROUP);
-    }
     let parent = chrome.contextMenus.create({
       title: "Run group",
       contexts: ["all"],
@@ -89,9 +84,6 @@ export async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn
     }
   }
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_RULE] === true) {
-    if (turn_on_run_rule === false) {
-      chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_RULE);
-    }
     let parent = chrome.contextMenus.create({
       title: "Run rule",
       contexts: ["all"],
@@ -179,7 +171,7 @@ export async function GetRule() {
     .then(data => {
       if (data.rules) {
         chrome.storage.local.set({ [KEY.LOCAL]: JSON.parse(data.rules), [Profile.TIME]: data.time }, function () {
-          CreateContextMenu(true, true, true);
+          CreateContextMenu();
         });
       }
     });

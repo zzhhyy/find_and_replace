@@ -295,7 +295,7 @@ export class Main extends React.Component {
         WriteRule(group, find, rule[KEY.VALUE]).then(result => {
           this.updateCurrentRules(this.state.currentGroup);
           this.onClickCancel();
-          CreateContextMenu(false, false, false);
+          CreateContextMenu();
         });
       });
     };
@@ -305,10 +305,10 @@ export class Main extends React.Component {
       DeleteRule(this.editingGroup, this.editingFind).then(_ => {
         AddOneRule();
       });
-      UpdateRule({[group]: { [find] : rule[KEY.VALUE]}}, {[rule.editingGroup]: { [rule.editingFind]: {} }});
+      UpdateRule({ [group]: { [find]: rule[KEY.VALUE] } }, { [rule.editingGroup]: { [rule.editingFind]: {} } });
     } else {
       AddOneRule();
-      UpdateRule({[group]: { [find] : rule[KEY.VALUE]}}, {});
+      UpdateRule({ [group]: { [find]: rule[KEY.VALUE] } }, {});
     }
   };
 
@@ -506,7 +506,7 @@ export class Main extends React.Component {
       WriteRule(rule.group, rule.find, value).then(_ => {
         this.updateCurrentRules(rule.group);
       });
-      UpdateRule({[rule.group]: { [rule.find] : value}}, {});
+      UpdateRule({ [rule.group]: { [rule.find]: value } }, {});
     });
   };
 
@@ -516,7 +516,7 @@ export class Main extends React.Component {
       WriteRule(rule.group, rule.find, value).then(_ => {
         this.updateCurrentRules(rule.group);
       });
-      UpdateRule({[rule.group]: { [rule.find] : value}}, {});
+      UpdateRule({ [rule.group]: { [rule.find]: value } }, {});
     });
   };
 
