@@ -3,7 +3,7 @@
   "description": "__MSG_extDescription__",
   "version": "3.5",
   "manifest_version": 3,
-  "permissions": ["tabs", "activeTab", "scripting", "storage", "sidePanel", "contextMenus"],
+  "permissions": ["tabs", "activeTab", "scripting", "storage", "sidePanel", "contextMenus", "alarms"],
   "icons": {
     "16": "find_and_replace.png",
     "32": "find_and_replace.png",

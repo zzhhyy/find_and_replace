@@ -56,4 +56,12 @@ export const ja = {
   Feedback: "フィードバック",
   ReportTranslationBug: "翻訳のバグを報告する",
   ReportBug: "バグを報告する",
+  Sync: "同期",
+  SendCode: "コードを送信",
+  SignIn: "サインインして同期",
+  SignOut: "サインアウト",
+  SyncNow: "今すぐ同期",
+  Email: "メール",
+  Code: "コード",
+  SyncComplete: "同期が完了しました",
 };

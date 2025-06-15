@@ -56,5 +56,13 @@ const R = {
   Feedback: "Feedback",
   ReportTranslationBug: "ReportTranslationBug",
   ReportBug: "ReportBug",
+  Sync: "Sync",
+  SendCode: "SendCode",
+  SignIn: "SignIn",
+  SignOut: "SignOut",
+  SyncNow: "SyncNow",
+  Email: "Email",
+  Code: "Code",
+  SyncComplete: "SyncComplete",
 };
 export default R;

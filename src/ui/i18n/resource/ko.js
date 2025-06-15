@@ -56,4 +56,12 @@ export const ko = {
   Feedback: "피드백",
   ReportTranslationBug: "번역 버그 신고",
   ReportBug: "버그 신고",
+  Sync: "동조",
+  SendCode: "코드 보내기",
+  SignIn: "로그인하고 동기화하세요",
+  SignOut: "로그아웃",
+  SyncNow: "지금 동기화하세요",
+  Email: "이메일",
+  Code: "암호",
+  SyncComplete: "동기화 완료",
 };

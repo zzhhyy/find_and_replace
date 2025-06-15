@@ -1,6 +1,6 @@
 /*global chrome*/
 
-import { CONTEXT_MENU_ID, KEY, SETTINGS } from "./constant";
+import { Command, CONTEXT_MENU_ID, KEY, Profile, SERVER_URL, SETTINGS } from "./constant";
 
 export function CutString(str, len) {
   let str_length = 0;
@@ -132,4 +132,55 @@ export function IsFirstRun() {
     }
   }
   return internalIsFirstRun;
+}
+
+export async function UpdateRule(addRule, removeRule) {
+  const id = (await chrome.storage.local.get([Profile.ID]))[Profile.ID];
+  const token = (await chrome.storage.local.get([Profile.TOKEN]))[Profile.TOKEN];
+  if (!id || !token) {
+    return;
+  }
+  let actions = [];
+  for (const group in addRule) {
+    for (const find in addRule[group]) {
+      actions.push({ type: "add", group: group, find: find, rule: addRule[group][find] });
+    }
+  }
+  for (const group in removeRule) {
+    for (const find in removeRule[group]) {
+      actions.push({ type: "remove", group: group, find: find });
+    }
+  }
+
+  await fetch(SERVER_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ cmd: Command.UPDATE_RULE, email: id, token: token, actions: JSON.stringify(actions) }),
+  });
+}
+
+export async function GetRule() {
+  const id = (await chrome.storage.local.get([Profile.ID]))[Profile.ID];
+  const token = (await chrome.storage.local.get([Profile.TOKEN]))[Profile.TOKEN];
+  const time = (await chrome.storage.local.get([Profile.TIME]))[Profile.TIME];
+  if (!id || !token) {
+    return;
+  }
+  await fetch(SERVER_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ cmd: Command.GET_RULE, email: id, token: token, time: time }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.rules) {
+        chrome.storage.local.set({ [KEY.LOCAL]: JSON.parse(data.rules), [Profile.TIME]: data.time }, function () {
+          CreateContextMenu(true, true, true);
+        });
+      }
+    });
 }

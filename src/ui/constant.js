@@ -32,6 +32,12 @@ export const SETTINGS = {
   },
 };
 
+export const Profile = {
+  ID: "profile_id",
+  TOKEN: "profile_token",
+  TIME: "profile_time",
+};
+
 export const MODE = {
   NORMAL: "normal",
   ADVANCED: "advanced",
@@ -48,3 +54,13 @@ export const CONTEXT_MENU_ID = {
   RUN_GROUP: "run_group",
   RUN_RULE: "run_rule",
 };
+
+export const Command = {
+  SEND_CODE: "sendcode",
+  SIGN_IN: "signin",
+  SIGN_OUT: "signout",
+  UPDATE_RULE: "updaterule",
+  GET_RULE: "getrule",
+};
+
+export const SERVER_URL = "https://find-and-replace-server.zhanghengyou5.workers.dev";

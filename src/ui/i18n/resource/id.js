@@ -56,4 +56,12 @@ export const id = {
   Feedback: "Masukan",
   ReportTranslationBug: "Laporkan bug terjemahan",
   ReportBug: "Laporkan bug",
+  Sync: "Sinkronisasi",
+  SendCode: "Kirim kode",
+  SignIn: "Masuk dan sinkronkan",
+  SignOut: "Keluar",
+  SyncNow: "Sinkronkan sekarang",
+  Email: "E-mail",
+  Code: "Kode",
+  SyncComplete: "Sinkronisasi selesai",
 };
