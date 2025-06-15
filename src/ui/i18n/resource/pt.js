@@ -56,4 +56,12 @@ export const pt = {
   Feedback: "Opinião",
   ReportTranslationBug: "Reportar erro de tradução",
   ReportBug: "Reportar erro",
+  Sync: "Sincronizar",
+  SendCode: "Enviar código",
+  SignIn: "Entrar e sincronizar",
+  SignOut: "sair",
+  SyncNow: "Sincronizar agora",
+  Email: "E-mail",
+  Code: "Código",
+  SyncComplete: "Sincronização concluída",
 };

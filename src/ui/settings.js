@@ -2,6 +2,7 @@
 import React from "react";
 import {
   Box,
+  CircularProgress,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -11,6 +12,7 @@ import {
   Radio,
   Tab,
   Tabs,
+  TextField,
   Select,
   MenuItem,
   Button,
@@ -18,8 +20,8 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 
-import { CONTEXT_MENU_ID, KEY, MODE, OPEN_MODE, SETTINGS } from "./constant";
-import { CreateContextMenu, IsChrome, IsSafari } from "./utils";
+import { CONTEXT_MENU_ID, KEY, MODE, OPEN_MODE, Profile, SERVER_URL, SETTINGS } from "./constant";
+import { CreateContextMenu, GetRule, IsChrome, IsSafari, UpdateRule } from "./utils";
 import { ReadGroup } from "./rule";
 import i18n from "./i18n/i18n";
 import R from "./i18n/R";
@@ -103,9 +105,19 @@ export class Settings extends React.Component {
       isRunGroupMenuOn: false,
       isRunRuleMenuOn: false,
       groups: [],
+      signInState: 0,
+      email: "",
     };
     this.initState();
     this.fileRef = React.createRef();
+    this.emailRef = React.createRef();
+    this.codeRef = React.createRef();
+    chrome.storage.local.get([Profile.ID]).then(result => {
+      const id = result[Profile.ID];
+      if (id) {
+        this.setState({ signInState: 3, email: id });
+      }
+    });
   }
 
   componentDidUpdate(prevProps) {
@@ -153,31 +165,19 @@ export class Settings extends React.Component {
 
   onRunAllContextMenuChange = event => {
     chrome.storage.local.set({ [SETTINGS.CONTEXT_MENU.RUN_ALL]: event.target.checked }, () => {
-      if (event.target.checked) {
-        CreateContextMenu(true, false, false);
-      } else {
-        chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_ALL);
-      }
+      CreateContextMenu();
     });
   };
 
   onRunGroupContextMenuChange = event => {
     chrome.storage.local.set({ [SETTINGS.CONTEXT_MENU.RUN_GROUP]: event.target.checked }, () => {
-      if (event.target.checked) {
-        CreateContextMenu(false, true, false);
-      } else {
-        chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_GROUP);
-      }
+      CreateContextMenu();
     });
   };
 
   onRunRuleContextMenuChange = event => {
     chrome.storage.local.set({ [SETTINGS.CONTEXT_MENU.RUN_RULE]: event.target.checked }, () => {
-      if (event.target.checked) {
-        CreateContextMenu(false, false, true);
-      } else {
-        chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_RULE);
-      }
+      CreateContextMenu();
     });
   };
 
@@ -202,8 +202,10 @@ export class Settings extends React.Component {
             importLocalRules[group] = rules;
           }
         }
+        await UpdateRule(importLocalRules, {});
         await chrome.storage.local.set({ [KEY.LOCAL]: importLocalRules });
       } else {
+        await UpdateRule(rules, {});
         await chrome.storage.local.set({ [KEY.LOCAL]: rules });
       }
 
@@ -223,6 +225,7 @@ export class Settings extends React.Component {
         const localRules = localResult[KEY.LOCAL] ?? {};
         if (Object.keys(localRules).length > 0) {
           if (window.confirm(i18n.T(R.ClearOldRule))) {
+            await UpdateRule({}, localRules);
             await chrome.storage.local.remove([KEY.LOCAL]);
             this.onWriteRules(rules);
           }
@@ -255,6 +258,67 @@ export class Settings extends React.Component {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  onSendCode = () => {
+    const email = this.emailRef.current.value;
+    fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cmd: "sendcode", email: email }),
+    });
+    this.setState({ signInState: 1 });
+  };
+
+  onSignIn = () => {
+    this.setState({ signInState: 2 });
+    const email = this.emailRef.current.value;
+    const code = this.codeRef.current.value;
+    fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cmd: "signin", email: email, code: code }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.token) {
+          chrome.storage.local.set({ [Profile.ID]: email, [Profile.TOKEN]: data.token, [Profile.TIME]: 0 });
+          this.setState({ signInState: 3, email: email });
+          chrome.storage.local.get([KEY.LOCAL]).then(localResult => {
+            const localRules = localResult[KEY.LOCAL] ?? {};
+            UpdateRule(localRules, {}).then(() => {
+              GetRule().then(() => {
+                this.props.onRuleUpdated();
+              });
+            });
+          });
+        }
+      });
+  };
+
+  onSignOut = async () => {
+    const id = (await chrome.storage.local.get([Profile.ID]))[Profile.ID];
+    const token = (await chrome.storage.local.get([Profile.TOKEN]))[Profile.TOKEN];
+    fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cmd: "signout", email: id, token: token }),
+    });
+    chrome.storage.local.remove([Profile.ID, Profile.TOKEN, Profile.TIME]);
+    this.setState({ signInState: 0 });
+  };
+
+  onSyncNow = () => {
+    GetRule().then(() => {
+      this.props.onRuleUpdated();
+      alert(i18n.T(R.SyncComplete));
+    });
   };
 
   renderGeneral() {
@@ -302,6 +366,63 @@ export class Settings extends React.Component {
           </RadioGroup>
         </FormControl>
       </div>
+    );
+  }
+
+  renderSync() {
+    return (
+      <>
+        {this.state.signInState < 2 && (
+          <div>
+            <TextField inputRef={this.emailRef} size="small" label={i18n.T(R.Email)} variant="outlined" />
+            <div style={{ height: "16px" }}></div>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <TextField inputRef={this.codeRef} style={{ width: "48%" }} size="small" label={i18n.T(R.Code)} variant="outlined" />
+              <Button
+                variant="text"
+                color="primary"
+                style={{ width: "48%", textTransform: "none" }}
+                disabled={this.state.signInState > 0}
+                onClick={this.onSendCode}
+              >
+                {i18n.T(R.SendCode)}
+              </Button>
+            </div>
+            <div style={{ height: "16px" }}></div>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <Button variant="contained" style={{ textTransform: "none" }} onClick={this.onSignIn}>
+                {i18n.T(R.SignIn)}
+              </Button>
+            </div>
+          </div>
+        )}
+        {this.state.signInState === 2 && (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <CircularProgress />
+          </div>
+        )}
+        {this.state.signInState === 3 && (
+          <>
+            <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <div style={{ width: "80%", fontSize: "16px", fontWeight: "bold", wordWrap: "break-word", wordBreak: "break-word", textAlign: "center" }}>
+                {this.state.email}
+              </div>
+            </div>
+            <div style={{ width: "100%", height: "24px" }}></div>
+            <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <Button variant="contained" color="primary" style={{ fontSize: "1rem", textTransform: "none" }} onClick={this.onSignOut}>
+                {i18n.T(R.SignOut)}
+              </Button>
+            </div>
+            <div style={{ width: "100%", height: "24px" }}></div>
+            <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <Button variant="text" color="primary" style={{ fontSize: "1rem", textTransform: "none" }} onClick={this.onSyncNow}>
+                {i18n.T(R.SyncNow)}
+              </Button>
+            </div>
+          </>
+        )}
+      </>
     );
   }
 
@@ -394,28 +515,50 @@ export class Settings extends React.Component {
           </IconButton>
         </div>
         <Box sx={{ flexGrow: 1, bgcolor: "background.paper", display: "flex", padding: 1 }}>
-          <Tabs orientation="vertical" value={this.state.tabIndex} onChange={this.onTabChange} sx={{ borderRight: 1, borderColor: "divider" }}>
-            <Tab label={i18n.T(R.General)} style={{ textTransform: "none" }} />
-            <Tab label={i18n.T(R.ContextMenu)} style={{ textTransform: "none" }} />
-            <Tab label={i18n.T(R.KeyboardShortcuts)} style={{ textTransform: "none" }} />
-            <Tab label={i18n.T(R.ImportExport)} style={{ textTransform: "none" }} />
-            <Tab label={i18n.T(R.Feedback)} style={{ textTransform: "none" }} />
-          </Tabs>
-          <TabPanel index={0} value={this.state.tabIndex}>
-            {this.renderGeneral()}
-          </TabPanel>
-          <TabPanel index={1} value={this.state.tabIndex}>
-            {this.renderContextMenu()}
-          </TabPanel>
-          <TabPanel index={2} value={this.state.tabIndex}>
-            {this.renderKeyboardShortcuts()}
-          </TabPanel>
-          <TabPanel index={3} value={this.state.tabIndex}>
-            {this.renderImportExport()}
-          </TabPanel>
-          <TabPanel index={4} value={this.state.tabIndex}>
-            {this.renderFeedback()}
-          </TabPanel>
+          {this.state.mode == MODE.ADVANCED && (
+            <>
+              <Tabs orientation="vertical" value={this.state.tabIndex} onChange={this.onTabChange} sx={{ borderRight: 1, borderColor: "divider" }}>
+                <Tab label={i18n.T(R.General)} style={{ textTransform: "none" }} />
+                <Tab label={i18n.T(R.Sync)} style={{ textTransform: "none" }} />
+                <Tab label={i18n.T(R.ContextMenu)} style={{ textTransform: "none" }} />
+                <Tab label={i18n.T(R.KeyboardShortcuts)} style={{ textTransform: "none" }} />
+                <Tab label={i18n.T(R.ImportExport)} style={{ textTransform: "none" }} />
+                <Tab label={i18n.T(R.Feedback)} style={{ textTransform: "none" }} />
+              </Tabs>
+              <TabPanel index={0} value={this.state.tabIndex}>
+                {this.renderGeneral()}
+              </TabPanel>
+              <TabPanel index={1} value={this.state.tabIndex}>
+                {this.renderSync()}
+              </TabPanel>
+              <TabPanel index={2} value={this.state.tabIndex}>
+                {this.renderContextMenu()}
+              </TabPanel>
+              <TabPanel index={3} value={this.state.tabIndex}>
+                {this.renderKeyboardShortcuts()}
+              </TabPanel>
+              <TabPanel index={4} value={this.state.tabIndex}>
+                {this.renderImportExport()}
+              </TabPanel>
+              <TabPanel index={5} value={this.state.tabIndex}>
+                {this.renderFeedback()}
+              </TabPanel>
+            </>
+          )}
+          {this.state.mode == MODE.NORMAL && (
+            <>
+              <Tabs orientation="vertical" value={this.state.tabIndex} onChange={this.onTabChange} sx={{ borderRight: 1, borderColor: "divider" }}>
+                <Tab label={i18n.T(R.General)} style={{ textTransform: "none" }} />
+                <Tab label={i18n.T(R.Feedback)} style={{ textTransform: "none" }} />
+              </Tabs>
+              <TabPanel index={0} value={this.state.tabIndex}>
+                {this.renderGeneral()}
+              </TabPanel>
+              <TabPanel index={1} value={this.state.tabIndex}>
+                {this.renderFeedback()}
+              </TabPanel>
+            </>
+          )}
         </Box>
       </Dialog>
     );

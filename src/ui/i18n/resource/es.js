@@ -56,4 +56,12 @@ export const es = {
   Feedback: "Comentario",
   ReportTranslationBug: "Informar de un error de traducción",
   ReportBug: "Informar de un error",
+  Sync: "Sincronizar",
+  SendCode: "Enviar código",
+  SignIn: "Iniciar sesión y sincronizar",
+  SignOut: "desconectar",
+  SyncNow: "Sincronizar ahora",
+  Email: "Correo electrónico",
+  Code: "Código",
+  SyncComplete: "Sincronización completada",
 };

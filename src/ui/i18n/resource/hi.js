@@ -56,4 +56,12 @@ export const hi = {
   Feedback: "प्रतिक्रिया",
   ReportTranslationBug: "अनुवाद त्रुटि की रिपोर्ट करें",
   ReportBug: "रिपोर्ट बग",
+  Sync: "साथ-साथ करना",
+  SendCode: "कोड भेजें",
+  SignIn: "साइन इन करें और सिंक करें",
+  SignOut: "साइन आउट",
+  SyncNow: "अभी सिंक करें",
+  Email: "ईमेल",
+  Code: "कोड",
+  SyncComplete: "समन्वयन पूर्ण हुआ",
 };

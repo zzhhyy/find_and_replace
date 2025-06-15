@@ -56,4 +56,12 @@ export const zh = {
   Feedback: "反馈",
   ReportTranslationBug: "报告翻译错误",
   ReportBug: "报告错误",
+  Sync: "同步",
+  SendCode: "发送代码",
+  SignIn: "登录并同步",
+  SignOut: "登出",
+  SyncNow: "立即同步",
+  Email: "电子邮件",
+  Code: "代码",
+  SyncComplete: "同步完成",
 };

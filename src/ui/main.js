@@ -20,7 +20,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import MainIcon from "./image/find_and_replace.png";
 import { Settings } from "./settings.js";
 import { Rule, RuleTable } from "./rule_table.js";
-import { RunCommand, CreateContextMenu, IsFirstRun } from "./utils.js";
+import { RunCommand, CreateContextMenu, IsFirstRun, UpdateRule } from "./utils.js";
 import { KEY, CMD, SETTINGS, MODE, OPEN_MODE } from "./constant.js";
 import { DeleteGroup, DeleteRule, DisableGroup, EnableGroup, ReadGroup, ReadRule, WriteRule } from "./rule.js";
 import i18n from "./i18n/i18n.js";
@@ -143,29 +143,7 @@ export class Main extends React.Component {
         }
       }
     });
-    const migrate = "migrated_sync";
-    if (localStorage.getItem(migrate)) {
-      this.updateCurrentRules("");
-    } else {
-      localStorage.setItem(migrate, "migrated_sync");
-      try {
-        chrome.storage.local.get([KEY.LOCAL], localResult => {
-          let localRules = localResult[KEY.LOCAL] ?? {};
-          chrome.storage.sync.get(null, syncResult => {
-            for (let [group, rules] of Object.entries(syncResult)) {
-              let tmpRules = localRules[group] ?? {};
-              localRules[group] = { ...tmpRules, ...rules };
-            }
-            chrome.storage.local.set({ [KEY.LOCAL]: localRules });
-            chrome.storage.sync.clear(() => {
-              this.updateCurrentRules("");
-            });
-          });
-        });
-      } catch (e) {
-        this.updateCurrentRules("");
-      }
-    }
+    this.updateCurrentRules("");
   }
 
   componentWillUnmount() {
@@ -317,7 +295,7 @@ export class Main extends React.Component {
         WriteRule(group, find, rule[KEY.VALUE]).then(result => {
           this.updateCurrentRules(this.state.currentGroup);
           this.onClickCancel();
-          CreateContextMenu(false, false, false);
+          CreateContextMenu();
         });
       });
     };
@@ -327,8 +305,10 @@ export class Main extends React.Component {
       DeleteRule(this.editingGroup, this.editingFind).then(_ => {
         AddOneRule();
       });
+      UpdateRule({ [group]: { [find]: rule[KEY.VALUE] } }, { [rule.editingGroup]: { [rule.editingFind]: {} } });
     } else {
       AddOneRule();
+      UpdateRule({ [group]: { [find]: rule[KEY.VALUE] } }, {});
     }
   };
 
@@ -516,6 +496,7 @@ export class Main extends React.Component {
       DeleteRule(rule.group, rule.find).then(empty => {
         this.updateCurrentRules(empty ? "" : rule.group);
       });
+      UpdateRule({}, { [rule.group]: { [rule.find]: {} } });
     }
   };
 
@@ -525,6 +506,7 @@ export class Main extends React.Component {
       WriteRule(rule.group, rule.find, value).then(_ => {
         this.updateCurrentRules(rule.group);
       });
+      UpdateRule({ [rule.group]: { [rule.find]: value } }, {});
     });
   };
 
@@ -534,6 +516,7 @@ export class Main extends React.Component {
       WriteRule(rule.group, rule.find, value).then(_ => {
         this.updateCurrentRules(rule.group);
       });
+      UpdateRule({ [rule.group]: { [rule.find]: value } }, {});
     });
   };
 

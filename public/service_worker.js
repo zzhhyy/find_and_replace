@@ -7,7 +7,7 @@ chrome.runtime.onInstalled.addListener(details => {
       const openMode = result["settings.general.open_mode"];
       chrome.action.setPopup({ popup: openMode !== "side_panel" && openMode !== "in_page" ? "index.html" : "" });
     });
-    CreateContextMenu(true, true, true);
+    CreateContextMenu();
   }
 });
 
@@ -17,6 +17,39 @@ chrome.runtime.onStartup.addListener(() => {
     chrome.action.setPopup({ popup: openMode !== "side_panel" && openMode !== "in_page" ? "index.html" : "" });
   });
   chrome.storage.local.remove(["normal"]);
+  chrome.alarms.get("far_sync", alarm => {
+    if (!alarm) {
+      chrome.alarms.create("far_sync", {
+        periodInMinutes: 30,
+      });
+    }
+  });
+});
+
+chrome.alarms.onAlarm.addListener(async alarm => {
+  if (alarm.name === "far_sync") {
+    const id = (await chrome.storage.local.get(["profile_id"]))["profile_id"];
+    const token = (await chrome.storage.local.get(["profile_token"]))["profile_token"];
+    const time = (await chrome.storage.local.get(["profile_time"]))["profile_time"];
+    if (!id || !token) {
+      return;
+    }
+    fetch("https://find-and-replace-server.zhanghengyou5.workers.dev", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cmd: "getrule", email: id, token: token, time: time }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.rules) {
+          chrome.storage.local.set({ ["local"]: JSON.parse(data.rules), ["profile_time"]: data.time }, function () {
+            CreateContextMenu();
+          });
+        }
+      });
+  }
 });
 
 chrome.action.onClicked.addListener(tab => {
@@ -151,14 +184,12 @@ const CONTEXT_MENU_ID = {
   RUN_RULE: "run_rule",
 };
 
-async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run_rule) {
+async function CreateContextMenu() {
   const localSettings = await chrome.storage.local.get(null);
   const localResult = await chrome.storage.local.get("local");
   const localRules = localResult["local"] ?? {};
+  chrome.contextMenus.removeAll();
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_ALL] === true) {
-    if (turn_on_run_all === false) {
-      chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_ALL);
-    }
     chrome.contextMenus.create({
       title: "Run all",
       contexts: ["all"],
@@ -167,9 +198,6 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
     });
   }
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_GROUP] === true) {
-    if (turn_on_run_group === false) {
-      chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_GROUP);
-    }
     let parent = chrome.contextMenus.create({
       title: "Run group",
       contexts: ["all"],
@@ -190,9 +218,6 @@ async function CreateContextMenu(turn_on_run_all, turn_on_run_group, turn_on_run
     }
   }
   if (localSettings[SETTINGS.CONTEXT_MENU.RUN_RULE] === true) {
-    if (turn_on_run_rule === false) {
-      chrome.contextMenus.remove(CONTEXT_MENU_ID.RUN_RULE);
-    }
     let parent = chrome.contextMenus.create({
       title: "Run rule",
       contexts: ["all"],

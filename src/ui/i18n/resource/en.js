@@ -56,4 +56,12 @@ export const en = {
   Feedback: "Feedback",
   ReportTranslationBug: "Report translation bug",
   ReportBug: "Report bug",
+  Sync: "Sync",
+  SendCode: "Send code",
+  SignIn: "Sign in and sync",
+  SignOut: "Sign out",
+  SyncNow: "Sync now",
+  Email: "Email",
+  Code: "Code",
+  SyncComplete: "Sync completed",
 };

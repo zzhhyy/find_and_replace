@@ -56,4 +56,12 @@ export const ar = {
   Feedback: "تعليق",
   ReportTranslationBug: "الإبلاغ عن خطأ الترجمة",
   ReportBug: "الإبلاغ عن خطأ",
+  Sync: "المزامنة",
+  SendCode: "إرسال الرمز",
+  SignIn: "تسجيل الدخول والمزامنة",
+  SignOut: "تسجيل الخروج",
+  SyncNow: "المزامنة الآن",
+  Email: "بريد إلكتروني",
+  Code: "شفرة",
+  SyncComplete: "تم الانتهاء من المزامنة",
 };

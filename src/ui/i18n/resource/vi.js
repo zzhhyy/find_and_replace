@@ -56,4 +56,12 @@ export const vi = {
   Feedback: "Nhận xét",
   ReportTranslationBug: "Báo lỗi dịch thuật",
   ReportBug: "Báo lỗi",
+  Sync: "Đồng bộ",
+  SendCode: "Gửi mã",
+  SignIn: "Đăng nhập và đồng bộ hóa",
+  SignOut: "Đăng xuất",
+  SyncNow: "Đồng bộ ngay bây giờ",
+  Email: "E-mail",
+  Code: "Mã số",
+  SyncComplete: "Đồng bộ hóa hoàn tất",
 };

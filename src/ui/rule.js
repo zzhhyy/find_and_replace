@@ -1,4 +1,5 @@
 import { KEY } from "./constant";
+import { UpdateRule } from "./utils";
 
 export function ReadRule(group, find) {
   return new Promise(async (resolve, _) => {
@@ -67,8 +68,10 @@ export function DeleteGroup(group) {
   return new Promise(async (resolve, _) => {
     const localResult = await chrome.storage.local.get([KEY.LOCAL]);
     let localRules = localResult[KEY.LOCAL] ?? {};
+    const rules = localRules[group];
     delete localRules[group];
     await chrome.storage.local.set({ [KEY.LOCAL]: localRules });
+    UpdateRule({}, { [group]: rules });
     resolve();
   });
 }
@@ -84,6 +87,7 @@ export function EnableGroup(group) {
       }
       localRules[group] = rules;
       await chrome.storage.local.set({ [KEY.LOCAL]: localRules });
+      UpdateRule({ [group]: rules }, {});
     }
     resolve();
   });
@@ -100,6 +104,7 @@ export function DisableGroup(group) {
       }
       localRules[group] = rules;
       await chrome.storage.local.set({ [KEY.LOCAL]: localRules });
+      UpdateRule({ [group]: rules }, {});
     }
     resolve();
   });
